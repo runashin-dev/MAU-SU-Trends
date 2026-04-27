@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>MAU / SU Trends · ex-Korea</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #fafaf7;
+    min-height: 100vh;
+    padding: 40px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    color: #1a1a1a;
+  }
+  .kicker {
+    font-size: 11px; color: #888; letter-spacing: 0.2em;
+    margin-bottom: 8px; text-transform: uppercase;
+  }
+  h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 42px; font-weight: 400; letter-spacing: -0.02em;
+    line-height: 1.1; color: #111;
+  }
+  h1 .sub { color: #999; font-style: italic; font-size: 28px; margin-left: 12px; }
+  .meta { color: #777; font-size: 13px; margin-top: 10px; }
+  .controls {
+    display: flex; gap: 16px; margin: 32px 0;
+    align-items: center; flex-wrap: wrap;
+  }
+  .toggle {
+    display: flex; gap: 4px; background: #eeece4;
+    padding: 4px; border-radius: 8px;
+  }
+  .toggle button {
+    background: transparent; border: none; color: #888;
+    padding: 8px 16px; border-radius: 6px; font-size: 13px;
+    cursor: pointer; letter-spacing: 0.05em;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .toggle button.active {
+    background: #fff; color: #111; font-weight: 600;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+  .toggle button:hover:not(.active) { color: #333; }
+  .group-label {
+    font-size: 10px; color: #999; letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .range-input {
+    display: flex; align-items: center; gap: 8px;
+    background: #eeece4; padding: 4px 4px 4px 14px; border-radius: 8px;
+  }
+  .range-input label { font-size: 12px; color: #666; }
+  .range-input input[type="number"] {
+    width: 60px; padding: 6px 8px; border: 1px solid #dcd9ce;
+    border-radius: 6px; font-size: 13px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    text-align: center; background: #fff; color: #111;
+  }
+  .range-input input[type="number"]:focus { outline: none; border-color: #999; }
+  .range-input .unit-label { font-size: 12px; color: #555; padding: 0 10px 0 2px; }
+  .range-hint { font-size: 11px; color: #aaa; font-style: italic; }
+  .disclaimer {
+    margin-left: auto; font-size: 11px; color: #aaa; letter-spacing: 0.1em;
+  }
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    background: #fff; border: 1px solid #ebe9e1; border-radius: 12px;
+    padding: 20px; position: relative; overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+  .card .accent {
+    position: absolute; top: 0; left: 0; right: 0; height: 2px; opacity: 0.8;
+  }
+  .card-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .card-title {
+    font-family: Georgia, serif; font-size: 22px;
+    letter-spacing: -0.01em; color: #111;
+  }
+  .card-sub {
+    font-size: 10px; color: #999; letter-spacing: 0.2em; margin-top: 2px;
+  }
+  .change-wrap { display: flex; gap: 16px; align-items: flex-start; }
+  .change-item {
+    text-align: right; display: flex; flex-direction: column;
+    align-items: flex-end; gap: 2px;
+  }
+  .change-value {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 17px; font-weight: 500; letter-spacing: -0.02em; line-height: 1;
+  }
+  .change-label {
+    font-size: 9px; color: #aaa; letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .change-up { color: #16a34a; }
+  .change-down { color: #dc2626; }
+  .change-flat { color: #888; }
+  .change-na { color: #ccc; }
+  .chart-wrap { height: 160px; margin-top: 8px; }
+  .chart-wrap-combined { height: 220px; margin-top: 12px; }
+  .big-card {
+    background: #fff; border: 1px solid #ebe9e1; border-radius: 12px;
+    padding: 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+  .big-card .label {
+    font-size: 12px; color: #777; margin-bottom: 16px; letter-spacing: 0.1em;
+  }
+  .big-chart-wrap { height: 480px; }
+  .combined-stats {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    margin-top: 12px; padding: 10px 0; border-top: 1px solid #f0eee6;
+  }
+  .stat-block .stat-label {
+    font-size: 10px; color: #aaa; letter-spacing: 0.1em;
+    text-transform: uppercase; margin-bottom: 4px;
+  }
+  .stat-block .stat-row { display: flex; gap: 12px; }
+  .stat-block .stat-row > div { font-size: 12px; }
+  .stat-block .stat-row .change-value { font-size: 14px; }
+  .stat-block .stat-row .period { font-size: 9px; color: #aaa; }
+  footer {
+    margin-top: 28px; padding-top: 20px; border-top: 1px solid #ebe9e1;
+    color: #aaa; font-size: 11px; letter-spacing: 0.05em; line-height: 1.6;
+  }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div class="kicker">Healing Paper · Cross-Border Services</div>
+<h1>MAU / SU Trends <span class="sub">ex-Korea</span></h1>
+<div class="meta" id="meta-line"></div>
+
+<div class="controls">
+  <span class="group-label">Frequency</span>
+  <div class="toggle" id="freq-toggle">
+    <button data-freq="weekly" class="active">Weekly</button>
+    <button data-freq="monthly">Monthly</button>
+  </div>
+
+  <span class="group-label">Metric</span>
+  <div class="toggle" id="metric-toggle">
+    <button data-metric="MAU" class="active">MAU</button>
+    <button data-metric="SU">SU</button>
+  </div>
+
+  <div class="range-input">
+    <label for="range-number">최근</label>
+    <input type="number" id="range-number" value="8" min="2" max="12">
+    <span class="unit-label" id="range-unit">주</span>
+  </div>
+  <span class="range-hint">최대 12까지 입력 가능</span>
+
+  <span class="group-label">View</span>
+  <div class="toggle" id="view-toggle">
+    <button data-view="split" class="active">Small Multiples</button>
+    <button data-view="overlay">Overlay</button>
+    <button data-view="combined">Combined</button>
+  </div>
+
+  <div class="disclaimer">RELATIVE SCALE · TREND ONLY</div>
+</div>
+
+<div id="split-view" class="grid"></div>
+<div id="overlay-view" class="big-card hidden">
+  <div class="label" id="overlay-label"></div>
+  <div class="big-chart-wrap"><canvas id="overlay-chart"></canvas></div>
+</div>
+<div id="combined-view" class="grid hidden"></div>
+
+<footer>
+  Source · TRANSDATA.HA_DATAMART.HA_TOTAL · weekly_active / weekly_select / monthly_active / monthly_select · HOSPITAL_COUNTRY = 'all' (자국+인바운드 전체)<br>
+  Service grouping · JP / TH / TW / CN / 영어권(US·GB·CA·AU·NZ·SG·IE·IN·PH·MY·HK)
+</footer>
+
+<script>
+// ===== Data: 주간 12주 (HOSPITAL_COUNTRY = 'all') =====
+const weeklyData = [
+  { period: '01-19', 일본_MAU: 91442,  태국_MAU: 4755, 대만_MAU: 4343, 중국_MAU: 398, 영어권_MAU: 4719, 일본_SU: 23383, 태국_SU: 436, 대만_SU: 418,  중국_SU: 82,  영어권_SU: 766 },
+  { period: '01-26', 일본_MAU: 87723,  태국_MAU: 4837, 대만_MAU: 4329, 중국_MAU: 427, 영어권_MAU: 4489, 일본_SU: 23169, 태국_SU: 363, 대만_SU: 474,  중국_SU: 82,  영어권_SU: 764 },
+  { period: '02-02', 일본_MAU: 96472,  태국_MAU: 4459, 대만_MAU: 4384, 중국_MAU: 588, 영어권_MAU: 4884, 일본_SU: 24993, 태국_SU: 419, 대만_SU: 458,  중국_SU: 130, 영어권_SU: 841 },
+  { period: '02-09', 일본_MAU: 87037,  태국_MAU: 4040, 대만_MAU: 4292, 중국_MAU: 675, 영어권_MAU: 5010, 일본_SU: 23144, 태국_SU: 460, 대만_SU: 534,  중국_SU: 99,  영어권_SU: 806 },
+  { period: '02-16', 일본_MAU: 86396,  태국_MAU: 4551, 대만_MAU: 5079, 중국_MAU: 737, 영어권_MAU: 5084, 일본_SU: 23147, 태국_SU: 546, 대만_SU: 607,  중국_SU: 105, 영어권_SU: 900 },
+  { period: '02-23', 일본_MAU: 89106,  태국_MAU: 5017, 대만_MAU: 5991, 중국_MAU: 747, 영어권_MAU: 5293, 일본_SU: 24983, 태국_SU: 594, 대만_SU: 769,  중국_SU: 173, 영어권_SU: 1055 },
+  { period: '03-02', 일본_MAU: 90109,  태국_MAU: 5607, 대만_MAU: 5638, 중국_MAU: 644, 영어권_MAU: 5592, 일본_SU: 26347, 태국_SU: 753, 대만_SU: 806,  중국_SU: 174, 영어권_SU: 1099 },
+  { period: '03-09', 일본_MAU: 98827,  태국_MAU: 6361, 대만_MAU: 5813, 중국_MAU: 931, 영어권_MAU: 5844, 일본_SU: 27126, 태국_SU: 830, 대만_SU: 839,  중국_SU: 314, 영어권_SU: 1153 },
+  { period: '03-16', 일본_MAU: 97379,  태국_MAU: 5848, 대만_MAU: 6467, 중국_MAU: 963, 영어권_MAU: 5320, 일본_SU: 26508, 태국_SU: 742, 대만_SU: 922,  중국_SU: 316, 영어권_SU: 1000 },
+  { period: '03-23', 일본_MAU: 97611,  태국_MAU: 5823, 대만_MAU: 6517, 중국_MAU: 795, 영어권_MAU: 5653, 일본_SU: 26280, 태국_SU: 775, 대만_SU: 956,  중국_SU: 280, 영어권_SU: 1094 },
+  { period: '03-30', 일본_MAU: 99609,  태국_MAU: 5778, 대만_MAU: 5878, 중국_MAU: 787, 영어권_MAU: 5684, 일본_SU: 28528, 태국_SU: 920, 대만_SU: 1154, 중국_SU: 353, 영어권_SU: 1292 },
+  { period: '04-06', 일본_MAU: 108564, 태국_MAU: 5363, 대만_MAU: 5879, 중국_MAU: 863, 영어권_MAU: 5535, 일본_SU: 30549, 태국_SU: 935, 대만_SU: 1190, 중국_SU: 375, 영어권_SU: 1264 },
+  { period: '04-13', 일본_MAU: 110582, 태국_MAU: 5441, 대만_MAU: 6618, 중국_MAU: 819, 영어권_MAU: 5189, 일본_SU: 32341, 태국_SU: 887, 대만_SU: 1160, 중국_SU: 319, 영어권_SU: 1282 },
+];
+
+// ===== Data: 월간 12개월 (HOSPITAL_COUNTRY = 'all') =====
+const monthlyData = [
+  { period: '2025-04', 일본_MAU: 171502, 태국_MAU: 5892,  대만_MAU: 425,   중국_MAU: 1498, 영어권_MAU: 7674,  일본_SU: 64952, 태국_SU: 367,  대만_SU: 47,   중국_SU: 136,  영어권_SU: 1611 },
+  { period: '2025-05', 일본_MAU: 178862, 태국_MAU: 7587,  대만_MAU: 415,   중국_MAU: 1339, 영어권_MAU: 7665,  일본_SU: 60270, 태국_SU: 465,  대만_SU: 32,   중국_SU: 120,  영어권_SU: 1477 },
+  { period: '2025-06', 일본_MAU: 195696, 태국_MAU: 9796,  대만_MAU: 396,   중국_MAU: 1376, 영어권_MAU: 6349,  일본_SU: 71828, 태국_SU: 630,  대만_SU: 25,   중국_SU: 81,   영어권_SU: 1437 },
+  { period: '2025-07', 일본_MAU: 213170, 태국_MAU: 9815,  대만_MAU: 437,   중국_MAU: 1392, 영어권_MAU: 6383,  일본_SU: 82177, 태국_SU: 678,  대만_SU: 37,   중국_SU: 160,  영어권_SU: 1247 },
+  { period: '2025-08', 일본_MAU: 213687, 태국_MAU: 10948, 대만_MAU: 624,   중국_MAU: 1351, 영어권_MAU: 8849,  일본_SU: 80187, 태국_SU: 1042, 대만_SU: 53,   중국_SU: 129,  영어권_SU: 1676 },
+  { period: '2025-09', 일본_MAU: 216082, 태국_MAU: 13998, 대만_MAU: 994,   중국_MAU: 1472, 영어권_MAU: 13421, 일본_SU: 80882, 태국_SU: 1142, 대만_SU: 87,   중국_SU: 129,  영어권_SU: 2935 },
+  { period: '2025-10', 일본_MAU: 225279, 태국_MAU: 16530, 대만_MAU: 2435,  중국_MAU: 1449, 영어권_MAU: 16394, 일본_SU: 87134, 태국_SU: 1477, 대만_SU: 423,  중국_SU: 283,  영어권_SU: 3334 },
+  { period: '2025-11', 일본_MAU: 205523, 태국_MAU: 13031, 대만_MAU: 4040,  중국_MAU: 1283, 영어권_MAU: 15148, 일본_SU: 81306, 태국_SU: 1414, 대만_SU: 773,  중국_SU: 254,  영어권_SU: 3481 },
+  { period: '2025-12', 일본_MAU: 208628, 태국_MAU: 16001, 대만_MAU: 9553,  중국_MAU: 1373, 영어권_MAU: 13457, 일본_SU: 83618, 태국_SU: 1710, 대만_SU: 1336, 중국_SU: 374,  영어권_SU: 3166 },
+  { period: '2026-01', 일본_MAU: 225213, 태국_MAU: 17248, 대만_MAU: 13239, 중국_MAU: 1382, 영어권_MAU: 14182, 일본_SU: 90392, 태국_SU: 1677, 대만_SU: 1673, 중국_SU: 322,  영어권_SU: 3209 },
+  { period: '2026-02', 일본_MAU: 206908, 태국_MAU: 13550, 대만_MAU: 15193, 중국_MAU: 2164, 영어권_MAU: 13292, 일본_SU: 81728, 태국_SU: 1800, 대만_SU: 2138, 중국_SU: 456,  영어권_SU: 3129 },
+  { period: '2026-03', 일본_MAU: 231395, 태국_MAU: 19330, 대만_MAU: 19603, 중국_MAU: 2639, 영어권_MAU: 15492, 일본_SU: 98570, 태국_SU: 3086, 대만_SU: 3613, 중국_SU: 1073, 영어권_SU: 4315 },
+];
+
+const services = [
+  { key: '일본', color: '#E63946', code: 'JP' },
+  { key: '태국', color: '#F4A261', code: 'TH' },
+  { key: '대만', color: '#2A9D8F', code: 'TW' },
+  { key: '중국', color: '#264653', code: 'CN' },
+  { key: '영어권', color: '#9C6ADE', code: 'EN' },
+];
+
+// ===== State =====
+let currentFreq = 'weekly';
+let currentMetric = 'MAU';
+let currentView = 'split';
+let currentRange = 8;
+const splitCharts = {};
+const combinedCharts = {};
+let overlayChart = null;
+
+function fullDataset() { return currentFreq === 'weekly' ? weeklyData : monthlyData; }
+function rangeData() {
+  const full = fullDataset();
+  return full.slice(-Math.min(currentRange, full.length));
+}
+function unitLabel() { return currentFreq === 'weekly' ? '주' : '개월'; }
+function unitLabelEn() { return currentFreq === 'weekly' ? 'weeks' : 'months'; }
+function periodPrefix() { return currentFreq === 'weekly' ? 'WEEK OF' : 'MONTH OF'; }
+
+function fmtChange(p) {
+  if (p === null || p === undefined || !isFinite(p)) return { text: '—', cls: 'change-na' };
+  const sign = p > 0 ? '+' : '';
+  const cls = p > 0.5 ? 'change-up' : p < -0.5 ? 'change-down' : 'change-flat';
+  return { text: `${sign}${p.toFixed(1)}%`, cls };
+}
+
+function calcPct(arr, stepsAgo) {
+  if (!arr || arr.length < stepsAgo + 1) return null;
+  const last = arr[arr.length - 1];
+  const prev = arr[arr.length - 1 - stepsAgo];
+  return prev ? ((last - prev) / prev) * 100 : null;
+}
+
+function updateMeta() {
+  const d = rangeData();
+  document.getElementById('meta-line').textContent =
+    `${d[0].period} ~ ${d[d.length - 1].period} · ${currentFreq === 'weekly' ? '주간' : '월간'} 추이 (${d.length}${unitLabel()}) · 1${unitLabel()} 전·4${unitLabel()} 전 대비 성장률 · 상대 스케일만 표시`;
+  document.getElementById('range-unit').textContent = unitLabel();
+}
+
+function buildSplitView() {
+  const data = rangeData();
+  const full = fullDataset();
+  const container = document.getElementById('split-view');
+  container.innerHTML = '';
+  Object.values(splitCharts).forEach(c => c.destroy());
+  Object.keys(splitCharts).forEach(k => delete splitCharts[k]);
+
+  services.forEach(s => {
+    const values = data.map(r => r[`${s.key}_${currentMetric}`]);
+    const fullValues = full.map(r => r[`${s.key}_${currentMetric}`]);
+    const pct1 = calcPct(values, 1);
+    const pct4 = calcPct(fullValues, 4);
+    const w1 = fmtChange(pct1);
+    const w4 = fmtChange(pct4);
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="accent" style="background:${s.color}"></div>
+      <div class="card-head">
+        <div>
+          <div class="card-title">${s.key}</div>
+          <div class="card-sub">${s.code} · ${currentMetric}</div>
+        </div>
+        <div class="change-wrap">
+          <div class="change-item">
+            <div class="change-value ${w1.cls}">${w1.text}</div>
+            <div class="change-label">vs 1${unitLabel()} 전</div>
+          </div>
+          <div class="change-item">
+            <div class="change-value ${w4.cls}">${w4.text}</div>
+            <div class="change-label">vs 4${unitLabel()} 전</div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-${s.key}"></canvas></div>
+    `;
+    container.appendChild(card);
+
+    const ctx = card.querySelector('canvas').getContext('2d');
+    const peak = Math.max(...values);
+    const pctValues = values.map(v => (v / peak) * 100);
+
+    splitCharts[s.key] = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: data.map(r => r.period),
+        datasets: [{
+          data: pctValues,
+          borderColor: s.color, backgroundColor: s.color + '15',
+          borderWidth: 2.5, pointRadius: 3,
+          pointBackgroundColor: s.color, pointBorderWidth: 0,
+          tension: 0.35, fill: false,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#fff', borderColor: '#e5e3da', borderWidth: 1, padding: 10,
+            titleColor: '#888', titleFont: { size: 10 }, bodyColor: '#222', bodyFont: { size: 11 },
+            callbacks: {
+              title: (items) => `${periodPrefix()} ${items[0].label}`,
+              label: (ctx) => `  ${ctx.parsed.y.toFixed(0)}% of peak`
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { color: '#999', font: { size: 10 } }, grid: { display: false }, border: { color: '#e5e3da' } },
+          y: { display: false, min: Math.min(...pctValues) * 0.9, max: 105 }
+        }
+      }
+    });
+  });
+}
+
+function buildOverlayView() {
+  const data = rangeData();
+  const label = document.getElementById('overlay-label');
+  label.textContent = `ALL SERVICES · ${currentMetric} · NORMALIZED TO EACH SERVICE'S PEAK (100%) · LAST ${data.length} ${unitLabelEn().toUpperCase()}`;
+
+  const datasets = services.map(s => {
+    const values = data.map(r => r[`${s.key}_${currentMetric}`]);
+    const peak = Math.max(...values);
+    return {
+      label: s.key,
+      data: values.map(v => (v / peak) * 100),
+      borderColor: s.color, backgroundColor: s.color + '15',
+      borderWidth: 2.5, pointRadius: 3,
+      pointBackgroundColor: s.color, pointBorderWidth: 0,
+      tension: 0.35, fill: false,
+    };
+  });
+
+  if (overlayChart) overlayChart.destroy();
+  const ctx = document.getElementById('overlay-chart').getContext('2d');
+  overlayChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: data.map(r => r.period), datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom',
+          labels: { color: '#555', usePointStyle: true, pointStyle: 'circle', padding: 18, font: { family: 'Georgia, serif', size: 13 } }
+        },
+        tooltip: {
+          backgroundColor: '#fff', borderColor: '#e5e3da', borderWidth: 1, padding: 12,
+          titleColor: '#888', titleFont: { size: 11 }, bodyColor: '#222',
+          callbacks: {
+            title: (items) => `${periodPrefix()} ${items[0].label}`,
+            label: (ctx) => `  ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(0)}% of peak`
+          }
+        }
+      },
+      scales: {
+        x: { ticks: { color: '#666', font: { size: 11 } }, grid: { display: false }, border: { color: '#ddd' } },
+        y: { min: 0, max: 105,
+          ticks: { color: '#999', font: { size: 10 }, callback: (v) => v + '%' },
+          grid: { color: '#f0eee6' }, border: { display: false }
+        }
+      }
+    }
+  });
+}
+
+function buildCombinedView() {
+  const data = rangeData();
+  const full = fullDataset();
+  const container = document.getElementById('combined-view');
+  container.innerHTML = '';
+  Object.values(combinedCharts).forEach(c => c.destroy());
+  Object.keys(combinedCharts).forEach(k => delete combinedCharts[k]);
+
+  services.forEach(s => {
+    const mauValues = data.map(r => r[`${s.key}_MAU`]);
+    const suValues = data.map(r => r[`${s.key}_SU`]);
+    const fullMau = full.map(r => r[`${s.key}_MAU`]);
+    const fullSu = full.map(r => r[`${s.key}_SU`]);
+
+    const mauPeak = Math.max(...mauValues);
+    const suPeak = Math.max(...suValues);
+    const mauPct = mauValues.map(v => (v / mauPeak) * 100);
+    const suPct = suValues.map(v => (v / suPeak) * 100);
+
+    const mau1 = fmtChange(calcPct(mauValues, 1));
+    const mau4 = fmtChange(calcPct(fullMau, 4));
+    const su1 = fmtChange(calcPct(suValues, 1));
+    const su4 = fmtChange(calcPct(fullSu, 4));
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="accent" style="background:${s.color}"></div>
+      <div class="card-head">
+        <div>
+          <div class="card-title">${s.key}</div>
+          <div class="card-sub">${s.code} · MAU + SU</div>
+        </div>
+      </div>
+      <div class="combined-stats">
+        <div class="stat-block">
+          <div class="stat-label">─ MAU (선)</div>
+          <div class="stat-row">
+            <div><span class="change-value ${mau1.cls}">${mau1.text}</span> <span class="period">1${unitLabel()}</span></div>
+            <div><span class="change-value ${mau4.cls}">${mau4.text}</span> <span class="period">4${unitLabel()}</span></div>
+          </div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-label">▬ SU (막대)</div>
+          <div class="stat-row">
+            <div><span class="change-value ${su1.cls}">${su1.text}</span> <span class="period">1${unitLabel()}</span></div>
+            <div><span class="change-value ${su4.cls}">${su4.text}</span> <span class="period">4${unitLabel()}</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-wrap-combined"><canvas id="combined-${s.key}"></canvas></div>
+    `;
+    container.appendChild(card);
+
+    const ctx = card.querySelector('canvas').getContext('2d');
+    combinedCharts[s.key] = new Chart(ctx, {
+      data: {
+        labels: data.map(r => r.period),
+        datasets: [
+          {
+            type: 'bar', label: 'SU', data: suPct,
+            backgroundColor: s.color + '55', borderColor: s.color + '88',
+            borderWidth: 1, yAxisID: 'ySU', order: 2,
+          },
+          {
+            type: 'line', label: 'MAU', data: mauPct,
+            borderColor: s.color, backgroundColor: 'transparent',
+            borderWidth: 2.5, pointRadius: 3,
+            pointBackgroundColor: s.color, pointBorderColor: '#fff',
+            pointBorderWidth: 1.5, tension: 0.35, yAxisID: 'yMAU', order: 1,
+          }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#fff', borderColor: '#e5e3da', borderWidth: 1, padding: 10,
+            titleColor: '#888', titleFont: { size: 10 }, bodyColor: '#222', bodyFont: { size: 11 },
+            callbacks: {
+              title: (items) => `${periodPrefix()} ${items[0].label}`,
+              label: (ctx) => `  ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(0)}% of peak`
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { color: '#999', font: { size: 10 } }, grid: { display: false }, border: { color: '#e5e3da' } },
+          yMAU: {
+            type: 'linear', position: 'left', min: 0, max: 110,
+            ticks: { display: false }, grid: { color: '#f5f3ea' }, border: { display: false },
+            title: { display: true, text: 'MAU', color: s.color, font: { size: 9, weight: '600' } }
+          },
+          ySU: {
+            type: 'linear', position: 'right', min: 0, max: 110,
+            ticks: { display: false }, grid: { display: false }, border: { display: false },
+            title: { display: true, text: 'SU', color: '#888', font: { size: 9, weight: '600' } }
+          }
+        }
+      }
+    });
+  });
+}
+
+function setupToggle(id, handler) {
+  document.getElementById(id).addEventListener('click', (e) => {
+    if (e.target.tagName !== 'BUTTON') return;
+    document.querySelectorAll(`#${id} button`).forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    handler(e.target);
+  });
+}
+
+setupToggle('freq-toggle', (btn) => {
+  currentFreq = btn.dataset.freq;
+  const rangeInput = document.getElementById('range-number');
+  rangeInput.max = 12;
+  if (parseInt(rangeInput.value) > 12) rangeInput.value = 12;
+  if (parseInt(rangeInput.value) < 2) rangeInput.value = 6;
+  currentRange = parseInt(rangeInput.value);
+  render();
+});
+
+setupToggle('metric-toggle', (btn) => { currentMetric = btn.dataset.metric; render(); });
+setupToggle('view-toggle', (btn) => { currentView = btn.dataset.view; render(); });
+
+document.getElementById('range-number').addEventListener('input', (e) => {
+  const v = parseInt(e.target.value);
+  if (!isNaN(v) && v >= 2 && v <= 12) {
+    currentRange = v;
+    render();
+  }
+});
+
+function render() {
+  updateMeta();
+  const split = document.getElementById('split-view');
+  const overlay = document.getElementById('overlay-view');
+  const combined = document.getElementById('combined-view');
+  const metricToggle = document.getElementById('metric-toggle');
+  const metricLabel = metricToggle.previousElementSibling;
+
+  if (currentView === 'combined') {
+    metricToggle.style.display = 'none';
+    if (metricLabel && metricLabel.classList.contains('group-label')) metricLabel.style.display = 'none';
+  } else {
+    metricToggle.style.display = '';
+    if (metricLabel && metricLabel.classList.contains('group-label')) metricLabel.style.display = '';
+  }
+
+  split.classList.toggle('hidden', currentView !== 'split');
+  overlay.classList.toggle('hidden', currentView !== 'overlay');
+  combined.classList.toggle('hidden', currentView !== 'combined');
+
+  if (currentView === 'split') buildSplitView();
+  else if (currentView === 'overlay') buildOverlayView();
+  else buildCombinedView();
+}
+
+render();
+</script>
+
+</body>
+</html>
