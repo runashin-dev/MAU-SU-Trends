@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>MAU / SU Trends · ex-Korea</title>
+<title>강남언니 트렌드 대시보드</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -61,9 +61,8 @@
   .range-input input[type="number"]:focus { outline: none; border-color: #999; }
   .range-input .unit-label { font-size: 12px; color: #555; padding: 0 10px 0 2px; }
   .range-hint { font-size: 11px; color: #aaa; font-style: italic; }
-  .disclaimer {
-    margin-left: auto; font-size: 11px; color: #aaa; letter-spacing: 0.1em;
-  }
+  .disclaimer { margin-left: auto; font-size: 11px; color: #aaa; letter-spacing: 0.1em; }
+
   .grid {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
     gap: 20px;
@@ -73,67 +72,126 @@
     padding: 20px; position: relative; overflow: hidden;
     box-shadow: 0 1px 3px rgba(0,0,0,0.02);
   }
-  .card .accent {
-    position: absolute; top: 0; left: 0; right: 0; height: 2px; opacity: 0.8;
-  }
-  .card-head {
-    display: flex; align-items: baseline; justify-content: space-between;
-    margin-bottom: 4px;
-  }
-  .card-title {
-    font-family: Georgia, serif; font-size: 22px;
-    letter-spacing: -0.01em; color: #111;
-  }
-  .card-sub {
-    font-size: 10px; color: #999; letter-spacing: 0.2em; margin-top: 2px;
-  }
+  .card .accent { position: absolute; top: 0; left: 0; right: 0; height: 2px; opacity: 0.8; }
+  .card-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
+  .card-title { font-family: Georgia, serif; font-size: 22px; letter-spacing: -0.01em; color: #111; }
+  .card-sub { font-size: 10px; color: #999; letter-spacing: 0.2em; margin-top: 2px; }
   .change-wrap { display: flex; gap: 16px; align-items: flex-start; }
-  .change-item {
-    text-align: right; display: flex; flex-direction: column;
-    align-items: flex-end; gap: 2px;
-  }
-  .change-value {
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    font-size: 17px; font-weight: 500; letter-spacing: -0.02em; line-height: 1;
-  }
-  .change-label {
-    font-size: 9px; color: #aaa; letter-spacing: 0.12em; text-transform: uppercase;
-  }
+  .change-item { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+  .change-value { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 16px; font-weight: 500; letter-spacing: -0.02em; line-height: 1; }
+  .change-label { font-size: 9px; color: #aaa; letter-spacing: 0.12em; text-transform: uppercase; }
   .change-up { color: #16a34a; }
   .change-down { color: #dc2626; }
   .change-flat { color: #888; }
   .change-na { color: #ccc; }
   .chart-wrap { height: 160px; margin-top: 8px; }
-  .chart-wrap-combined { height: 220px; margin-top: 12px; }
-  .big-card {
-    background: #fff; border: 1px solid #ebe9e1; border-radius: 12px;
-    padding: 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-  }
-  .big-card .label {
-    font-size: 12px; color: #777; margin-bottom: 16px; letter-spacing: 0.1em;
-  }
+  .big-card { background: #fff; border: 1px solid #ebe9e1; border-radius: 12px; padding: 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+  .big-card .label { font-size: 12px; color: #777; margin-bottom: 16px; letter-spacing: 0.1em; }
   .big-chart-wrap { height: 480px; }
-  .combined-stats {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-    margin-top: 12px; padding: 10px 0; border-top: 1px solid #f0eee6;
+
+  /* KR-tab specific styles */
+  .totals-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+  .total-card {
+    background: #fff; border: 1px solid #ebe9e1; border-radius: 12px;
+    padding: 24px 28px; position: relative; overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
   }
-  .stat-block .stat-label {
-    font-size: 10px; color: #aaa; letter-spacing: 0.1em;
-    text-transform: uppercase; margin-bottom: 4px;
+  .total-card .accent { position: absolute; top: 0; left: 0; right: 0; height: 3px; opacity: 0.85; }
+  .total-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 16px; }
+  .total-title { font-family: Georgia, serif; font-size: 26px; letter-spacing: -0.01em; color: #111; }
+  .total-sub { font-size: 10px; color: #999; letter-spacing: 0.2em; margin-top: 2px; }
+  .total-chart-wrap { height: 180px; }
+
+  .cat-chips {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px;
+    padding: 16px; background: #f5f3ea; border-radius: 12px;
   }
-  .stat-block .stat-row { display: flex; gap: 12px; }
-  .stat-block .stat-row > div { font-size: 12px; }
-  .stat-block .stat-row .change-value { font-size: 14px; }
-  .stat-block .stat-row .period { font-size: 9px; color: #aaa; }
-  footer {
-    margin-top: 28px; padding-top: 20px; border-top: 1px solid #ebe9e1;
-    color: #aaa; font-size: 11px; letter-spacing: 0.05em; line-height: 1.6;
+  .cat-chips-label { width: 100%; font-size: 10px; color: #888; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px; }
+  .chip {
+    background: #fff; border: 1px solid #dcd9ce; color: #555;
+    padding: 6px 12px; border-radius: 999px; font-size: 12px; cursor: pointer;
+    transition: all 0.15s; font-family: inherit;
   }
+  .chip.active { border-color: transparent; color: #fff; font-weight: 600; }
+  .chip:hover:not(.active) { background: #f0eee6; }
+  .chip-actions { width: 100%; margin-top: 4px; display: flex; gap: 8px; }
+  .chip-actions button {
+    background: transparent; border: none; color: #888; font-size: 11px;
+    cursor: pointer; padding: 2px 6px; text-decoration: underline; font-family: inherit;
+  }
+  .chip-actions button:hover { color: #333; }
+
+  .wow-section {
+    margin: 28px 0;
+    padding: 24px 28px; background: #fff; border: 1px solid #ebe9e1; border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+  .wow-title { font-family: Georgia, serif; font-size: 22px; color: #111; letter-spacing: -0.01em; margin-bottom: 6px; }
+  .wow-subtitle { font-size: 12px; color: #888; margin-bottom: 22px; }
+  .wow-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 28px 40px; }
+  .wow-cat-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; padding-bottom: 8px; }
+  .wow-cat-tick { width: 4px; height: 18px; border-radius: 2px; }
+  .wow-cat-name { font-size: 15px; font-weight: 600; color: #222; }
+  .wow-tag-row {
+    display: grid; grid-template-columns: 100px 1fr 50px;
+    align-items: center; gap: 12px; margin-bottom: 8px; font-size: 13px;
+  }
+  .wow-tag-name { color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .wow-bar-track { position: relative; height: 8px; background: #f0eee6; border-radius: 4px; overflow: visible; }
+  .wow-bar-center { position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: #d4d0c2; }
+  .wow-bar-fill { position: absolute; top: 0; height: 100%; border-radius: 4px; }
+  .wow-pct { text-align: right; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; font-weight: 500; }
+
+  footer { margin-top: 28px; padding-top: 20px; border-top: 1px solid #ebe9e1; color: #aaa; font-size: 11px; letter-spacing: 0.05em; line-height: 1.6; }
   .hidden { display: none; }
+
+  /* === Tab Header === */
+  .tab-bar {
+    display: flex; gap: 0; margin: 24px 0 8px;
+    border-bottom: 2px solid #ebe9e1;
+  }
+  .tab-bar button {
+    background: transparent; border: none; padding: 14px 28px;
+    font-family: Georgia, serif; font-size: 16px;
+    color: #999; cursor: pointer;
+    position: relative; transition: color 0.15s;
+    letter-spacing: -0.01em;
+  }
+  .tab-bar button:hover { color: #555; }
+  .tab-bar button.active { color: #111; font-weight: 600; }
+  .tab-bar button.active::after {
+    content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
+    height: 2px; background: #111;
+  }
+  .tab-bar button .tab-sub {
+    display: block; font-size: 10px; color: #aaa;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    margin-top: 4px; font-family: -apple-system, sans-serif; font-weight: 400;
+  }
+  .tab-bar button.active .tab-sub { color: #777; }
+
+  .tab-page { display: none; }
+  .tab-page.active { display: block; }
 </style>
 </head>
 <body>
 
+<div class="kicker">Healing Paper · 강남언니</div>
+<h1>트렌드 대시보드 <span class="sub">Trend Dashboards</span></h1>
+
+<nav class="tab-bar">
+  <button data-tab="overseas" class="active">
+    해외 MAU / SU
+    <span class="tab-sub">EX-KOREA · JP/TH/TW/CN/EN</span>
+  </button>
+  <button data-tab="kr">
+    국내 카테고리 SU
+    <span class="tab-sub">KR · 시술/수술 14개 대분류</span>
+  </button>
+</nav>
+
+<!-- ============ Overseas Tab ============ -->
+<div id="tab-overseas" class="tab-page active">
 <div class="kicker">Healing Paper · Cross-Border Services</div>
 <h1>MAU / SU Trends <span class="sub">ex-Korea</span></h1>
 <div class="meta" id="meta-line"></div>
@@ -186,8 +244,103 @@
   SU Scope · '전체' = HOSPITAL_COUNTRY='all' (자국+인바운드) / 'KR → JP 인바운드' = HOSPITAL_COUNTRY='KR' (각국 유저가 한국 병원 선택)<br>
   Service grouping · JP / TH / TW / CN / 영어권(US·GB·CA·AU·NZ·SG·IE·IN·PH·MY·HK) · Last updated: 2026-05-26
 </footer>
+</div>
+
+<!-- ============ KR Tab ============ -->
+<div id="tab-kr" class="tab-page">
+<div class="kicker">Healing Paper · 강남언니 · KR Domestic</div>
+<h1>시술/수술 카테고리별 SU 트렌드 <span class="sub">국내 (KR)</span></h1>
+<div class="meta" id="kr-meta-line"></div>
+
+<!-- 시술/수술 전체 합산 (Hero) -->
+<div class="totals-row" id="totals-row" style="margin-top: 28px;">
+  <div class="total-card" id="total-card-ns">
+    <div class="accent" style="background: #2A9D8F"></div>
+    <div class="total-head">
+      <div>
+        <div class="total-title">시술 전체</div>
+        <div class="total-sub">NONSURGICAL · SUM OF ALL CATEGORIES</div>
+      </div>
+      <div class="change-wrap" id="total-changes-ns"></div>
+    </div>
+    <div class="total-chart-wrap"><canvas id="total-chart-ns"></canvas></div>
+  </div>
+  <div class="total-card" id="total-card-s">
+    <div class="accent" style="background: #E63946"></div>
+    <div class="total-head">
+      <div>
+        <div class="total-title">수술 전체</div>
+        <div class="total-sub">SURGICAL · SUM OF ALL CATEGORIES</div>
+      </div>
+      <div class="change-wrap" id="total-changes-s"></div>
+    </div>
+    <div class="total-chart-wrap"><canvas id="total-chart-s"></canvas></div>
+  </div>
+</div>
+
+<div class="controls">
+  <span class="group-label">Type</span>
+  <div class="toggle" id="type-toggle">
+    <button data-type="NONSURGICAL" class="active">시술</button>
+    <button data-type="SURGICAL">수술</button>
+  </div>
+
+  <div class="range-input">
+    <label for="range-number">최근</label>
+    <input type="number" id="kr-range-number" value="8" min="2" max="12">
+    <span class="unit-label">주</span>
+  </div>
+  <span class="range-hint">최대 12까지 입력 가능</span>
+
+  <span class="group-label">View</span>
+  <div class="toggle" id="kr-view-toggle">
+    <button data-view="split" class="active">Small Multiples</button>
+    <button data-view="overlay">Overlay</button>
+  </div>
+
+  <div class="disclaimer">RELATIVE SCALE · TREND ONLY</div>
+</div>
+
+<div class="cat-chips" id="cat-chips">
+  <div class="cat-chips-label">카테고리 선택 (클릭으로 토글)</div>
+</div>
+
+<div id="kr-split-view" class="grid"></div>
+<div id="kr-overlay-view" class="big-card hidden">
+  <div class="label" id="kr-overlay-label"></div>
+  <div class="big-chart-wrap"><canvas id="kr-overlay-chart"></canvas></div>
+</div>
+
+<!-- Top 5 태그 WOW -->
+<div class="wow-section">
+  <div class="wow-title" id="wow-title">세부 태그 WOW 증감 — 기준주 SU 상위 5개</div>
+  <div class="wow-subtitle" id="wow-subtitle"></div>
+  <div class="wow-grid" id="wow-grid"></div>
+</div>
+
+<footer>
+  Source · 태그별 일간 SU (자체 업로드) · 카테고리 매핑: 카테고리_데이터_260414.xlsx (663/665 = 99.7% 매칭)<br>
+  시술/수술 분류 · operation_type · 14개 대분류 · 진행 중 주차(05-25) 자동 제외<br>
+  Last updated: 2026-05-26
+</footer>
+</div>
 
 <script>
+// Tab switching
+document.querySelector('.tab-bar').addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn || !btn.dataset.tab) return;
+  document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  // 탭 전환 시 chart resize 트리거 (히든이었던 차트가 제대로 안 그려지는 경우 방지)
+  window.dispatchEvent(new Event('resize'));
+});
+
+// ===== Overseas Tab Script (isolated) =====
+(function() {
+
 // ===== Data: 주간 12주 (HOSPITAL_COUNTRY = 'all'은 전체, _SU_inbound는 HOSPITAL_COUNTRY='KR'만) =====
 const weeklyData = [
   { period: '03-02', 일본_MAU: 90429,  태국_MAU: 5621, 대만_MAU: 5656, 중국_MAU: 644, 영어권_MAU: 5605, 일본_SU: 26347, 태국_SU: 753, 대만_SU: 806,  중국_SU: 174, 영어권_SU: 1099, 일본_SU_inbound: 6252, 태국_SU_inbound: 753, 대만_SU_inbound: 806,  중국_SU_inbound: 174, 영어권_SU_inbound: 1099 },
@@ -580,6 +733,467 @@ function render() {
 }
 
 render();
+
+})();
+
+
+// ===== KR Tab Script (isolated) =====
+(function() {
+
+const dataAll = [{"period": "12-30", "NONSURGICAL_가슴성형": 10, "NONSURGICAL_기타": 1482, "NONSURGICAL_눈성형": 24, "NONSURGICAL_리프팅": 6858, "NONSURGICAL_모발이식": 33, "NONSURGICAL_보톡스": 14054, "NONSURGICAL_제모": 5640, "NONSURGICAL_지방성형": 10335, "NONSURGICAL_치아": 207, "NONSURGICAL_코성형": 978, "NONSURGICAL_피부": 11945, "NONSURGICAL_필러": 7826, "NONSURGICAL_한방": 307, "SURGICAL_가슴성형": 1113, "SURGICAL_기타": 263, "SURGICAL_눈성형": 23295, "SURGICAL_리프팅": 739, "SURGICAL_모발이식": 256, "SURGICAL_안면윤곽/양악": 3256, "SURGICAL_지방성형": 5571, "SURGICAL_치아": 289, "SURGICAL_코성형": 11457, "SURGICAL_피부": 26, "SURGICAL_필러": 2}, {"period": "01-06", "NONSURGICAL_가슴성형": 20, "NONSURGICAL_기타": 2176, "NONSURGICAL_눈성형": 63, "NONSURGICAL_리프팅": 8155, "NONSURGICAL_모발이식": 22, "NONSURGICAL_보톡스": 16909, "NONSURGICAL_제모": 7366, "NONSURGICAL_지방성형": 12958, "NONSURGICAL_치아": 317, "NONSURGICAL_코성형": 1006, "NONSURGICAL_피부": 15019, "NONSURGICAL_필러": 9655, "NONSURGICAL_한방": 315, "SURGICAL_가슴성형": 1267, "SURGICAL_기타": 314, "SURGICAL_눈성형": 27532, "SURGICAL_리프팅": 992, "SURGICAL_모발이식": 279, "SURGICAL_안면윤곽/양악": 3586, "SURGICAL_지방성형": 6317, "SURGICAL_치아": 451, "SURGICAL_코성형": 13151, "SURGICAL_피부": 21, "SURGICAL_필러": 0}, {"period": "01-13", "NONSURGICAL_가슴성형": 11, "NONSURGICAL_기타": 2091, "NONSURGICAL_눈성형": 61, "NONSURGICAL_리프팅": 8350, "NONSURGICAL_모발이식": 30, "NONSURGICAL_보톡스": 16602, "NONSURGICAL_제모": 6805, "NONSURGICAL_지방성형": 11763, "NONSURGICAL_치아": 310, "NONSURGICAL_코성형": 1116, "NONSURGICAL_피부": 15475, "NONSURGICAL_필러": 9422, "NONSURGICAL_한방": 326, "SURGICAL_가슴성형": 1202, "SURGICAL_기타": 351, "SURGICAL_눈성형": 26151, "SURGICAL_리프팅": 1211, "SURGICAL_모발이식": 299, "SURGICAL_안면윤곽/양악": 5348, "SURGICAL_지방성형": 6360, "SURGICAL_치아": 415, "SURGICAL_코성형": 14201, "SURGICAL_피부": 35, "SURGICAL_필러": 1}, {"period": "01-20", "NONSURGICAL_가슴성형": 13, "NONSURGICAL_기타": 2566, "NONSURGICAL_눈성형": 73, "NONSURGICAL_리프팅": 8801, "NONSURGICAL_모발이식": 35, "NONSURGICAL_보톡스": 18038, "NONSURGICAL_제모": 7229, "NONSURGICAL_지방성형": 13211, "NONSURGICAL_치아": 268, "NONSURGICAL_코성형": 874, "NONSURGICAL_피부": 17127, "NONSURGICAL_필러": 9687, "NONSURGICAL_한방": 330, "SURGICAL_가슴성형": 1089, "SURGICAL_기타": 354, "SURGICAL_눈성형": 23661, "SURGICAL_리프팅": 870, "SURGICAL_모발이식": 241, "SURGICAL_안면윤곽/양악": 5577, "SURGICAL_지방성형": 5667, "SURGICAL_치아": 391, "SURGICAL_코성형": 12823, "SURGICAL_피부": 22, "SURGICAL_필러": 1}, {"period": "01-27", "NONSURGICAL_가슴성형": 12, "NONSURGICAL_기타": 1865, "NONSURGICAL_눈성형": 42, "NONSURGICAL_리프팅": 6663, "NONSURGICAL_모발이식": 13, "NONSURGICAL_보톡스": 13895, "NONSURGICAL_제모": 6931, "NONSURGICAL_지방성형": 12189, "NONSURGICAL_치아": 242, "NONSURGICAL_코성형": 731, "NONSURGICAL_피부": 13106, "NONSURGICAL_필러": 8450, "NONSURGICAL_한방": 273, "SURGICAL_가슴성형": 852, "SURGICAL_기타": 262, "SURGICAL_눈성형": 16684, "SURGICAL_리프팅": 558, "SURGICAL_모발이식": 156, "SURGICAL_안면윤곽/양악": 2980, "SURGICAL_지방성형": 4357, "SURGICAL_치아": 359, "SURGICAL_코성형": 8329, "SURGICAL_피부": 20, "SURGICAL_필러": 1}, {"period": "02-03", "NONSURGICAL_가슴성형": 22, "NONSURGICAL_기타": 1286, "NONSURGICAL_눈성형": 60, "NONSURGICAL_리프팅": 7109, "NONSURGICAL_모발이식": 26, "NONSURGICAL_보톡스": 12971, "NONSURGICAL_제모": 5724, "NONSURGICAL_지방성형": 12263, "NONSURGICAL_치아": 276, "NONSURGICAL_코성형": 785, "NONSURGICAL_피부": 10608, "NONSURGICAL_필러": 8165, "NONSURGICAL_한방": 289, "SURGICAL_가슴성형": 1203, "SURGICAL_기타": 364, "SURGICAL_눈성형": 20662, "SURGICAL_리프팅": 731, "SURGICAL_모발이식": 235, "SURGICAL_안면윤곽/양악": 4969, "SURGICAL_지방성형": 6459, "SURGICAL_치아": 466, "SURGICAL_코성형": 10680, "SURGICAL_피부": 22, "SURGICAL_필러": 0}, {"period": "02-10", "NONSURGICAL_가슴성형": 15, "NONSURGICAL_기타": 1489, "NONSURGICAL_눈성형": 55, "NONSURGICAL_리프팅": 7025, "NONSURGICAL_모발이식": 26, "NONSURGICAL_보톡스": 13606, "NONSURGICAL_제모": 5706, "NONSURGICAL_지방성형": 13196, "NONSURGICAL_치아": 255, "NONSURGICAL_코성형": 910, "NONSURGICAL_피부": 11549, "NONSURGICAL_필러": 8743, "NONSURGICAL_한방": 285, "SURGICAL_가슴성형": 1147, "SURGICAL_기타": 366, "SURGICAL_눈성형": 19412, "SURGICAL_리프팅": 878, "SURGICAL_모발이식": 215, "SURGICAL_안면윤곽/양악": 5218, "SURGICAL_지방성형": 5960, "SURGICAL_치아": 435, "SURGICAL_코성형": 10639, "SURGICAL_피부": 21, "SURGICAL_필러": 0}, {"period": "02-17", "NONSURGICAL_가슴성형": 12, "NONSURGICAL_기타": 1487, "NONSURGICAL_눈성형": 46, "NONSURGICAL_리프팅": 6987, "NONSURGICAL_모발이식": 26, "NONSURGICAL_보톡스": 13741, "NONSURGICAL_제모": 5875, "NONSURGICAL_지방성형": 12537, "NONSURGICAL_치아": 290, "NONSURGICAL_코성형": 798, "NONSURGICAL_피부": 12112, "NONSURGICAL_필러": 8332, "NONSURGICAL_한방": 280, "SURGICAL_가슴성형": 1039, "SURGICAL_기타": 315, "SURGICAL_눈성형": 18842, "SURGICAL_리프팅": 879, "SURGICAL_모발이식": 293, "SURGICAL_안면윤곽/양악": 5261, "SURGICAL_지방성형": 5598, "SURGICAL_치아": 460, "SURGICAL_코성형": 10085, "SURGICAL_피부": 26, "SURGICAL_필러": 0}, {"period": "02-24", "NONSURGICAL_가슴성형": 8, "NONSURGICAL_기타": 1570, "NONSURGICAL_눈성형": 37, "NONSURGICAL_리프팅": 6843, "NONSURGICAL_모발이식": 19, "NONSURGICAL_보톡스": 12360, "NONSURGICAL_제모": 5938, "NONSURGICAL_지방성형": 12003, "NONSURGICAL_치아": 276, "NONSURGICAL_코성형": 731, "NONSURGICAL_피부": 11604, "NONSURGICAL_필러": 8421, "NONSURGICAL_한방": 318, "SURGICAL_가슴성형": 1082, "SURGICAL_기타": 387, "SURGICAL_눈성형": 17005, "SURGICAL_리프팅": 744, "SURGICAL_모발이식": 273, "SURGICAL_안면윤곽/양악": 5474, "SURGICAL_지방성형": 5666, "SURGICAL_치아": 386, "SURGICAL_코성형": 9285, "SURGICAL_피부": 16, "SURGICAL_필러": 0}, {"period": "03-03", "NONSURGICAL_가슴성형": 11, "NONSURGICAL_기타": 1371, "NONSURGICAL_눈성형": 48, "NONSURGICAL_리프팅": 6600, "NONSURGICAL_모발이식": 14, "NONSURGICAL_보톡스": 10986, "NONSURGICAL_제모": 5978, "NONSURGICAL_지방성형": 11200, "NONSURGICAL_치아": 285, "NONSURGICAL_코성형": 644, "NONSURGICAL_피부": 10246, "NONSURGICAL_필러": 7533, "NONSURGICAL_한방": 232, "SURGICAL_가슴성형": 1031, "SURGICAL_기타": 350, "SURGICAL_눈성형": 16275, "SURGICAL_리프팅": 750, "SURGICAL_모발이식": 327, "SURGICAL_안면윤곽/양악": 4250, "SURGICAL_지방성형": 5376, "SURGICAL_치아": 497, "SURGICAL_코성형": 9058, "SURGICAL_피부": 17, "SURGICAL_필러": 0}, {"period": "03-10", "NONSURGICAL_가슴성형": 15, "NONSURGICAL_기타": 1662, "NONSURGICAL_눈성형": 34, "NONSURGICAL_리프팅": 7197, "NONSURGICAL_모발이식": 31, "NONSURGICAL_보톡스": 12670, "NONSURGICAL_제모": 7273, "NONSURGICAL_지방성형": 13828, "NONSURGICAL_치아": 276, "NONSURGICAL_코성형": 756, "NONSURGICAL_피부": 11940, "NONSURGICAL_필러": 7831, "NONSURGICAL_한방": 287, "SURGICAL_가슴성형": 923, "SURGICAL_기타": 327, "SURGICAL_눈성형": 17155, "SURGICAL_리프팅": 781, "SURGICAL_모발이식": 380, "SURGICAL_안면윤곽/양악": 5548, "SURGICAL_지방성형": 5367, "SURGICAL_치아": 394, "SURGICAL_코성형": 10271, "SURGICAL_피부": 21, "SURGICAL_필러": 2}, {"period": "03-17", "NONSURGICAL_가슴성형": 10, "NONSURGICAL_기타": 1649, "NONSURGICAL_눈성형": 38, "NONSURGICAL_리프팅": 6872, "NONSURGICAL_모발이식": 27, "NONSURGICAL_보톡스": 12308, "NONSURGICAL_제모": 7374, "NONSURGICAL_지방성형": 12358, "NONSURGICAL_치아": 318, "NONSURGICAL_코성형": 665, "NONSURGICAL_피부": 11752, "NONSURGICAL_필러": 7714, "NONSURGICAL_한방": 249, "SURGICAL_가슴성형": 977, "SURGICAL_기타": 326, "SURGICAL_눈성형": 17649, "SURGICAL_리프팅": 853, "SURGICAL_모발이식": 352, "SURGICAL_안면윤곽/양악": 5714, "SURGICAL_지방성형": 5143, "SURGICAL_치아": 307, "SURGICAL_코성형": 10699, "SURGICAL_피부": 14, "SURGICAL_필러": 1}, {"period": "03-24", "NONSURGICAL_가슴성형": 19, "NONSURGICAL_기타": 1289, "NONSURGICAL_눈성형": 49, "NONSURGICAL_리프팅": 5982, "NONSURGICAL_모발이식": 24, "NONSURGICAL_보톡스": 11212, "NONSURGICAL_제모": 6758, "NONSURGICAL_지방성형": 10719, "NONSURGICAL_치아": 269, "NONSURGICAL_코성형": 604, "NONSURGICAL_피부": 10074, "NONSURGICAL_필러": 6513, "NONSURGICAL_한방": 279, "SURGICAL_가슴성형": 1133, "SURGICAL_기타": 365, "SURGICAL_눈성형": 16378, "SURGICAL_리프팅": 816, "SURGICAL_모발이식": 319, "SURGICAL_안면윤곽/양악": 5728, "SURGICAL_지방성형": 5468, "SURGICAL_치아": 333, "SURGICAL_코성형": 10475, "SURGICAL_피부": 27, "SURGICAL_필러": 1}, {"period": "03-31", "NONSURGICAL_가슴성형": 10, "NONSURGICAL_기타": 1367, "NONSURGICAL_눈성형": 51, "NONSURGICAL_리프팅": 7257, "NONSURGICAL_모발이식": 37, "NONSURGICAL_보톡스": 12731, "NONSURGICAL_제모": 8072, "NONSURGICAL_지방성형": 12970, "NONSURGICAL_치아": 354, "NONSURGICAL_코성형": 735, "NONSURGICAL_피부": 11969, "NONSURGICAL_필러": 7138, "NONSURGICAL_한방": 310, "SURGICAL_가슴성형": 1152, "SURGICAL_기타": 343, "SURGICAL_눈성형": 16330, "SURGICAL_리프팅": 1125, "SURGICAL_모발이식": 214, "SURGICAL_안면윤곽/양악": 5481, "SURGICAL_지방성형": 5143, "SURGICAL_치아": 328, "SURGICAL_코성형": 9821, "SURGICAL_피부": 18, "SURGICAL_필러": 0}, {"period": "04-07", "NONSURGICAL_가슴성형": 15, "NONSURGICAL_기타": 1515, "NONSURGICAL_눈성형": 51, "NONSURGICAL_리프팅": 6736, "NONSURGICAL_모발이식": 40, "NONSURGICAL_보톡스": 12538, "NONSURGICAL_제모": 7755, "NONSURGICAL_지방성형": 12678, "NONSURGICAL_치아": 315, "NONSURGICAL_코성형": 649, "NONSURGICAL_피부": 11487, "NONSURGICAL_필러": 6905, "NONSURGICAL_한방": 332, "SURGICAL_가슴성형": 1202, "SURGICAL_기타": 326, "SURGICAL_눈성형": 16640, "SURGICAL_리프팅": 1017, "SURGICAL_모발이식": 272, "SURGICAL_안면윤곽/양악": 5859, "SURGICAL_지방성형": 6082, "SURGICAL_치아": 305, "SURGICAL_코성형": 9995, "SURGICAL_피부": 15, "SURGICAL_필러": 0}, {"period": "04-14", "NONSURGICAL_가슴성형": 12, "NONSURGICAL_기타": 1438, "NONSURGICAL_눈성형": 41, "NONSURGICAL_리프팅": 7040, "NONSURGICAL_모발이식": 30, "NONSURGICAL_보톡스": 11880, "NONSURGICAL_제모": 7058, "NONSURGICAL_지방성형": 12307, "NONSURGICAL_치아": 300, "NONSURGICAL_코성형": 646, "NONSURGICAL_피부": 10950, "NONSURGICAL_필러": 7282, "NONSURGICAL_한방": 254, "SURGICAL_가슴성형": 1239, "SURGICAL_기타": 378, "SURGICAL_눈성형": 17572, "SURGICAL_리프팅": 1035, "SURGICAL_모발이식": 352, "SURGICAL_안면윤곽/양악": 5920, "SURGICAL_지방성형": 5762, "SURGICAL_치아": 337, "SURGICAL_코성형": 10885, "SURGICAL_피부": 20, "SURGICAL_필러": 2}, {"period": "04-21", "NONSURGICAL_가슴성형": 7, "NONSURGICAL_기타": 1533, "NONSURGICAL_눈성형": 70, "NONSURGICAL_리프팅": 6883, "NONSURGICAL_모발이식": 50, "NONSURGICAL_보톡스": 12360, "NONSURGICAL_제모": 8726, "NONSURGICAL_지방성형": 12758, "NONSURGICAL_치아": 283, "NONSURGICAL_코성형": 581, "NONSURGICAL_피부": 11850, "NONSURGICAL_필러": 7068, "NONSURGICAL_한방": 255, "SURGICAL_가슴성형": 1152, "SURGICAL_기타": 359, "SURGICAL_눈성형": 17480, "SURGICAL_리프팅": 1344, "SURGICAL_모발이식": 231, "SURGICAL_안면윤곽/양악": 6035, "SURGICAL_지방성형": 7506, "SURGICAL_치아": 296, "SURGICAL_코성형": 9293, "SURGICAL_피부": 18, "SURGICAL_필러": 3}, {"period": "04-28", "NONSURGICAL_가슴성형": 12, "NONSURGICAL_기타": 1468, "NONSURGICAL_눈성형": 68, "NONSURGICAL_리프팅": 7107, "NONSURGICAL_모발이식": 63, "NONSURGICAL_보톡스": 11842, "NONSURGICAL_제모": 9410, "NONSURGICAL_지방성형": 11913, "NONSURGICAL_치아": 264, "NONSURGICAL_코성형": 655, "NONSURGICAL_피부": 12204, "NONSURGICAL_필러": 7283, "NONSURGICAL_한방": 240, "SURGICAL_가슴성형": 1092, "SURGICAL_기타": 323, "SURGICAL_눈성형": 15952, "SURGICAL_리프팅": 918, "SURGICAL_모발이식": 245, "SURGICAL_안면윤곽/양악": 4867, "SURGICAL_지방성형": 5990, "SURGICAL_치아": 280, "SURGICAL_코성형": 8040, "SURGICAL_피부": 16, "SURGICAL_필러": 0}, {"period": "05-05", "NONSURGICAL_가슴성형": 9, "NONSURGICAL_기타": 1545, "NONSURGICAL_눈성형": 66, "NONSURGICAL_리프팅": 5921, "NONSURGICAL_모발이식": 37, "NONSURGICAL_보톡스": 11056, "NONSURGICAL_제모": 8197, "NONSURGICAL_지방성형": 11901, "NONSURGICAL_치아": 236, "NONSURGICAL_코성형": 548, "NONSURGICAL_피부": 10030, "NONSURGICAL_필러": 6340, "NONSURGICAL_한방": 227, "SURGICAL_가슴성형": 975, "SURGICAL_기타": 287, "SURGICAL_눈성형": 14655, "SURGICAL_리프팅": 809, "SURGICAL_모발이식": 223, "SURGICAL_안면윤곽/양악": 3554, "SURGICAL_지방성형": 4515, "SURGICAL_치아": 270, "SURGICAL_코성형": 7450, "SURGICAL_피부": 19, "SURGICAL_필러": 0}, {"period": "05-12", "NONSURGICAL_가슴성형": 13, "NONSURGICAL_기타": 1364, "NONSURGICAL_눈성형": 56, "NONSURGICAL_리프팅": 5962, "NONSURGICAL_모발이식": 38, "NONSURGICAL_보톡스": 11185, "NONSURGICAL_제모": 7376, "NONSURGICAL_지방성형": 11861, "NONSURGICAL_치아": 289, "NONSURGICAL_코성형": 559, "NONSURGICAL_피부": 9455, "NONSURGICAL_필러": 6087, "NONSURGICAL_한방": 218, "SURGICAL_가슴성형": 1117, "SURGICAL_기타": 324, "SURGICAL_눈성형": 15210, "SURGICAL_리프팅": 628, "SURGICAL_모발이식": 221, "SURGICAL_안면윤곽/양악": 4599, "SURGICAL_지방성형": 5858, "SURGICAL_치아": 343, "SURGICAL_코성형": 8638, "SURGICAL_피부": 18, "SURGICAL_필러": 0}, {"period": "05-19", "NONSURGICAL_가슴성형": 7, "NONSURGICAL_기타": 1611, "NONSURGICAL_눈성형": 58, "NONSURGICAL_리프팅": 6053, "NONSURGICAL_모발이식": 45, "NONSURGICAL_보톡스": 11635, "NONSURGICAL_제모": 8926, "NONSURGICAL_지방성형": 11917, "NONSURGICAL_치아": 277, "NONSURGICAL_코성형": 434, "NONSURGICAL_피부": 10222, "NONSURGICAL_필러": 6169, "NONSURGICAL_한방": 284, "SURGICAL_가슴성형": 1086, "SURGICAL_기타": 400, "SURGICAL_눈성형": 14702, "SURGICAL_리프팅": 683, "SURGICAL_모발이식": 177, "SURGICAL_안면윤곽/양악": 5284, "SURGICAL_지방성형": 5348, "SURGICAL_치아": 253, "SURGICAL_코성형": 8668, "SURGICAL_피부": 25, "SURGICAL_필러": 0}, {"period": "05-26", "NONSURGICAL_가슴성형": 13, "NONSURGICAL_기타": 1633, "NONSURGICAL_눈성형": 78, "NONSURGICAL_리프팅": 6900, "NONSURGICAL_모발이식": 41, "NONSURGICAL_보톡스": 12837, "NONSURGICAL_제모": 9479, "NONSURGICAL_지방성형": 12488, "NONSURGICAL_치아": 303, "NONSURGICAL_코성형": 497, "NONSURGICAL_피부": 11417, "NONSURGICAL_필러": 6846, "NONSURGICAL_한방": 238, "SURGICAL_가슴성형": 993, "SURGICAL_기타": 418, "SURGICAL_눈성형": 17818, "SURGICAL_리프팅": 723, "SURGICAL_모발이식": 247, "SURGICAL_안면윤곽/양악": 5717, "SURGICAL_지방성형": 5622, "SURGICAL_치아": 316, "SURGICAL_코성형": 9045, "SURGICAL_피부": 23, "SURGICAL_필러": 0}, {"period": "06-02", "NONSURGICAL_가슴성형": 18, "NONSURGICAL_기타": 1755, "NONSURGICAL_눈성형": 70, "NONSURGICAL_리프팅": 6892, "NONSURGICAL_모발이식": 69, "NONSURGICAL_보톡스": 13320, "NONSURGICAL_제모": 9142, "NONSURGICAL_지방성형": 12525, "NONSURGICAL_치아": 290, "NONSURGICAL_코성형": 558, "NONSURGICAL_피부": 11559, "NONSURGICAL_필러": 6805, "NONSURGICAL_한방": 201, "SURGICAL_가슴성형": 991, "SURGICAL_기타": 366, "SURGICAL_눈성형": 14570, "SURGICAL_리프팅": 692, "SURGICAL_모발이식": 204, "SURGICAL_안면윤곽/양악": 4525, "SURGICAL_지방성형": 5970, "SURGICAL_치아": 285, "SURGICAL_코성형": 7916, "SURGICAL_피부": 19, "SURGICAL_필러": 1}, {"period": "06-09", "NONSURGICAL_가슴성형": 11, "NONSURGICAL_기타": 1855, "NONSURGICAL_눈성형": 56, "NONSURGICAL_리프팅": 7386, "NONSURGICAL_모발이식": 54, "NONSURGICAL_보톡스": 14202, "NONSURGICAL_제모": 9859, "NONSURGICAL_지방성형": 13739, "NONSURGICAL_치아": 294, "NONSURGICAL_코성형": 495, "NONSURGICAL_피부": 12700, "NONSURGICAL_필러": 7499, "NONSURGICAL_한방": 270, "SURGICAL_가슴성형": 1277, "SURGICAL_기타": 443, "SURGICAL_눈성형": 17159, "SURGICAL_리프팅": 949, "SURGICAL_모발이식": 223, "SURGICAL_안면윤곽/양악": 6064, "SURGICAL_지방성형": 6117, "SURGICAL_치아": 462, "SURGICAL_코성형": 10095, "SURGICAL_피부": 27, "SURGICAL_필러": 0}, {"period": "06-16", "NONSURGICAL_가슴성형": 8, "NONSURGICAL_기타": 2024, "NONSURGICAL_눈성형": 73, "NONSURGICAL_리프팅": 7487, "NONSURGICAL_모발이식": 44, "NONSURGICAL_보톡스": 13034, "NONSURGICAL_제모": 9524, "NONSURGICAL_지방성형": 13076, "NONSURGICAL_치아": 360, "NONSURGICAL_코성형": 602, "NONSURGICAL_피부": 12833, "NONSURGICAL_필러": 7221, "NONSURGICAL_한방": 270, "SURGICAL_가슴성형": 1361, "SURGICAL_기타": 451, "SURGICAL_눈성형": 17450, "SURGICAL_리프팅": 899, "SURGICAL_모발이식": 219, "SURGICAL_안면윤곽/양악": 5415, "SURGICAL_지방성형": 6574, "SURGICAL_치아": 525, "SURGICAL_코성형": 11325, "SURGICAL_피부": 15, "SURGICAL_필러": 0}, {"period": "06-23", "NONSURGICAL_가슴성형": 10, "NONSURGICAL_기타": 2022, "NONSURGICAL_눈성형": 55, "NONSURGICAL_리프팅": 7427, "NONSURGICAL_모발이식": 54, "NONSURGICAL_보톡스": 13943, "NONSURGICAL_제모": 9495, "NONSURGICAL_지방성형": 13073, "NONSURGICAL_치아": 406, "NONSURGICAL_코성형": 629, "NONSURGICAL_피부": 12058, "NONSURGICAL_필러": 7226, "NONSURGICAL_한방": 336, "SURGICAL_가슴성형": 1279, "SURGICAL_기타": 401, "SURGICAL_눈성형": 16424, "SURGICAL_리프팅": 705, "SURGICAL_모발이식": 210, "SURGICAL_안면윤곽/양악": 4543, "SURGICAL_지방성형": 5878, "SURGICAL_치아": 428, "SURGICAL_코성형": 10474, "SURGICAL_피부": 20, "SURGICAL_필러": 0}, {"period": "06-30", "NONSURGICAL_가슴성형": 14, "NONSURGICAL_기타": 2115, "NONSURGICAL_눈성형": 73, "NONSURGICAL_리프팅": 7848, "NONSURGICAL_모발이식": 50, "NONSURGICAL_보톡스": 14923, "NONSURGICAL_제모": 11011, "NONSURGICAL_지방성형": 13944, "NONSURGICAL_치아": 311, "NONSURGICAL_코성형": 639, "NONSURGICAL_피부": 12830, "NONSURGICAL_필러": 7957, "NONSURGICAL_한방": 313, "SURGICAL_가슴성형": 1273, "SURGICAL_기타": 422, "SURGICAL_눈성형": 17781, "SURGICAL_리프팅": 1002, "SURGICAL_모발이식": 266, "SURGICAL_안면윤곽/양악": 3993, "SURGICAL_지방성형": 5941, "SURGICAL_치아": 330, "SURGICAL_코성형": 11091, "SURGICAL_피부": 36, "SURGICAL_필러": 0}, {"period": "07-07", "NONSURGICAL_가슴성형": 10, "NONSURGICAL_기타": 2211, "NONSURGICAL_눈성형": 69, "NONSURGICAL_리프팅": 7966, "NONSURGICAL_모발이식": 51, "NONSURGICAL_보톡스": 14705, "NONSURGICAL_제모": 12098, "NONSURGICAL_지방성형": 14162, "NONSURGICAL_치아": 340, "NONSURGICAL_코성형": 626, "NONSURGICAL_피부": 13611, "NONSURGICAL_필러": 8288, "NONSURGICAL_한방": 278, "SURGICAL_가슴성형": 1283, "SURGICAL_기타": 350, "SURGICAL_눈성형": 16339, "SURGICAL_리프팅": 782, "SURGICAL_모발이식": 295, "SURGICAL_안면윤곽/양악": 4120, "SURGICAL_지방성형": 5920, "SURGICAL_치아": 290, "SURGICAL_코성형": 9506, "SURGICAL_피부": 33, "SURGICAL_필러": 1}, {"period": "07-14", "NONSURGICAL_가슴성형": 15, "NONSURGICAL_기타": 1567, "NONSURGICAL_눈성형": 63, "NONSURGICAL_리프팅": 6764, "NONSURGICAL_모발이식": 53, "NONSURGICAL_보톡스": 11549, "NONSURGICAL_제모": 8622, "NONSURGICAL_지방성형": 10812, "NONSURGICAL_치아": 256, "NONSURGICAL_코성형": 634, "NONSURGICAL_피부": 10438, "NONSURGICAL_필러": 7550, "NONSURGICAL_한방": 254, "SURGICAL_가슴성형": 1153, "SURGICAL_기타": 421, "SURGICAL_눈성형": 15083, "SURGICAL_리프팅": 756, "SURGICAL_모발이식": 266, "SURGICAL_안면윤곽/양악": 4791, "SURGICAL_지방성형": 5750, "SURGICAL_치아": 298, "SURGICAL_코성형": 10666, "SURGICAL_피부": 27, "SURGICAL_필러": 0}, {"period": "07-21", "NONSURGICAL_가슴성형": 10, "NONSURGICAL_기타": 1911, "NONSURGICAL_눈성형": 58, "NONSURGICAL_리프팅": 7357, "NONSURGICAL_모발이식": 61, "NONSURGICAL_보톡스": 13463, "NONSURGICAL_제모": 10056, "NONSURGICAL_지방성형": 11661, "NONSURGICAL_치아": 365, "NONSURGICAL_코성형": 685, "NONSURGICAL_피부": 12331, "NONSURGICAL_필러": 8197, "NONSURGICAL_한방": 312, "SURGICAL_가슴성형": 1113, "SURGICAL_기타": 421, "SURGICAL_눈성형": 15964, "SURGICAL_리프팅": 861, "SURGICAL_모발이식": 287, "SURGICAL_안면윤곽/양악": 4722, "SURGICAL_지방성형": 5918, "SURGICAL_치아": 288, "SURGICAL_코성형": 10302, "SURGICAL_피부": 30, "SURGICAL_필러": 1}, {"period": "07-28", "NONSURGICAL_가슴성형": 14, "NONSURGICAL_기타": 1794, "NONSURGICAL_눈성형": 61, "NONSURGICAL_리프팅": 7928, "NONSURGICAL_모발이식": 44, "NONSURGICAL_보톡스": 14727, "NONSURGICAL_제모": 10641, "NONSURGICAL_지방성형": 12610, "NONSURGICAL_치아": 316, "NONSURGICAL_코성형": 739, "NONSURGICAL_피부": 13063, "NONSURGICAL_필러": 8501, "NONSURGICAL_한방": 285, "SURGICAL_가슴성형": 1200, "SURGICAL_기타": 388, "SURGICAL_눈성형": 14235, "SURGICAL_리프팅": 650, "SURGICAL_모발이식": 251, "SURGICAL_안면윤곽/양악": 3881, "SURGICAL_지방성형": 5394, "SURGICAL_치아": 291, "SURGICAL_코성형": 9263, "SURGICAL_피부": 18, "SURGICAL_필러": 1}, {"period": "08-04", "NONSURGICAL_가슴성형": 10, "NONSURGICAL_기타": 1589, "NONSURGICAL_눈성형": 77, "NONSURGICAL_리프팅": 7483, "NONSURGICAL_모발이식": 51, "NONSURGICAL_보톡스": 13377, "NONSURGICAL_제모": 8150, "NONSURGICAL_지방성형": 11194, "NONSURGICAL_치아": 352, "NONSURGICAL_코성형": 707, "NONSURGICAL_피부": 11218, "NONSURGICAL_필러": 8617, "NONSURGICAL_한방": 321, "SURGICAL_가슴성형": 1202, "SURGICAL_기타": 398, "SURGICAL_눈성형": 14809, "SURGICAL_리프팅": 776, "SURGICAL_모발이식": 211, "SURGICAL_안면윤곽/양악": 3792, "SURGICAL_지방성형": 5304, "SURGICAL_치아": 360, "SURGICAL_코성형": 8769, "SURGICAL_피부": 21, "SURGICAL_필러": 0}, {"period": "08-11", "NONSURGICAL_가슴성형": 13, "NONSURGICAL_기타": 2003, "NONSURGICAL_눈성형": 64, "NONSURGICAL_리프팅": 7669, "NONSURGICAL_모발이식": 53, "NONSURGICAL_보톡스": 14618, "NONSURGICAL_제모": 9275, "NONSURGICAL_지방성형": 11752, "NONSURGICAL_치아": 312, "NONSURGICAL_코성형": 729, "NONSURGICAL_피부": 13330, "NONSURGICAL_필러": 8183, "NONSURGICAL_한방": 284, "SURGICAL_가슴성형": 983, "SURGICAL_기타": 340, "SURGICAL_눈성형": 13367, "SURGICAL_리프팅": 653, "SURGICAL_모발이식": 257, "SURGICAL_안면윤곽/양악": 3152, "SURGICAL_지방성형": 4894, "SURGICAL_치아": 297, "SURGICAL_코성형": 7651, "SURGICAL_피부": 31, "SURGICAL_필러": 0}, {"period": "08-18", "NONSURGICAL_가슴성형": 12, "NONSURGICAL_기타": 1592, "NONSURGICAL_눈성형": 69, "NONSURGICAL_리프팅": 7142, "NONSURGICAL_모발이식": 42, "NONSURGICAL_보톡스": 12819, "NONSURGICAL_제모": 8079, "NONSURGICAL_지방성형": 10942, "NONSURGICAL_치아": 335, "NONSURGICAL_코성형": 781, "NONSURGICAL_피부": 10983, "NONSURGICAL_필러": 7589, "NONSURGICAL_한방": 269, "SURGICAL_가슴성형": 1004, "SURGICAL_기타": 331, "SURGICAL_눈성형": 14754, "SURGICAL_리프팅": 681, "SURGICAL_모발이식": 287, "SURGICAL_안면윤곽/양악": 2614, "SURGICAL_지방성형": 5220, "SURGICAL_치아": 447, "SURGICAL_코성형": 7970, "SURGICAL_피부": 35, "SURGICAL_필러": 0}, {"period": "08-25", "NONSURGICAL_가슴성형": 12, "NONSURGICAL_기타": 3436, "NONSURGICAL_눈성형": 47, "NONSURGICAL_리프팅": 9448, "NONSURGICAL_모발이식": 53, "NONSURGICAL_보톡스": 23118, "NONSURGICAL_제모": 13914, "NONSURGICAL_지방성형": 14980, "NONSURGICAL_치아": 401, "NONSURGICAL_코성형": 672, "NONSURGICAL_피부": 19241, "NONSURGICAL_필러": 9055, "NONSURGICAL_한방": 343, "SURGICAL_가슴성형": 1014, "SURGICAL_기타": 298, "SURGICAL_눈성형": 13890, "SURGICAL_리프팅": 692, "SURGICAL_모발이식": 180, "SURGICAL_안면윤곽/양악": 2780, "SURGICAL_지방성형": 4712, "SURGICAL_치아": 270, "SURGICAL_코성형": 7945, "SURGICAL_피부": 24, "SURGICAL_필러": 1}, {"period": "09-01", "NONSURGICAL_가슴성형": 10, "NONSURGICAL_기타": 2132, "NONSURGICAL_눈성형": 85, "NONSURGICAL_리프팅": 7776, "NONSURGICAL_모발이식": 40, "NONSURGICAL_보톡스": 16899, "NONSURGICAL_제모": 7040, "NONSURGICAL_지방성형": 12042, "NONSURGICAL_치아": 325, "NONSURGICAL_코성형": 691, "NONSURGICAL_피부": 13761, "NONSURGICAL_필러": 8261, "NONSURGICAL_한방": 278, "SURGICAL_가슴성형": 1064, "SURGICAL_기타": 369, "SURGICAL_눈성형": 14905, "SURGICAL_리프팅": 746, "SURGICAL_모발이식": 336, "SURGICAL_안면윤곽/양악": 3139, "SURGICAL_지방성형": 5603, "SURGICAL_치아": 351, "SURGICAL_코성형": 8197, "SURGICAL_피부": 17, "SURGICAL_필러": 0}, {"period": "09-08", "NONSURGICAL_가슴성형": 14, "NONSURGICAL_기타": 1620, "NONSURGICAL_눈성형": 60, "NONSURGICAL_리프팅": 7661, "NONSURGICAL_모발이식": 51, "NONSURGICAL_보톡스": 14903, "NONSURGICAL_제모": 6226, "NONSURGICAL_지방성형": 11202, "NONSURGICAL_치아": 355, "NONSURGICAL_코성형": 683, "NONSURGICAL_피부": 12623, "NONSURGICAL_필러": 7519, "NONSURGICAL_한방": 281, "SURGICAL_가슴성형": 1023, "SURGICAL_기타": 297, "SURGICAL_눈성형": 15909, "SURGICAL_리프팅": 932, "SURGICAL_모발이식": 291, "SURGICAL_안면윤곽/양악": 3588, "SURGICAL_지방성형": 5722, "SURGICAL_치아": 336, "SURGICAL_코성형": 8451, "SURGICAL_피부": 25, "SURGICAL_필러": 0}, {"period": "09-15", "NONSURGICAL_가슴성형": 8, "NONSURGICAL_기타": 1507, "NONSURGICAL_눈성형": 71, "NONSURGICAL_리프팅": 7311, "NONSURGICAL_모발이식": 47, "NONSURGICAL_보톡스": 14340, "NONSURGICAL_제모": 5797, "NONSURGICAL_지방성형": 10417, "NONSURGICAL_치아": 327, "NONSURGICAL_코성형": 696, "NONSURGICAL_피부": 11947, "NONSURGICAL_필러": 7236, "NONSURGICAL_한방": 293, "SURGICAL_가슴성형": 1017, "SURGICAL_기타": 364, "SURGICAL_눈성형": 16189, "SURGICAL_리프팅": 920, "SURGICAL_모발이식": 218, "SURGICAL_안면윤곽/양악": 3656, "SURGICAL_지방성형": 5962, "SURGICAL_치아": 386, "SURGICAL_코성형": 8956, "SURGICAL_피부": 22, "SURGICAL_필러": 0}, {"period": "09-22", "NONSURGICAL_가슴성형": 8, "NONSURGICAL_기타": 2041, "NONSURGICAL_눈성형": 59, "NONSURGICAL_리프팅": 8590, "NONSURGICAL_모발이식": 52, "NONSURGICAL_보톡스": 17048, "NONSURGICAL_제모": 7230, "NONSURGICAL_지방성형": 11707, "NONSURGICAL_치아": 325, "NONSURGICAL_코성형": 776, "NONSURGICAL_피부": 15356, "NONSURGICAL_필러": 8149, "NONSURGICAL_한방": 248, "SURGICAL_가슴성형": 997, "SURGICAL_기타": 456, "SURGICAL_눈성형": 16083, "SURGICAL_리프팅": 852, "SURGICAL_모발이식": 231, "SURGICAL_안면윤곽/양악": 3650, "SURGICAL_지방성형": 5529, "SURGICAL_치아": 337, "SURGICAL_코성형": 9161, "SURGICAL_피부": 22, "SURGICAL_필러": 0}, {"period": "09-29", "NONSURGICAL_가슴성형": 9, "NONSURGICAL_기타": 1587, "NONSURGICAL_눈성형": 62, "NONSURGICAL_리프팅": 8002, "NONSURGICAL_모발이식": 30, "NONSURGICAL_보톡스": 14569, "NONSURGICAL_제모": 5607, "NONSURGICAL_지방성형": 10348, "NONSURGICAL_치아": 244, "NONSURGICAL_코성형": 716, "NONSURGICAL_피부": 13754, "NONSURGICAL_필러": 8430, "NONSURGICAL_한방": 281, "SURGICAL_가슴성형": 1083, "SURGICAL_기타": 370, "SURGICAL_눈성형": 13925, "SURGICAL_리프팅": 880, "SURGICAL_모발이식": 230, "SURGICAL_안면윤곽/양악": 3384, "SURGICAL_지방성형": 5225, "SURGICAL_치아": 240, "SURGICAL_코성형": 8070, "SURGICAL_피부": 17, "SURGICAL_필러": 1}, {"period": "10-06", "NONSURGICAL_가슴성형": 8, "NONSURGICAL_기타": 1281, "NONSURGICAL_눈성형": 54, "NONSURGICAL_리프팅": 6083, "NONSURGICAL_모발이식": 40, "NONSURGICAL_보톡스": 12452, "NONSURGICAL_제모": 5109, "NONSURGICAL_지방성형": 9410, "NONSURGICAL_치아": 201, "NONSURGICAL_코성형": 572, "NONSURGICAL_피부": 10219, "NONSURGICAL_필러": 6823, "NONSURGICAL_한방": 244, "SURGICAL_가슴성형": 616, "SURGICAL_기타": 264, "SURGICAL_눈성형": 11491, "SURGICAL_리프팅": 523, "SURGICAL_모발이식": 229, "SURGICAL_안면윤곽/양악": 2311, "SURGICAL_지방성형": 3807, "SURGICAL_치아": 238, "SURGICAL_코성형": 5546, "SURGICAL_피부": 17, "SURGICAL_필러": 0}, {"period": "10-13", "NONSURGICAL_가슴성형": 5, "NONSURGICAL_기타": 1652, "NONSURGICAL_눈성형": 50, "NONSURGICAL_리프팅": 7697, "NONSURGICAL_모발이식": 48, "NONSURGICAL_보톡스": 14730, "NONSURGICAL_제모": 6204, "NONSURGICAL_지방성형": 10546, "NONSURGICAL_치아": 343, "NONSURGICAL_코성형": 657, "NONSURGICAL_피부": 12000, "NONSURGICAL_필러": 7445, "NONSURGICAL_한방": 287, "SURGICAL_가슴성형": 1046, "SURGICAL_기타": 340, "SURGICAL_눈성형": 16275, "SURGICAL_리프팅": 950, "SURGICAL_모발이식": 301, "SURGICAL_안면윤곽/양악": 3708, "SURGICAL_지방성형": 4894, "SURGICAL_치아": 369, "SURGICAL_코성형": 8703, "SURGICAL_피부": 20, "SURGICAL_필러": 0}, {"period": "10-20", "NONSURGICAL_가슴성형": 16, "NONSURGICAL_기타": 1629, "NONSURGICAL_눈성형": 50, "NONSURGICAL_리프팅": 7470, "NONSURGICAL_모발이식": 43, "NONSURGICAL_보톡스": 14956, "NONSURGICAL_제모": 6406, "NONSURGICAL_지방성형": 9769, "NONSURGICAL_치아": 381, "NONSURGICAL_코성형": 661, "NONSURGICAL_피부": 12699, "NONSURGICAL_필러": 6797, "NONSURGICAL_한방": 194, "SURGICAL_가슴성형": 964, "SURGICAL_기타": 263, "SURGICAL_눈성형": 15828, "SURGICAL_리프팅": 878, "SURGICAL_모발이식": 213, "SURGICAL_안면윤곽/양악": 3573, "SURGICAL_지방성형": 4650, "SURGICAL_치아": 316, "SURGICAL_코성형": 8918, "SURGICAL_피부": 14, "SURGICAL_필러": 0}, {"period": "10-27", "NONSURGICAL_가슴성형": 14, "NONSURGICAL_기타": 1134, "NONSURGICAL_눈성형": 44, "NONSURGICAL_리프팅": 6303, "NONSURGICAL_모발이식": 31, "NONSURGICAL_보톡스": 11614, "NONSURGICAL_제모": 4335, "NONSURGICAL_지방성형": 8323, "NONSURGICAL_치아": 348, "NONSURGICAL_코성형": 628, "NONSURGICAL_피부": 9930, "NONSURGICAL_필러": 5972, "NONSURGICAL_한방": 235, "SURGICAL_가슴성형": 893, "SURGICAL_기타": 275, "SURGICAL_눈성형": 15799, "SURGICAL_리프팅": 939, "SURGICAL_모발이식": 250, "SURGICAL_안면윤곽/양악": 3351, "SURGICAL_지방성형": 4282, "SURGICAL_치아": 193, "SURGICAL_코성형": 9440, "SURGICAL_피부": 17, "SURGICAL_필러": 0}, {"period": "11-03", "NONSURGICAL_가슴성형": 21, "NONSURGICAL_기타": 1790, "NONSURGICAL_눈성형": 70, "NONSURGICAL_리프팅": 8111, "NONSURGICAL_모발이식": 47, "NONSURGICAL_보톡스": 17408, "NONSURGICAL_제모": 6899, "NONSURGICAL_지방성형": 11126, "NONSURGICAL_치아": 354, "NONSURGICAL_코성형": 826, "NONSURGICAL_피부": 13075, "NONSURGICAL_필러": 7135, "NONSURGICAL_한방": 326, "SURGICAL_가슴성형": 1039, "SURGICAL_기타": 269, "SURGICAL_눈성형": 18261, "SURGICAL_리프팅": 861, "SURGICAL_모발이식": 234, "SURGICAL_안면윤곽/양악": 3619, "SURGICAL_지방성형": 4698, "SURGICAL_치아": 435, "SURGICAL_코성형": 10493, "SURGICAL_피부": 15, "SURGICAL_필러": 0}, {"period": "11-10", "NONSURGICAL_가슴성형": 14, "NONSURGICAL_기타": 1809, "NONSURGICAL_눈성형": 60, "NONSURGICAL_리프팅": 7621, "NONSURGICAL_모발이식": 45, "NONSURGICAL_보톡스": 15342, "NONSURGICAL_제모": 5643, "NONSURGICAL_지방성형": 11381, "NONSURGICAL_치아": 373, "NONSURGICAL_코성형": 804, "NONSURGICAL_피부": 12117, "NONSURGICAL_필러": 6970, "NONSURGICAL_한방": 283, "SURGICAL_가슴성형": 1115, "SURGICAL_기타": 292, "SURGICAL_눈성형": 18541, "SURGICAL_리프팅": 978, "SURGICAL_모발이식": 289, "SURGICAL_안면윤곽/양악": 3700, "SURGICAL_지방성형": 4567, "SURGICAL_치아": 395, "SURGICAL_코성형": 10296, "SURGICAL_피부": 15, "SURGICAL_필러": 0}, {"period": "11-17", "NONSURGICAL_가슴성형": 10, "NONSURGICAL_기타": 2209, "NONSURGICAL_눈성형": 60, "NONSURGICAL_리프팅": 8122, "NONSURGICAL_모발이식": 29, "NONSURGICAL_보톡스": 15512, "NONSURGICAL_제모": 6401, "NONSURGICAL_지방성형": 11420, "NONSURGICAL_치아": 341, "NONSURGICAL_코성형": 734, "NONSURGICAL_피부": 12829, "NONSURGICAL_필러": 7074, "NONSURGICAL_한방": 280, "SURGICAL_가슴성형": 961, "SURGICAL_기타": 343, "SURGICAL_눈성형": 18960, "SURGICAL_리프팅": 999, "SURGICAL_모발이식": 276, "SURGICAL_안면윤곽/양악": 3637, "SURGICAL_지방성형": 4630, "SURGICAL_치아": 350, "SURGICAL_코성형": 10592, "SURGICAL_피부": 17, "SURGICAL_필러": 0}, {"period": "11-24", "NONSURGICAL_가슴성형": 7, "NONSURGICAL_기타": 2020, "NONSURGICAL_눈성형": 56, "NONSURGICAL_리프팅": 8203, "NONSURGICAL_모발이식": 37, "NONSURGICAL_보톡스": 17870, "NONSURGICAL_제모": 6722, "NONSURGICAL_지방성형": 11750, "NONSURGICAL_치아": 350, "NONSURGICAL_코성형": 781, "NONSURGICAL_피부": 13721, "NONSURGICAL_필러": 7216, "NONSURGICAL_한방": 282, "SURGICAL_가슴성형": 999, "SURGICAL_기타": 367, "SURGICAL_눈성형": 18988, "SURGICAL_리프팅": 1033, "SURGICAL_모발이식": 240, "SURGICAL_안면윤곽/양악": 4355, "SURGICAL_지방성형": 4808, "SURGICAL_치아": 252, "SURGICAL_코성형": 10584, "SURGICAL_피부": 29, "SURGICAL_필러": 0}, {"period": "12-01", "NONSURGICAL_가슴성형": 24, "NONSURGICAL_기타": 3118, "NONSURGICAL_눈성형": 49, "NONSURGICAL_리프팅": 10002, "NONSURGICAL_모발이식": 33, "NONSURGICAL_보톡스": 23370, "NONSURGICAL_제모": 9334, "NONSURGICAL_지방성형": 13928, "NONSURGICAL_치아": 315, "NONSURGICAL_코성형": 847, "NONSURGICAL_피부": 17156, "NONSURGICAL_필러": 8461, "NONSURGICAL_한방": 375, "SURGICAL_가슴성형": 907, "SURGICAL_기타": 311, "SURGICAL_눈성형": 18025, "SURGICAL_리프팅": 1042, "SURGICAL_모발이식": 274, "SURGICAL_안면윤곽/양악": 3987, "SURGICAL_지방성형": 4425, "SURGICAL_치아": 360, "SURGICAL_코성형": 10271, "SURGICAL_피부": 13, "SURGICAL_필러": 0}, {"period": "12-08", "NONSURGICAL_가슴성형": 13, "NONSURGICAL_기타": 3426, "NONSURGICAL_눈성형": 69, "NONSURGICAL_리프팅": 10622, "NONSURGICAL_모발이식": 30, "NONSURGICAL_보톡스": 22827, "NONSURGICAL_제모": 9384, "NONSURGICAL_지방성형": 13355, "NONSURGICAL_치아": 372, "NONSURGICAL_코성형": 841, "NONSURGICAL_피부": 16998, "NONSURGICAL_필러": 8439, "NONSURGICAL_한방": 290, "SURGICAL_가슴성형": 926, "SURGICAL_기타": 364, "SURGICAL_눈성형": 19786, "SURGICAL_리프팅": 1016, "SURGICAL_모발이식": 271, "SURGICAL_안면윤곽/양악": 3955, "SURGICAL_지방성형": 5397, "SURGICAL_치아": 514, "SURGICAL_코성형": 11266, "SURGICAL_피부": 20, "SURGICAL_필러": 0}, {"period": "12-15", "NONSURGICAL_가슴성형": 13, "NONSURGICAL_기타": 2990, "NONSURGICAL_눈성형": 46, "NONSURGICAL_리프팅": 9324, "NONSURGICAL_모발이식": 23, "NONSURGICAL_보톡스": 18408, "NONSURGICAL_제모": 7351, "NONSURGICAL_지방성형": 11272, "NONSURGICAL_치아": 357, "NONSURGICAL_코성형": 793, "NONSURGICAL_피부": 14037, "NONSURGICAL_필러": 7355, "NONSURGICAL_한방": 282, "SURGICAL_가슴성형": 1026, "SURGICAL_기타": 428, "SURGICAL_눈성형": 20452, "SURGICAL_리프팅": 1134, "SURGICAL_모발이식": 201, "SURGICAL_안면윤곽/양악": 4332, "SURGICAL_지방성형": 5378, "SURGICAL_치아": 491, "SURGICAL_코성형": 12717, "SURGICAL_피부": 12, "SURGICAL_필러": 0}, {"period": "12-22", "NONSURGICAL_가슴성형": 12, "NONSURGICAL_기타": 2337, "NONSURGICAL_눈성형": 33, "NONSURGICAL_리프팅": 8477, "NONSURGICAL_모발이식": 31, "NONSURGICAL_보톡스": 14666, "NONSURGICAL_제모": 5518, "NONSURGICAL_지방성형": 9012, "NONSURGICAL_치아": 283, "NONSURGICAL_코성형": 681, "NONSURGICAL_피부": 13341, "NONSURGICAL_필러": 6542, "NONSURGICAL_한방": 301, "SURGICAL_가슴성형": 849, "SURGICAL_기타": 310, "SURGICAL_눈성형": 18855, "SURGICAL_리프팅": 1029, "SURGICAL_모발이식": 227, "SURGICAL_안면윤곽/양악": 3575, "SURGICAL_지방성형": 5263, "SURGICAL_치아": 287, "SURGICAL_코성형": 11643, "SURGICAL_피부": 19, "SURGICAL_필러": 1}, {"period": "12-29", "NONSURGICAL_가슴성형": 11, "NONSURGICAL_기타": 1691, "NONSURGICAL_눈성형": 63, "NONSURGICAL_리프팅": 8027, "NONSURGICAL_모발이식": 26, "NONSURGICAL_보톡스": 14229, "NONSURGICAL_제모": 5669, "NONSURGICAL_지방성형": 8882, "NONSURGICAL_치아": 315, "NONSURGICAL_코성형": 821, "NONSURGICAL_피부": 12494, "NONSURGICAL_필러": 6835, "NONSURGICAL_한방": 268, "SURGICAL_가슴성형": 932, "SURGICAL_기타": 387, "SURGICAL_눈성형": 21633, "SURGICAL_리프팅": 1082, "SURGICAL_모발이식": 268, "SURGICAL_안면윤곽/양악": 3751, "SURGICAL_지방성형": 5449, "SURGICAL_치아": 372, "SURGICAL_코성형": 12013, "SURGICAL_피부": 22, "SURGICAL_필러": 0}, {"period": "01-05", "NONSURGICAL_가슴성형": 26, "NONSURGICAL_기타": 3475, "NONSURGICAL_눈성형": 86, "NONSURGICAL_리프팅": 11246, "NONSURGICAL_모발이식": 41, "NONSURGICAL_보톡스": 25900, "NONSURGICAL_제모": 10716, "NONSURGICAL_지방성형": 13675, "NONSURGICAL_치아": 410, "NONSURGICAL_코성형": 857, "NONSURGICAL_피부": 19870, "NONSURGICAL_필러": 10580, "NONSURGICAL_한방": 408, "SURGICAL_가슴성형": 1084, "SURGICAL_기타": 375, "SURGICAL_눈성형": 24267, "SURGICAL_리프팅": 1309, "SURGICAL_모발이식": 330, "SURGICAL_안면윤곽/양악": 4736, "SURGICAL_지방성형": 6254, "SURGICAL_치아": 406, "SURGICAL_코성형": 13978, "SURGICAL_피부": 18, "SURGICAL_필러": 1}, {"period": "01-12", "NONSURGICAL_가슴성형": 15, "NONSURGICAL_기타": 2961, "NONSURGICAL_눈성형": 60, "NONSURGICAL_리프팅": 9716, "NONSURGICAL_모발이식": 47, "NONSURGICAL_보톡스": 21385, "NONSURGICAL_제모": 8652, "NONSURGICAL_지방성형": 13301, "NONSURGICAL_치아": 441, "NONSURGICAL_코성형": 799, "NONSURGICAL_피부": 16861, "NONSURGICAL_필러": 9368, "NONSURGICAL_한방": 374, "SURGICAL_가슴성형": 1065, "SURGICAL_기타": 396, "SURGICAL_눈성형": 22884, "SURGICAL_리프팅": 1285, "SURGICAL_모발이식": 284, "SURGICAL_안면윤곽/양악": 4816, "SURGICAL_지방성형": 6294, "SURGICAL_치아": 431, "SURGICAL_코성형": 13143, "SURGICAL_피부": 18, "SURGICAL_필러": 0}, {"period": "01-19", "NONSURGICAL_가슴성형": 11, "NONSURGICAL_기타": 2806, "NONSURGICAL_눈성형": 47, "NONSURGICAL_리프팅": 9460, "NONSURGICAL_모발이식": 34, "NONSURGICAL_보톡스": 20467, "NONSURGICAL_제모": 8150, "NONSURGICAL_지방성형": 13087, "NONSURGICAL_치아": 402, "NONSURGICAL_코성형": 825, "NONSURGICAL_피부": 16550, "NONSURGICAL_필러": 9513, "NONSURGICAL_한방": 390, "SURGICAL_가슴성형": 1071, "SURGICAL_기타": 377, "SURGICAL_눈성형": 23784, "SURGICAL_리프팅": 1319, "SURGICAL_모발이식": 314, "SURGICAL_안면윤곽/양악": 4207, "SURGICAL_지방성형": 6038, "SURGICAL_치아": 398, "SURGICAL_코성형": 12791, "SURGICAL_피부": 19, "SURGICAL_필러": 0}, {"period": "01-26", "NONSURGICAL_가슴성형": 16, "NONSURGICAL_기타": 2155, "NONSURGICAL_눈성형": 71, "NONSURGICAL_리프팅": 10494, "NONSURGICAL_모발이식": 34, "NONSURGICAL_보톡스": 19476, "NONSURGICAL_제모": 8121, "NONSURGICAL_지방성형": 13168, "NONSURGICAL_치아": 412, "NONSURGICAL_코성형": 859, "NONSURGICAL_피부": 18134, "NONSURGICAL_필러": 10914, "NONSURGICAL_한방": 341, "SURGICAL_가슴성형": 1163, "SURGICAL_기타": 416, "SURGICAL_눈성형": 22607, "SURGICAL_리프팅": 1192, "SURGICAL_모발이식": 264, "SURGICAL_안면윤곽/양악": 4330, "SURGICAL_지방성형": 6367, "SURGICAL_치아": 367, "SURGICAL_코성형": 12493, "SURGICAL_피부": 22, "SURGICAL_필러": 0}, {"period": "02-02", "NONSURGICAL_가슴성형": 18, "NONSURGICAL_기타": 2046, "NONSURGICAL_눈성형": 70, "NONSURGICAL_리프팅": 10292, "NONSURGICAL_모발이식": 20, "NONSURGICAL_보톡스": 20330, "NONSURGICAL_제모": 8255, "NONSURGICAL_지방성형": 14374, "NONSURGICAL_치아": 396, "NONSURGICAL_코성형": 856, "NONSURGICAL_피부": 17429, "NONSURGICAL_필러": 11321, "NONSURGICAL_한방": 343, "SURGICAL_가슴성형": 1192, "SURGICAL_기타": 399, "SURGICAL_눈성형": 20014, "SURGICAL_리프팅": 1360, "SURGICAL_모발이식": 255, "SURGICAL_안면윤곽/양악": 4634, "SURGICAL_지방성형": 7025, "SURGICAL_치아": 436, "SURGICAL_코성형": 12559, "SURGICAL_피부": 24, "SURGICAL_필러": 1}, {"period": "02-09", "NONSURGICAL_가슴성형": 14, "NONSURGICAL_기타": 1466, "NONSURGICAL_눈성형": 75, "NONSURGICAL_리프팅": 8483, "NONSURGICAL_모발이식": 19, "NONSURGICAL_보톡스": 17714, "NONSURGICAL_제모": 7093, "NONSURGICAL_지방성형": 12184, "NONSURGICAL_치아": 377, "NONSURGICAL_코성형": 762, "NONSURGICAL_피부": 14974, "NONSURGICAL_필러": 9610, "NONSURGICAL_한방": 310, "SURGICAL_가슴성형": 1185, "SURGICAL_기타": 374, "SURGICAL_눈성형": 17856, "SURGICAL_리프팅": 1094, "SURGICAL_모발이식": 282, "SURGICAL_안면윤곽/양악": 4534, "SURGICAL_지방성형": 6449, "SURGICAL_치아": 388, "SURGICAL_코성형": 11765, "SURGICAL_피부": 19, "SURGICAL_필러": 1}, {"period": "02-16", "NONSURGICAL_가슴성형": 10, "NONSURGICAL_기타": 1434, "NONSURGICAL_눈성형": 51, "NONSURGICAL_리프팅": 8045, "NONSURGICAL_모발이식": 28, "NONSURGICAL_보톡스": 17506, "NONSURGICAL_제모": 8414, "NONSURGICAL_지방성형": 12932, "NONSURGICAL_치아": 389, "NONSURGICAL_코성형": 750, "NONSURGICAL_피부": 13293, "NONSURGICAL_필러": 9452, "NONSURGICAL_한방": 306, "SURGICAL_가슴성형": 920, "SURGICAL_기타": 342, "SURGICAL_눈성형": 14322, "SURGICAL_리프팅": 915, "SURGICAL_모발이식": 237, "SURGICAL_안면윤곽/양악": 3908, "SURGICAL_지방성형": 5543, "SURGICAL_치아": 432, "SURGICAL_코성형": 9381, "SURGICAL_피부": 21, "SURGICAL_필러": 0}, {"period": "02-23", "NONSURGICAL_가슴성형": 18, "NONSURGICAL_기타": 1431, "NONSURGICAL_눈성형": 49, "NONSURGICAL_리프팅": 8569, "NONSURGICAL_모발이식": 17, "NONSURGICAL_보톡스": 18264, "NONSURGICAL_제모": 8711, "NONSURGICAL_지방성형": 12329, "NONSURGICAL_치아": 375, "NONSURGICAL_코성형": 632, "NONSURGICAL_피부": 14354, "NONSURGICAL_필러": 9154, "NONSURGICAL_한방": 263, "SURGICAL_가슴성형": 1049, "SURGICAL_기타": 347, "SURGICAL_눈성형": 16210, "SURGICAL_리프팅": 1064, "SURGICAL_모발이식": 204, "SURGICAL_안면윤곽/양악": 4333, "SURGICAL_지방성형": 6103, "SURGICAL_치아": 403, "SURGICAL_코성형": 11041, "SURGICAL_피부": 25, "SURGICAL_필러": 0}, {"period": "03-02", "NONSURGICAL_가슴성형": 19, "NONSURGICAL_기타": 1389, "NONSURGICAL_눈성형": 53, "NONSURGICAL_리프팅": 7227, "NONSURGICAL_모발이식": 19, "NONSURGICAL_보톡스": 16721, "NONSURGICAL_제모": 7758, "NONSURGICAL_지방성형": 10328, "NONSURGICAL_치아": 322, "NONSURGICAL_코성형": 612, "NONSURGICAL_피부": 12495, "NONSURGICAL_필러": 8303, "NONSURGICAL_한방": 268, "SURGICAL_가슴성형": 965, "SURGICAL_기타": 372, "SURGICAL_눈성형": 15015, "SURGICAL_리프팅": 926, "SURGICAL_모발이식": 195, "SURGICAL_안면윤곽/양악": 4003, "SURGICAL_지방성형": 6197, "SURGICAL_치아": 340, "SURGICAL_코성형": 10072, "SURGICAL_피부": 16, "SURGICAL_필러": 0}, {"period": "03-09", "NONSURGICAL_가슴성형": 14, "NONSURGICAL_기타": 1913, "NONSURGICAL_눈성형": 72, "NONSURGICAL_리프팅": 8821, "NONSURGICAL_모발이식": 43, "NONSURGICAL_보톡스": 19309, "NONSURGICAL_제모": 9812, "NONSURGICAL_지방성형": 11980, "NONSURGICAL_치아": 400, "NONSURGICAL_코성형": 726, "NONSURGICAL_피부": 16467, "NONSURGICAL_필러": 9727, "NONSURGICAL_한방": 291, "SURGICAL_가슴성형": 1053, "SURGICAL_기타": 323, "SURGICAL_눈성형": 14272, "SURGICAL_리프팅": 978, "SURGICAL_모발이식": 178, "SURGICAL_안면윤곽/양악": 4136, "SURGICAL_지방성형": 5874, "SURGICAL_치아": 414, "SURGICAL_코성형": 10237, "SURGICAL_피부": 17, "SURGICAL_필러": 1}, {"period": "03-16", "NONSURGICAL_가슴성형": 13, "NONSURGICAL_기타": 1792, "NONSURGICAL_눈성형": 74, "NONSURGICAL_리프팅": 8525, "NONSURGICAL_모발이식": 17, "NONSURGICAL_보톡스": 18483, "NONSURGICAL_제모": 8310, "NONSURGICAL_지방성형": 10918, "NONSURGICAL_치아": 351, "NONSURGICAL_코성형": 817, "NONSURGICAL_피부": 14961, "NONSURGICAL_필러": 8520, "NONSURGICAL_한방": 319, "SURGICAL_가슴성형": 920, "SURGICAL_기타": 310, "SURGICAL_눈성형": 14057, "SURGICAL_리프팅": 992, "SURGICAL_모발이식": 214, "SURGICAL_안면윤곽/양악": 3959, "SURGICAL_지방성형": 6212, "SURGICAL_치아": 336, "SURGICAL_코성형": 10192, "SURGICAL_피부": 19, "SURGICAL_필러": 0}, {"period": "03-23", "NONSURGICAL_가슴성형": 18, "NONSURGICAL_기타": 1168, "NONSURGICAL_눈성형": 39, "NONSURGICAL_리프팅": 6864, "NONSURGICAL_모발이식": 14, "NONSURGICAL_보톡스": 13570, "NONSURGICAL_제모": 7321, "NONSURGICAL_지방성형": 8663, "NONSURGICAL_치아": 397, "NONSURGICAL_코성형": 645, "NONSURGICAL_피부": 11234, "NONSURGICAL_필러": 6776, "NONSURGICAL_한방": 274, "SURGICAL_가슴성형": 968, "SURGICAL_기타": 315, "SURGICAL_눈성형": 13702, "SURGICAL_리프팅": 860, "SURGICAL_모발이식": 182, "SURGICAL_안면윤곽/양악": 3749, "SURGICAL_지방성형": 5850, "SURGICAL_치아": 350, "SURGICAL_코성형": 9631, "SURGICAL_피부": 16, "SURGICAL_필러": 0}, {"period": "03-30", "NONSURGICAL_가슴성형": 19, "NONSURGICAL_기타": 1735, "NONSURGICAL_눈성형": 60, "NONSURGICAL_리프팅": 8994, "NONSURGICAL_모발이식": 55, "NONSURGICAL_보톡스": 18198, "NONSURGICAL_제모": 9435, "NONSURGICAL_지방성형": 10615, "NONSURGICAL_치아": 391, "NONSURGICAL_코성형": 667, "NONSURGICAL_피부": 15326, "NONSURGICAL_필러": 8941, "NONSURGICAL_한방": 258, "SURGICAL_가슴성형": 1040, "SURGICAL_기타": 267, "SURGICAL_눈성형": 13120, "SURGICAL_리프팅": 869, "SURGICAL_모발이식": 195, "SURGICAL_안면윤곽/양악": 3506, "SURGICAL_지방성형": 5636, "SURGICAL_치아": 262, "SURGICAL_코성형": 8926, "SURGICAL_피부": 17, "SURGICAL_필러": 1}, {"period": "04-06", "NONSURGICAL_가슴성형": 17, "NONSURGICAL_기타": 1398, "NONSURGICAL_눈성형": 51, "NONSURGICAL_리프팅": 7493, "NONSURGICAL_모발이식": 15, "NONSURGICAL_보톡스": 16002, "NONSURGICAL_제모": 8850, "NONSURGICAL_지방성형": 9169, "NONSURGICAL_치아": 372, "NONSURGICAL_코성형": 750, "NONSURGICAL_피부": 12353, "NONSURGICAL_필러": 7375, "NONSURGICAL_한방": 259, "SURGICAL_가슴성형": 1061, "SURGICAL_기타": 227, "SURGICAL_눈성형": 13840, "SURGICAL_리프팅": 992, "SURGICAL_모발이식": 207, "SURGICAL_안면윤곽/양악": 3647, "SURGICAL_지방성형": 5608, "SURGICAL_치아": 333, "SURGICAL_코성형": 8825, "SURGICAL_피부": 25, "SURGICAL_필러": 0}, {"period": "04-13", "NONSURGICAL_가슴성형": 21, "NONSURGICAL_기타": 1394, "NONSURGICAL_눈성형": 41, "NONSURGICAL_리프팅": 8084, "NONSURGICAL_모발이식": 33, "NONSURGICAL_보톡스": 16704, "NONSURGICAL_제모": 8837, "NONSURGICAL_지방성형": 10235, "NONSURGICAL_치아": 350, "NONSURGICAL_코성형": 669, "NONSURGICAL_피부": 13550, "NONSURGICAL_필러": 7673, "NONSURGICAL_한방": 263, "SURGICAL_가슴성형": 1118, "SURGICAL_기타": 229, "SURGICAL_눈성형": 14032, "SURGICAL_리프팅": 897, "SURGICAL_모발이식": 248, "SURGICAL_안면윤곽/양악": 3725, "SURGICAL_지방성형": 6236, "SURGICAL_치아": 294, "SURGICAL_코성형": 9206, "SURGICAL_피부": 21, "SURGICAL_필러": 0}, {"period": "04-20", "NONSURGICAL_가슴성형": 22, "NONSURGICAL_기타": 1367, "NONSURGICAL_눈성형": 49, "NONSURGICAL_리프팅": 8245, "NONSURGICAL_모발이식": 27, "NONSURGICAL_보톡스": 16630, "NONSURGICAL_제모": 9961, "NONSURGICAL_지방성형": 10219, "NONSURGICAL_치아": 428, "NONSURGICAL_코성형": 617, "NONSURGICAL_피부": 14404, "NONSURGICAL_필러": 7719, "NONSURGICAL_한방": 293, "SURGICAL_가슴성형": 1174, "SURGICAL_기타": 268, "SURGICAL_눈성형": 14110, "SURGICAL_리프팅": 928, "SURGICAL_모발이식": 226, "SURGICAL_안면윤곽/양악": 3250, "SURGICAL_지방성형": 5891, "SURGICAL_치아": 397, "SURGICAL_코성형": 9018, "SURGICAL_피부": 16, "SURGICAL_필러": 0}, {"period": "04-27", "NONSURGICAL_가슴성형": 17, "NONSURGICAL_기타": 1473, "NONSURGICAL_눈성형": 60, "NONSURGICAL_리프팅": 8841, "NONSURGICAL_모발이식": 34, "NONSURGICAL_보톡스": 19059, "NONSURGICAL_제모": 11488, "NONSURGICAL_지방성형": 11158, "NONSURGICAL_치아": 441, "NONSURGICAL_코성형": 701, "NONSURGICAL_피부": 16234, "NONSURGICAL_필러": 8406, "NONSURGICAL_한방": 311, "SURGICAL_가슴성형": 1004, "SURGICAL_기타": 265, "SURGICAL_눈성형": 13050, "SURGICAL_리프팅": 889, "SURGICAL_모발이식": 209, "SURGICAL_안면윤곽/양악": 3164, "SURGICAL_지방성형": 5554, "SURGICAL_치아": 303, "SURGICAL_코성형": 8170, "SURGICAL_피부": 7, "SURGICAL_필러": 0}, {"period": "05-04", "NONSURGICAL_가슴성형": 15, "NONSURGICAL_기타": 1324, "NONSURGICAL_눈성형": 53, "NONSURGICAL_리프팅": 7622, "NONSURGICAL_모발이식": 28, "NONSURGICAL_보톡스": 17644, "NONSURGICAL_제모": 9891, "NONSURGICAL_지방성형": 10756, "NONSURGICAL_치아": 317, "NONSURGICAL_코성형": 610, "NONSURGICAL_피부": 13251, "NONSURGICAL_필러": 7720, "NONSURGICAL_한방": 302, "SURGICAL_가슴성형": 1084, "SURGICAL_기타": 251, "SURGICAL_눈성형": 11768, "SURGICAL_리프팅": 845, "SURGICAL_모발이식": 174, "SURGICAL_안면윤곽/양악": 2846, "SURGICAL_지방성형": 5259, "SURGICAL_치아": 256, "SURGICAL_코성형": 7959, "SURGICAL_피부": 15, "SURGICAL_필러": 1}, {"period": "05-11", "NONSURGICAL_가슴성형": 28, "NONSURGICAL_기타": 1252, "NONSURGICAL_눈성형": 36, "NONSURGICAL_리프팅": 7131, "NONSURGICAL_모발이식": 25, "NONSURGICAL_보톡스": 16638, "NONSURGICAL_제모": 10573, "NONSURGICAL_지방성형": 10514, "NONSURGICAL_치아": 347, "NONSURGICAL_코성형": 604, "NONSURGICAL_피부": 12270, "NONSURGICAL_필러": 7355, "NONSURGICAL_한방": 299, "SURGICAL_가슴성형": 1166, "SURGICAL_기타": 271, "SURGICAL_눈성형": 12957, "SURGICAL_리프팅": 961, "SURGICAL_모발이식": 189, "SURGICAL_안면윤곽/양악": 3104, "SURGICAL_지방성형": 5810, "SURGICAL_치아": 235, "SURGICAL_코성형": 9333, "SURGICAL_피부": 16, "SURGICAL_필러": 1}, {"period": "05-18", "NONSURGICAL_가슴성형": 23, "NONSURGICAL_기타": 1214, "NONSURGICAL_눈성형": 36, "NONSURGICAL_리프팅": 6784, "NONSURGICAL_모발이식": 16, "NONSURGICAL_보톡스": 15745, "NONSURGICAL_제모": 9827, "NONSURGICAL_지방성형": 10078, "NONSURGICAL_치아": 371, "NONSURGICAL_코성형": 598, "NONSURGICAL_피부": 11749, "NONSURGICAL_필러": 6729, "NONSURGICAL_한방": 319, "SURGICAL_가슴성형": 1015, "SURGICAL_기타": 279, "SURGICAL_눈성형": 12659, "SURGICAL_리프팅": 893, "SURGICAL_모발이식": 193, "SURGICAL_안면윤곽/양악": 3230, "SURGICAL_지방성형": 5685, "SURGICAL_치아": 360, "SURGICAL_코성형": 8974, "SURGICAL_피부": 15, "SURGICAL_필러": 2}, {"period": "05-25", "NONSURGICAL_가슴성형": 1, "NONSURGICAL_기타": 162, "NONSURGICAL_눈성형": 6, "NONSURGICAL_리프팅": 850, "NONSURGICAL_모발이식": 1, "NONSURGICAL_보톡스": 2230, "NONSURGICAL_제모": 1431, "NONSURGICAL_지방성형": 974, "NONSURGICAL_치아": 41, "NONSURGICAL_코성형": 60, "NONSURGICAL_피부": 1584, "NONSURGICAL_필러": 930, "NONSURGICAL_한방": 29, "SURGICAL_가슴성형": 129, "SURGICAL_기타": 20, "SURGICAL_눈성형": 1462, "SURGICAL_리프팅": 103, "SURGICAL_모발이식": 21, "SURGICAL_안면윤곽/양악": 345, "SURGICAL_지방성형": 498, "SURGICAL_치아": 24, "SURGICAL_코성형": 1071, "SURGICAL_피부": 1, "SURGICAL_필러": 0}];
+const dataTotal = [{"period": "12-30", "NONSURGICAL": 59699, "SURGICAL": 46267}, {"period": "01-06", "NONSURGICAL": 73981, "SURGICAL": 53910}, {"period": "01-13", "NONSURGICAL": 72362, "SURGICAL": 55574}, {"period": "01-20", "NONSURGICAL": 78252, "SURGICAL": 50696}, {"period": "01-27", "NONSURGICAL": 64412, "SURGICAL": 34558}, {"period": "02-03", "NONSURGICAL": 59584, "SURGICAL": 45791}, {"period": "02-10", "NONSURGICAL": 62860, "SURGICAL": 44291}, {"period": "02-17", "NONSURGICAL": 62523, "SURGICAL": 42798}, {"period": "02-24", "NONSURGICAL": 60128, "SURGICAL": 40318}, {"period": "03-03", "NONSURGICAL": 55148, "SURGICAL": 37931}, {"period": "03-10", "NONSURGICAL": 63800, "SURGICAL": 41169}, {"period": "03-17", "NONSURGICAL": 61334, "SURGICAL": 42035}, {"period": "03-24", "NONSURGICAL": 53791, "SURGICAL": 41043}, {"period": "03-31", "NONSURGICAL": 63001, "SURGICAL": 39955}, {"period": "04-07", "NONSURGICAL": 61016, "SURGICAL": 41713}, {"period": "04-14", "NONSURGICAL": 59238, "SURGICAL": 43502}, {"period": "04-21", "NONSURGICAL": 62424, "SURGICAL": 43717}, {"period": "04-28", "NONSURGICAL": 62529, "SURGICAL": 37723}, {"period": "05-05", "NONSURGICAL": 56113, "SURGICAL": 32757}, {"period": "05-12", "NONSURGICAL": 54463, "SURGICAL": 36956}, {"period": "05-19", "NONSURGICAL": 57638, "SURGICAL": 36626}, {"period": "05-26", "NONSURGICAL": 62770, "SURGICAL": 40922}, {"period": "06-02", "NONSURGICAL": 63204, "SURGICAL": 35539}, {"period": "06-09", "NONSURGICAL": 68420, "SURGICAL": 42816}, {"period": "06-16", "NONSURGICAL": 66556, "SURGICAL": 44234}, {"period": "06-23", "NONSURGICAL": 66734, "SURGICAL": 40362}, {"period": "06-30", "NONSURGICAL": 72028, "SURGICAL": 42135}, {"period": "07-07", "NONSURGICAL": 74415, "SURGICAL": 38919}, {"period": "07-14", "NONSURGICAL": 58577, "SURGICAL": 39211}, {"period": "07-21", "NONSURGICAL": 66467, "SURGICAL": 39907}, {"period": "07-28", "NONSURGICAL": 70723, "SURGICAL": 35572}, {"period": "08-04", "NONSURGICAL": 63146, "SURGICAL": 35642}, {"period": "08-11", "NONSURGICAL": 68285, "SURGICAL": 31625}, {"period": "08-18", "NONSURGICAL": 60654, "SURGICAL": 33343}, {"period": "08-25", "NONSURGICAL": 94720, "SURGICAL": 31806}, {"period": "09-01", "NONSURGICAL": 69340, "SURGICAL": 34727}, {"period": "09-08", "NONSURGICAL": 63198, "SURGICAL": 36574}, {"period": "09-15", "NONSURGICAL": 59997, "SURGICAL": 37690}, {"period": "09-22", "NONSURGICAL": 71589, "SURGICAL": 37318}, {"period": "09-29", "NONSURGICAL": 63639, "SURGICAL": 33425}, {"period": "10-06", "NONSURGICAL": 52496, "SURGICAL": 25042}, {"period": "10-13", "NONSURGICAL": 61664, "SURGICAL": 36606}, {"period": "10-20", "NONSURGICAL": 61071, "SURGICAL": 35617}, {"period": "10-27", "NONSURGICAL": 48911, "SURGICAL": 35439}, {"period": "11-03", "NONSURGICAL": 67188, "SURGICAL": 39924}, {"period": "11-10", "NONSURGICAL": 62462, "SURGICAL": 40188}, {"period": "11-17", "NONSURGICAL": 65021, "SURGICAL": 40765}, {"period": "11-24", "NONSURGICAL": 69015, "SURGICAL": 41655}, {"period": "12-01", "NONSURGICAL": 87012, "SURGICAL": 39615}, {"period": "12-08", "NONSURGICAL": 86666, "SURGICAL": 43515}, {"period": "12-15", "NONSURGICAL": 72251, "SURGICAL": 46171}, {"period": "12-22", "NONSURGICAL": 61234, "SURGICAL": 42058}, {"period": "12-29", "NONSURGICAL": 59331, "SURGICAL": 45909}, {"period": "01-05", "NONSURGICAL": 97290, "SURGICAL": 52758}, {"period": "01-12", "NONSURGICAL": 83980, "SURGICAL": 50616}, {"period": "01-19", "NONSURGICAL": 81742, "SURGICAL": 50318}, {"period": "01-26", "NONSURGICAL": 84195, "SURGICAL": 49221}, {"period": "02-02", "NONSURGICAL": 85750, "SURGICAL": 47899}, {"period": "02-09", "NONSURGICAL": 73081, "SURGICAL": 43947}, {"period": "02-16", "NONSURGICAL": 72610, "SURGICAL": 36021}, {"period": "02-23", "NONSURGICAL": 74166, "SURGICAL": 40779}, {"period": "03-02", "NONSURGICAL": 65514, "SURGICAL": 38101}, {"period": "03-09", "NONSURGICAL": 79575, "SURGICAL": 37483}, {"period": "03-16", "NONSURGICAL": 73100, "SURGICAL": 37211}, {"period": "03-23", "NONSURGICAL": 56983, "SURGICAL": 35623}, {"period": "03-30", "NONSURGICAL": 74694, "SURGICAL": 33839}, {"period": "04-06", "NONSURGICAL": 64104, "SURGICAL": 34765}, {"period": "04-13", "NONSURGICAL": 67854, "SURGICAL": 36006}, {"period": "04-20", "NONSURGICAL": 69981, "SURGICAL": 35278}, {"period": "04-27", "NONSURGICAL": 78223, "SURGICAL": 32615}, {"period": "05-04", "NONSURGICAL": 69533, "SURGICAL": 30458}, {"period": "05-11", "NONSURGICAL": 67072, "SURGICAL": 34043}, {"period": "05-18", "NONSURGICAL": 63489, "SURGICAL": 33305}, {"period": "05-25", "NONSURGICAL": 8299, "SURGICAL": 3674}];
+const tagsByGroup = {"NONSURGICAL_가슴성형": [{"tag": "유륜미백", "vals": [9, 12, 12, 15, 13, 14, 18, 12, 11, 26, 16, 1]}, {"tag": "여유증(시술)", "vals": [5, 1, 6, 4, 4, 7, 4, 5, 4, 2, 7, 0]}, {"tag": "유륜문신", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}], "NONSURGICAL_기타": [{"tag": "문신제거", "vals": [268, 262, 207, 320, 272, 291, 290, 276, 257, 214, 224, 26]}, {"tag": "백옥주사", "vals": [211, 167, 100, 156, 109, 111, 113, 140, 124, 130, 113, 16]}, {"tag": "신데렐라주사", "vals": [193, 151, 93, 143, 88, 104, 99, 116, 106, 110, 99, 13]}, {"tag": "눈썹반영구제거", "vals": [133, 142, 106, 165, 130, 115, 110, 106, 107, 91, 97, 14]}, {"tag": "미용수액", "vals": [148, 141, 84, 118, 67, 75, 71, 87, 67, 74, 78, 13]}, {"tag": "비타민주사", "vals": [149, 127, 73, 107, 58, 75, 66, 86, 75, 86, 64, 6]}, {"tag": "아이라인반영구제거", "vals": [78, 84, 70, 109, 92, 83, 70, 62, 55, 62, 59, 5]}, {"tag": "마늘주사", "vals": [92, 77, 45, 71, 53, 53, 44, 58, 58, 51, 58, 7]}, {"tag": "태반주사", "vals": [107, 77, 34, 72, 51, 63, 52, 67, 57, 54, 55, 10]}, {"tag": "눈썹반영구", "vals": [61, 73, 33, 41, 54, 55, 55, 69, 59, 46, 48, 7]}, {"tag": "보조개성형", "vals": [83, 63, 57, 45, 56, 52, 56, 58, 42, 31, 39, 4]}, {"tag": "다이어트수액/주사", "vals": [44, 67, 33, 47, 41, 31, 43, 38, 41, 41, 36, 9]}, {"tag": "감초주사", "vals": [25, 30, 13, 28, 24, 23, 19, 33, 18, 26, 28, 1]}, {"tag": "대음순미백", "vals": [56, 65, 45, 78, 64, 39, 32, 36, 19, 22, 25, 3]}, {"tag": "아이라인반영구", "vals": [29, 27, 14, 19, 23, 27, 24, 32, 30, 18, 21, 3]}, {"tag": "질필러", "vals": [49, 28, 35, 30, 29, 29, 37, 34, 27, 25, 20, 8]}, {"tag": "입술반영구", "vals": [31, 25, 14, 14, 22, 20, 28, 30, 31, 19, 17, 1]}, {"tag": "질쎄라", "vals": [12, 32, 12, 17, 13, 16, 10, 11, 9, 13, 17, 1]}, {"tag": "헤어라인반영구", "vals": [21, 18, 16, 19, 22, 24, 22, 26, 24, 15, 13, 1]}, {"tag": "두피반영구", "vals": [24, 20, 17, 20, 14, 23, 18, 18, 18, 18, 12, 1]}, {"tag": "소음순미백", "vals": [5, 12, 4, 14, 13, 10, 17, 16, 10, 8, 12, 2]}, {"tag": "쁘띠질성형", "vals": [14, 16, 5, 8, 12, 7, 12, 7, 11, 8, 11, 3]}, {"tag": "흉터커버반영구", "vals": [17, 13, 11, 14, 12, 9, 12, 8, 12, 14, 11, 2]}, {"tag": "아르기닌수액", "vals": [8, 14, 8, 11, 13, 10, 8, 10, 12, 17, 10, 3]}, {"tag": "미인점반영구", "vals": [8, 9, 2, 5, 6, 7, 8, 4, 7, 5, 7, 0]}, {"tag": "교근신경차단술", "vals": [3, 6, 4, 9, 8, 5, 6, 5, 7, 6, 6, 0]}, {"tag": "음핵성형(레이저)", "vals": [3, 4, 5, 3, 5, 0, 4, 5, 2, 3, 5, 0]}, {"tag": "자궁경부암예방주사", "vals": [8, 10, 2, 3, 6, 1, 3, 2, 4, 8, 5, 0]}, {"tag": "NMN수액", "vals": [0, 0, 2, 2, 1, 1, 2, 0, 0, 4, 4, 1]}, {"tag": "고압산소케어", "vals": [6, 8, 4, 6, 10, 4, 4, 6, 6, 7, 3, 1]}, {"tag": "인중축소레이저", "vals": [2, 0, 0, 1, 7, 5, 6, 6, 8, 8, 3, 0]}, {"tag": "종아리신경차단술(시술)", "vals": [1, 4, 1, 3, 1, 1, 6, 4, 2, 2, 3, 0]}, {"tag": "캘로이드주사", "vals": [0, 5, 2, 3, 3, 3, 0, 0, 1, 2, 3, 0]}, {"tag": "레이저질성형", "vals": [2, 5, 4, 6, 5, 8, 2, 5, 4, 1, 2, 0]}, {"tag": "속눈썹찔림교정", "vals": [5, 2, 0, 3, 1, 1, 1, 1, 2, 3, 2, 0]}, {"tag": "다한증레이저", "vals": [0, 0, 3, 4, 2, 3, 2, 1, 2, 2, 1, 0]}, {"tag": "미라드라이", "vals": [0, 0, 4, 4, 2, 3, 3, 1, 2, 2, 1, 0]}, {"tag": "산소테라피", "vals": [5, 6, 0, 6, 4, 2, 5, 4, 2, 3, 1, 1]}, {"tag": "액취증(레이저)", "vals": [0, 0, 4, 4, 2, 3, 4, 5, 3, 3, 1, 0]}, {"tag": "간해독주사", "vals": [7, 2, 2, 5, 1, 0, 2, 0, 0, 0, 0, 0]}, {"tag": "발톱치료", "vals": [0, 0, 0, 1, 1, 0, 1, 0, 2, 0, 0, 0]}, {"tag": "비비브레이저", "vals": [5, 0, 0, 1, 1, 2, 0, 0, 1, 0, 0, 0]}, {"tag": "아미노산주사", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "피어싱", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}], "NONSURGICAL_눈성형": [{"tag": "눈밑지방재배치(시술)", "vals": [38, 46, 26, 36, 31, 27, 33, 35, 42, 27, 22, 3]}, {"tag": "안구건조증", "vals": [6, 8, 5, 3, 9, 3, 7, 7, 6, 5, 5, 0]}, {"tag": "상안검레이저", "vals": [12, 9, 4, 8, 4, 4, 3, 8, 1, 1, 4, 1]}, {"tag": "하안검레이저", "vals": [15, 10, 4, 9, 5, 4, 3, 8, 1, 2, 4, 1]}, {"tag": "레이저트임성형", "vals": [1, 1, 0, 4, 2, 3, 3, 2, 3, 1, 1, 1]}], "NONSURGICAL_리프팅": [{"tag": "인모드리프팅", "vals": [1113, 1132, 868, 1158, 1034, 1057, 1023, 1113, 970, 880, 907, 106]}, {"tag": "온다리프팅", "vals": [910, 898, 737, 1078, 852, 920, 1060, 1093, 990, 857, 868, 106]}, {"tag": "슈링크유니버스", "vals": [983, 936, 717, 953, 752, 794, 785, 925, 814, 709, 658, 87]}, {"tag": "풀페이스리프팅", "vals": [537, 593, 489, 631, 570, 601, 663, 677, 587, 543, 544, 74]}, {"tag": "실리프팅", "vals": [630, 558, 503, 611, 590, 563, 568, 581, 510, 517, 515, 57]}, {"tag": "울쎄라리프팅", "vals": [639, 547, 498, 606, 572, 672, 650, 617, 500, 509, 464, 51]}, {"tag": "슈링크리프팅", "vals": [704, 654, 521, 702, 523, 591, 593, 663, 571, 481, 456, 65]}, {"tag": "울쎄라피프라임", "vals": [407, 383, 365, 407, 383, 448, 460, 425, 351, 359, 310, 41]}, {"tag": "티타늄리프팅", "vals": [410, 413, 298, 373, 320, 356, 367, 340, 319, 340, 289, 36]}, {"tag": "아이슈링크", "vals": [336, 304, 190, 318, 228, 233, 280, 329, 255, 240, 223, 26]}, {"tag": "써마지리프팅", "vals": [240, 219, 200, 237, 201, 234, 227, 245, 200, 209, 200, 18]}, {"tag": "코실리프팅", "vals": [200, 187, 159, 158, 167, 152, 140, 172, 150, 115, 150, 18]}, {"tag": "올타이트리프팅", "vals": [138, 124, 124, 173, 115, 128, 159, 150, 144, 130, 124, 11]}, {"tag": "코프팅", "vals": [191, 196, 158, 182, 161, 153, 123, 176, 132, 114, 124, 13]}, {"tag": "튠라이너", "vals": [123, 130, 85, 160, 92, 116, 112, 131, 108, 109, 92, 19]}, {"tag": "튠페이스리프팅", "vals": [155, 125, 90, 138, 93, 108, 119, 121, 105, 114, 84, 15]}, {"tag": "브이슈링크", "vals": [118, 116, 83, 115, 82, 96, 78, 128, 104, 90, 83, 11]}, {"tag": "볼뉴머리프팅", "vals": [109, 105, 96, 108, 95, 82, 95, 98, 86, 83, 81, 17]}, {"tag": "리프테라", "vals": [194, 144, 104, 158, 93, 111, 122, 124, 101, 98, 76, 15]}, {"tag": "올리지오리프팅", "vals": [95, 127, 83, 104, 65, 84, 70, 92, 93, 91, 73, 12]}, {"tag": "팔자주름박리", "vals": [70, 78, 70, 64, 80, 74, 68, 59, 55, 68, 67, 7]}, {"tag": "아이써마지", "vals": [64, 67, 72, 82, 53, 49, 60, 62, 60, 41, 58, 3]}, {"tag": "덴서티리프팅", "vals": [59, 65, 37, 51, 45, 57, 62, 60, 64, 54, 52, 7]}, {"tag": "세르프리프팅", "vals": [39, 56, 49, 47, 43, 52, 51, 72, 56, 63, 41, 3]}, {"tag": "튠바디리프팅", "vals": [47, 38, 25, 30, 29, 26, 25, 24, 21, 39, 32, 2]}, {"tag": "인모드바디", "vals": [33, 33, 28, 38, 22, 39, 36, 44, 16, 32, 25, 3]}, {"tag": "리니어지", "vals": [23, 31, 20, 24, 28, 32, 28, 36, 30, 28, 24, 3]}, {"tag": "텐써마", "vals": [38, 36, 24, 22, 23, 34, 32, 31, 22, 17, 17, 2]}, {"tag": "더마슈링크", "vals": [10, 1, 5, 15, 8, 10, 11, 9, 8, 17, 16, 0]}, {"tag": "에어젯리프팅", "vals": [12, 14, 12, 18, 11, 13, 14, 19, 15, 11, 16, 3]}, {"tag": "소프웨이브", "vals": [17, 23, 12, 26, 19, 17, 20, 21, 16, 18, 15, 1]}, {"tag": "더블로리프팅", "vals": [36, 35, 25, 43, 11, 30, 23, 26, 30, 25, 13, 3]}, {"tag": "엠페이스 ", "vals": [11, 23, 13, 19, 17, 16, 12, 23, 18, 17, 12, 2]}, {"tag": "텐쎄라", "vals": [24, 28, 17, 24, 14, 16, 13, 23, 11, 13, 12, 0]}, {"tag": "브이로리프팅", "vals": [18, 16, 13, 28, 13, 25, 22, 23, 15, 15, 10, 1]}, {"tag": "튠아이", "vals": [11, 11, 6, 9, 7, 6, 12, 7, 9, 5, 10, 0]}, {"tag": "쿨소닉", "vals": [7, 10, 13, 15, 13, 15, 7, 16, 12, 14, 9, 2]}, {"tag": "얼굴체외충격파", "vals": [17, 18, 12, 16, 8, 17, 14, 21, 20, 14, 8, 4]}, {"tag": "쇼핑리프팅(짧은실)", "vals": [5, 4, 2, 5, 3, 4, 3, 3, 3, 3, 6, 1]}, {"tag": "울핏", "vals": [3, 3, 0, 1, 1, 1, 5, 0, 8, 2, 6, 0]}, {"tag": "쿨페이즈", "vals": [6, 11, 12, 12, 12, 14, 6, 21, 11, 10, 3, 2]}, {"tag": "트리니티리프팅", "vals": [6, 3, 1, 6, 5, 6, 4, 5, 4, 5, 3, 0]}, {"tag": "써펙트리프팅", "vals": [1, 1, 1, 1, 2, 3, 2, 4, 1, 0, 2, 0]}, {"tag": "포트라리프팅", "vals": [0, 0, 0, 4, 4, 6, 0, 8, 1, 5, 2, 0]}, {"tag": "에스슈링크", "vals": [1, 1, 4, 1, 1, 3, 2, 2, 1, 0, 1, 0]}, {"tag": "엑셀웨이브", "vals": [1, 1, 8, 8, 8, 9, 2, 4, 6, 7, 1, 0]}, {"tag": "엘라스티꿈", "vals": [0, 0, 2, 0, 0, 0, 1, 0, 0, 2, 1, 0]}, {"tag": "피팅", "vals": [14, 14, 2, 5, 9, 2, 0, 2, 0, 4, 1, 0]}, {"tag": "라페라프로", "vals": [0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0]}, {"tag": "리니어펌", "vals": [0, 0, 0, 1, 3, 3, 1, 0, 4, 1, 0, 0]}, {"tag": "벨르업리프팅", "vals": [2, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "비오라V30", "vals": [0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1]}, {"tag": "스킨아우라", "vals": [2, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]}, {"tag": "써니", "vals": [0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0]}, {"tag": "엑실리스리프팅", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "엔코어리프팅", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "엘리시스센스", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "오푸스리프팅", "vals": [1, 0, 2, 3, 4, 2, 5, 3, 1, 2, 0, 0]}, {"tag": "울트라인", "vals": [0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1]}, {"tag": "이래비티", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "이브타이탄", "vals": [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0]}, {"tag": "클리어리프팅", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "포토나리프팅", "vals": [0, 0, 0, 0, 1, 0, 2, 2, 1, 3, 0, 0]}, {"tag": "프라임레이즈", "vals": [7, 5, 1, 1, 2, 0, 3, 7, 10, 4, 0, 0]}, {"tag": "프로파운드", "vals": [1, 0, 1, 1, 2, 0, 1, 4, 0, 2, 0, 1]}, {"tag": "HIFU", "vals": [3, 3, 1, 2, 2, 2, 1, 0, 1, 0, 0, 0]}], "NONSURGICAL_모발이식": [{"tag": "두피케어", "vals": [30, 12, 11, 34, 11, 17, 17, 20, 17, 15, 9, 1]}, {"tag": "모발재생치료", "vals": [13, 5, 3, 21, 4, 16, 10, 14, 11, 10, 7, 0]}], "NONSURGICAL_보톡스": [{"tag": "사각턱보톡스", "vals": [3724, 3519, 2676, 3311, 3000, 3064, 3042, 3375, 3177, 2970, 2768, 374]}, {"tag": "잔주름보톡스", "vals": [1601, 1461, 1094, 1491, 1335, 1353, 1321, 1520, 1451, 1312, 1272, 186]}, {"tag": "스킨보톡스", "vals": [1407, 1297, 902, 1377, 1112, 1249, 1269, 1389, 1229, 1104, 1162, 156]}, {"tag": "침샘보톡스", "vals": [1545, 1509, 1098, 1482, 1216, 1192, 1232, 1426, 1310, 1201, 1154, 151]}, {"tag": "입꼬리보톡스", "vals": [1366, 1326, 947, 1316, 1122, 1204, 1191, 1332, 1248, 1187, 1046, 163]}, {"tag": "승모근보톡스", "vals": [1062, 933, 774, 937, 878, 933, 920, 1073, 1015, 1014, 961, 106]}, {"tag": "눈가주름보톡스", "vals": [1102, 1064, 807, 1029, 973, 957, 1001, 1189, 1080, 1036, 917, 146]}, {"tag": "종아리보톡스", "vals": [954, 857, 723, 932, 833, 885, 851, 987, 953, 935, 917, 118]}, {"tag": "이마주름보톡스", "vals": [897, 947, 695, 949, 853, 884, 935, 1085, 928, 922, 839, 122]}, {"tag": "미간보톡스", "vals": [895, 867, 607, 837, 738, 816, 773, 873, 844, 827, 751, 121]}, {"tag": "콧볼보톡스", "vals": [796, 693, 530, 722, 653, 675, 639, 737, 744, 702, 594, 97]}, {"tag": "턱끝보톡스", "vals": [710, 663, 455, 646, 552, 562, 534, 625, 589, 547, 478, 86]}, {"tag": "관자놀이보톡스", "vals": [579, 573, 386, 569, 513, 502, 478, 630, 582, 521, 476, 76]}, {"tag": "팔자주름보톡스", "vals": [539, 628, 412, 505, 472, 458, 447, 524, 445, 423, 434, 43]}, {"tag": "광대보톡스", "vals": [455, 526, 321, 391, 336, 336, 379, 471, 443, 378, 378, 56]}, {"tag": "콧등보톡스", "vals": [448, 433, 287, 416, 339, 401, 401, 502, 412, 426, 377, 78]}, {"tag": "다한증보톡스", "vals": [233, 228, 158, 279, 212, 276, 279, 301, 265, 248, 294, 36]}, {"tag": "입가주름보톡스", "vals": [296, 313, 223, 306, 245, 269, 267, 322, 260, 248, 235, 29]}, {"tag": "팔뚝보톡스", "vals": [178, 167, 127, 192, 151, 182, 187, 188, 175, 178, 201, 19]}, {"tag": "겨드랑이보톡스", "vals": [78, 92, 47, 109, 86, 107, 104, 104, 108, 118, 148, 20]}, {"tag": "목주름보톡스", "vals": [146, 142, 107, 125, 124, 125, 107, 122, 100, 90, 88, 17]}, {"tag": "허벅지보톡스", "vals": [68, 48, 46, 66, 51, 64, 57, 64, 71, 55, 75, 7]}, {"tag": "코끝보톡스", "vals": [71, 45, 42, 44, 45, 53, 47, 50, 55, 40, 60, 4]}, {"tag": "인중축소보톡스", "vals": [76, 62, 52, 78, 79, 78, 80, 77, 78, 73, 53, 7]}, {"tag": "잇몸보톡스", "vals": [78, 78, 48, 75, 76, 61, 68, 76, 66, 58, 48, 12]}, {"tag": "액취증보톡스", "vals": [4, 7, 6, 13, 7, 13, 18, 13, 9, 16, 10, 0]}, {"tag": "손보톡스", "vals": [1, 3, 0, 1, 0, 5, 1, 2, 6, 8, 6, 0]}, {"tag": "발목보톡스", "vals": [0, 2, 0, 0, 1, 0, 2, 2, 1, 1, 3, 0]}], "NONSURGICAL_제모": [{"tag": "겨드랑이제모", "vals": [937, 873, 712, 1024, 916, 1023, 1119, 1300, 1151, 1262, 1178, 178]}, {"tag": "인중제모", "vals": [1156, 1028, 877, 1203, 1085, 1167, 1248, 1490, 1263, 1259, 1161, 171]}, {"tag": "브라질리언제모", "vals": [922, 744, 629, 830, 810, 758, 895, 1017, 871, 979, 937, 145]}, {"tag": "팔제모", "vals": [676, 552, 524, 643, 655, 652, 745, 858, 751, 829, 757, 110]}, {"tag": "얼굴제모", "vals": [862, 673, 636, 729, 759, 673, 784, 938, 827, 855, 739, 115]}, {"tag": "종아리제모", "vals": [572, 519, 434, 616, 543, 621, 654, 823, 705, 732, 723, 110]}, {"tag": "다리제모", "vals": [483, 369, 390, 468, 484, 466, 561, 608, 541, 629, 549, 73]}, {"tag": "턱제모", "vals": [798, 612, 590, 653, 661, 605, 703, 739, 641, 667, 541, 81]}, {"tag": "수염제모", "vals": [597, 521, 423, 545, 473, 518, 544, 630, 531, 496, 456, 55]}, {"tag": "아포지레이저", "vals": [425, 370, 292, 394, 342, 386, 408, 438, 346, 363, 451, 64]}, {"tag": "젠틀맥스프로", "vals": [378, 341, 331, 415, 374, 355, 362, 481, 362, 378, 370, 45]}, {"tag": "비키니라인제모", "vals": [233, 200, 164, 234, 202, 206, 205, 325, 299, 347, 360, 59]}, {"tag": "항문제모", "vals": [363, 322, 253, 368, 306, 297, 346, 335, 298, 350, 344, 42]}, {"tag": "회음부제모", "vals": [236, 205, 150, 211, 177, 161, 162, 177, 130, 127, 150, 17]}, {"tag": "무릎제모", "vals": [67, 89, 91, 139, 104, 130, 129, 148, 116, 125, 123, 17]}, {"tag": "헤어라인제모", "vals": [92, 93, 68, 106, 83, 86, 116, 132, 113, 133, 121, 18]}, {"tag": "볼제모", "vals": [113, 113, 89, 122, 89, 118, 125, 162, 140, 131, 116, 15]}, {"tag": "허벅지제모", "vals": [118, 105, 72, 104, 94, 84, 88, 120, 102, 110, 104, 21]}, {"tag": "이마제모", "vals": [80, 73, 65, 99, 75, 74, 102, 125, 105, 106, 102, 14]}, {"tag": "목제모", "vals": [117, 106, 88, 116, 100, 102, 101, 129, 103, 85, 87, 22]}, {"tag": "등제모", "vals": [18, 16, 18, 36, 36, 46, 42, 75, 54, 65, 70, 7]}, {"tag": "배제모", "vals": [16, 7, 12, 32, 38, 40, 37, 69, 47, 60, 60, 7]}, {"tag": "눈썹제모", "vals": [69, 66, 51, 59, 57, 53, 62, 70, 62, 67, 48, 8]}, {"tag": "배렛나루제모", "vals": [42, 36, 27, 30, 28, 20, 41, 52, 30, 33, 38, 12]}, {"tag": "전신제모", "vals": [5, 3, 1, 2, 8, 24, 21, 38, 41, 44, 36, 5]}, {"tag": "미간제모", "vals": [14, 9, 14, 27, 23, 24, 41, 24, 27, 26, 32, 2]}, {"tag": "가슴제모", "vals": [24, 18, 14, 10, 13, 8, 18, 25, 11, 18, 26, 3]}, {"tag": "뒷목제모", "vals": [0, 1, 3, 16, 11, 10, 20, 17, 12, 15, 25, 2]}, {"tag": "음경제모", "vals": [0, 5, 2, 6, 3, 3, 16, 25, 25, 37, 22, 4]}, {"tag": "발제모", "vals": [96, 14, 69, 15, 84, 15, 87, 19, 35, 87, 21, 0]}, {"tag": "손제모", "vals": [97, 14, 70, 14, 83, 13, 84, 16, 37, 85, 21, 1]}, {"tag": "손가락제모", "vals": [31, 33, 32, 29, 28, 22, 25, 23, 35, 19, 16, 1]}, {"tag": "어깨제모", "vals": [56, 59, 38, 25, 15, 20, 26, 15, 17, 21, 12, 5]}, {"tag": "손등제모", "vals": [22, 26, 26, 23, 22, 14, 17, 11, 22, 12, 11, 0]}, {"tag": "엉덩이제모", "vals": [55, 50, 40, 67, 48, 28, 15, 18, 17, 10, 10, 1]}, {"tag": "발가락제모", "vals": [17, 21, 12, 13, 7, 8, 8, 12, 12, 7, 5, 1]}, {"tag": "발등제모", "vals": [15, 17, 13, 10, 14, 7, 4, 4, 12, 4, 5, 0]}, {"tag": "유륜제모", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "허리제모", "vals": [10, 7, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0]}], "NONSURGICAL_지방성형": [{"tag": "윤곽주사", "vals": [2452, 2135, 1699, 2118, 1777, 1812, 1770, 1917, 1856, 1734, 1573, 173]}, {"tag": "얼굴지방분해주사", "vals": [2158, 1863, 1440, 1789, 1547, 1646, 1562, 1726, 1621, 1546, 1424, 150]}, {"tag": "팔지방분해주사", "vals": [1265, 1203, 931, 1125, 987, 1175, 1143, 1253, 1208, 1210, 1144, 104]}, {"tag": "복부지방분해주사", "vals": [1188, 1149, 877, 1061, 941, 1112, 1085, 1178, 1143, 1124, 1077, 95]}, {"tag": "허벅지지방분해주사", "vals": [1133, 1074, 819, 995, 899, 1070, 1052, 1117, 1089, 1066, 1039, 93]}, {"tag": "종아리지방분해주사", "vals": [809, 749, 614, 711, 604, 718, 776, 828, 768, 765, 724, 65]}, {"tag": "옆구리지방분해주사", "vals": [616, 621, 493, 605, 532, 598, 637, 707, 680, 677, 673, 70]}, {"tag": "부유방지방분해주사", "vals": [386, 350, 274, 325, 280, 334, 396, 408, 377, 409, 398, 28]}, {"tag": "등지방분해주사", "vals": [297, 295, 218, 252, 245, 264, 326, 351, 299, 343, 341, 18]}, {"tag": "윤곽톡스", "vals": [311, 210, 207, 267, 246, 229, 174, 240, 265, 234, 233, 25]}, {"tag": "코조각주사", "vals": [314, 226, 203, 290, 249, 240, 191, 240, 235, 196, 228, 28]}, {"tag": "승모근지방분해주사", "vals": [171, 150, 142, 156, 138, 168, 181, 220, 207, 227, 209, 19]}, {"tag": "얼굴지방분해(레이저)", "vals": [199, 199, 142, 221, 178, 194, 177, 191, 182, 153, 163, 18]}, {"tag": "발목지방분해주사", "vals": [90, 105, 107, 92, 89, 110, 101, 110, 108, 107, 107, 11]}, {"tag": "엉덩이지방분해주사", "vals": [75, 79, 61, 99, 63, 101, 112, 116, 104, 100, 107, 10]}, {"tag": "브이올렛주사", "vals": [110, 113, 60, 91, 73, 73, 76, 95, 74, 77, 89, 8]}, {"tag": "어깨지방분해주사", "vals": [33, 30, 29, 35, 24, 36, 44, 66, 71, 81, 85, 6]}, {"tag": "지방추출주사", "vals": [49, 58, 56, 64, 49, 64, 89, 61, 89, 90, 82, 18]}, {"tag": "다이어트약", "vals": [57, 56, 54, 57, 62, 60, 66, 63, 72, 99, 80, 6]}, {"tag": "고주파관리", "vals": [72, 69, 46, 75, 62, 53, 57, 73, 70, 70, 68, 10]}, {"tag": "종아리체외충격파지방분해", "vals": [29, 25, 32, 26, 18, 24, 36, 23, 44, 31, 37, 4]}, {"tag": "복부체외충격파지방분해", "vals": [16, 24, 14, 19, 11, 23, 25, 24, 36, 18, 30, 2]}, {"tag": "팔체외충격파지방분해", "vals": [11, 11, 11, 10, 4, 18, 15, 18, 25, 15, 22, 2]}, {"tag": "허벅지체외충격파지방분해", "vals": [11, 11, 11, 10, 4, 18, 15, 18, 25, 15, 22, 2]}, {"tag": "종아리고주파지방분해", "vals": [18, 14, 21, 17, 15, 6, 22, 10, 21, 17, 19, 2]}, {"tag": "종아리초음파지방분해", "vals": [18, 14, 21, 16, 14, 5, 21, 9, 20, 17, 16, 2]}, {"tag": "복부초음파지방분해", "vals": [9, 9, 6, 8, 6, 8, 7, 8, 8, 14, 12, 0]}, {"tag": "허벅지고주파지방분해", "vals": [13, 16, 5, 11, 7, 8, 8, 11, 10, 13, 12, 0]}, {"tag": "엘싸", "vals": [18, 10, 27, 15, 12, 18, 15, 9, 11, 17, 10, 1]}, {"tag": "HPL", "vals": [8, 0, 4, 5, 4, 8, 9, 6, 4, 5, 8, 0]}, {"tag": "트리플바디", "vals": [7, 16, 11, 11, 10, 9, 6, 12, 8, 17, 7, 1]}, {"tag": "팔초음파지방분해", "vals": [10, 3, 10, 5, 4, 5, 7, 5, 6, 9, 5, 0]}, {"tag": "복부지방분해레이저", "vals": [2, 10, 5, 7, 3, 6, 2, 3, 2, 3, 4, 0]}, {"tag": "복부고주파지방분해", "vals": [2, 5, 0, 3, 2, 0, 2, 7, 4, 4, 3, 0]}, {"tag": "팔지방분해레이저", "vals": [5, 5, 5, 3, 2, 2, 3, 4, 3, 3, 3, 0]}, {"tag": "허벅지지방분해레이저", "vals": [1, 4, 2, 3, 1, 2, 2, 2, 1, 1, 3, 0]}, {"tag": "허벅지초음파지방분해", "vals": [2, 2, 0, 2, 1, 1, 0, 6, 1, 2, 3, 0]}, {"tag": "엉덩이고주파지방분해", "vals": [0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 2, 0]}, {"tag": "옆구리고주파지방분해", "vals": [0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 2, 0]}, {"tag": "팔고주파지방분해", "vals": [0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 2, 0]}, {"tag": "노블쉐이프", "vals": [1, 2, 0, 0, 0, 2, 0, 1, 0, 0, 1, 1]}, {"tag": "등냉각지방분해", "vals": [1, 0, 0, 1, 0, 0, 0, 2, 0, 0, 1, 0]}, {"tag": "등지방분해레이저", "vals": [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0]}, {"tag": "복부냉각지방분해", "vals": [1, 0, 1, 1, 0, 2, 0, 2, 0, 0, 1, 0]}, {"tag": "어깨냉각지방분해", "vals": [1, 0, 0, 1, 0, 0, 0, 2, 0, 0, 1, 0]}, {"tag": "엉덩이냉각지방분해", "vals": [1, 0, 0, 1, 0, 0, 0, 2, 0, 0, 1, 0]}, {"tag": "엉덩이체외충격파지방분해", "vals": [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0]}, {"tag": "엔더몰로지", "vals": [3, 1, 0, 3, 1, 1, 0, 0, 0, 1, 1, 0]}, {"tag": "카복시", "vals": [0, 0, 0, 1, 1, 1, 1, 0, 2, 3, 1, 1]}, {"tag": "코어스컬프", "vals": [0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0]}, {"tag": "팔냉각지방분해", "vals": [1, 0, 1, 1, 0, 2, 0, 2, 0, 0, 1, 0]}, {"tag": "허벅지냉각지방분해", "vals": [1, 0, 1, 1, 0, 2, 0, 2, 0, 0, 1, 0]}, {"tag": "마운자로", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "바본주사", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "벨로디리프팅", "vals": [0, 0, 0, 1, 0, 2, 0, 0, 0, 0, 0, 0]}, {"tag": "사이저레이저", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "삭센다", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "아큐스컬프", "vals": [1, 0, 1, 0, 0, 2, 4, 8, 3, 0, 0, 1]}, {"tag": "앰스컬프", "vals": [0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0]}, {"tag": "엉덩이초음파지방분해", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "옆구리냉각지방분해", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "옆구리초음파지방분해", "vals": [4, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0]}, {"tag": "위고비", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "종아리냉각지방분해", "vals": [0, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0]}, {"tag": "LED다이어트", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}], "NONSURGICAL_치아": [{"tag": "치아미백", "vals": [260, 215, 251, 264, 243, 219, 251, 288, 206, 206, 230, 28]}, {"tag": "라미네이트", "vals": [99, 90, 95, 82, 80, 83, 136, 101, 83, 98, 98, 9]}, {"tag": "안면비대칭교정", "vals": [27, 25, 27, 23, 32, 24, 17, 28, 19, 21, 29, 1]}, {"tag": "미니쉬", "vals": [1, 3, 2, 2, 2, 1, 0, 0, 1, 7, 4, 0]}, {"tag": "스케일링", "vals": [6, 10, 7, 11, 4, 4, 9, 12, 7, 6, 4, 1]}, {"tag": "레진", "vals": [3, 4, 7, 6, 4, 6, 5, 5, 1, 3, 3, 1]}, {"tag": "인레이", "vals": [3, 3, 5, 2, 3, 7, 5, 4, 0, 3, 2, 1]}, {"tag": "지르코니아크라운", "vals": [1, 1, 1, 1, 3, 6, 3, 3, 0, 3, 1, 0]}, {"tag": "올세라믹", "vals": [0, 0, 2, 0, 1, 0, 1, 0, 0, 0, 0, 0]}, {"tag": "잇몸미백", "vals": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]}, {"tag": "초음파스케일링", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}], "NONSURGICAL_코성형": [{"tag": "하이코", "vals": [202, 206, 169, 179, 191, 161, 149, 187, 162, 128, 142, 13]}, {"tag": "비절개코끝시술", "vals": [176, 177, 136, 132, 173, 153, 133, 149, 134, 152, 139, 16]}, {"tag": "비절개코교정", "vals": [148, 183, 143, 152, 180, 146, 143, 138, 129, 147, 136, 13]}, {"tag": "비절개콧볼축소", "vals": [92, 96, 79, 84, 91, 97, 76, 87, 88, 80, 94, 11]}, {"tag": "미스코", "vals": [57, 79, 60, 55, 51, 49, 50, 79, 50, 50, 47, 3]}, {"tag": "복코교정(시술)", "vals": [48, 72, 54, 63, 62, 60, 59, 58, 46, 43, 37, 4]}, {"tag": "코골이치료", "vals": [3, 4, 4, 2, 2, 3, 7, 3, 1, 4, 3, 0]}], "NONSURGICAL_피부": [{"tag": "쥬베룩", "vals": [1742, 1490, 1140, 1586, 1193, 1365, 1440, 1594, 1316, 1272, 1084, 156]}, {"tag": "리쥬란힐러", "vals": [1044, 986, 654, 916, 681, 782, 831, 934, 757, 697, 643, 71]}, {"tag": "아쿠아필링", "vals": [560, 538, 405, 558, 463, 509, 539, 596, 566, 547, 498, 76]}, {"tag": "레이저토닝", "vals": [654, 571, 434, 606, 515, 593, 629, 647, 547, 524, 452, 64]}, {"tag": "포텐자", "vals": [574, 512, 398, 579, 416, 534, 629, 659, 508, 443, 423, 64]}, {"tag": "LDM", "vals": [514, 528, 365, 532, 419, 470, 499, 619, 439, 421, 384, 49]}, {"tag": "콜라겐주사", "vals": [697, 562, 387, 564, 472, 484, 464, 495, 461, 428, 374, 50]}, {"tag": "피코토닝", "vals": [513, 488, 404, 508, 442, 470, 520, 561, 429, 442, 362, 43]}, {"tag": "사마귀제거", "vals": [397, 388, 333, 389, 343, 347, 394, 520, 373, 363, 359, 45]}, {"tag": "비립종제거", "vals": [400, 361, 331, 395, 351, 331, 370, 474, 355, 336, 350, 42]}, {"tag": "물광주사", "vals": [556, 462, 312, 445, 345, 398, 444, 486, 408, 317, 348, 51]}, {"tag": "쥐젖제거", "vals": [366, 338, 306, 352, 320, 312, 330, 451, 319, 306, 330, 39]}, {"tag": "점제거시술", "vals": [360, 327, 286, 335, 312, 301, 346, 423, 316, 302, 299, 41]}, {"tag": "클라리티", "vals": [347, 296, 239, 328, 277, 348, 329, 336, 294, 296, 282, 48]}, {"tag": "여드름압출", "vals": [285, 263, 229, 282, 239, 278, 289, 319, 298, 276, 276, 26]}, {"tag": "리쥬란아이", "vals": [359, 382, 210, 331, 231, 295, 328, 376, 264, 263, 258, 22]}, {"tag": "울트라콜", "vals": [419, 331, 226, 388, 242, 274, 272, 320, 267, 207, 234, 37]}, {"tag": "착색토닝", "vals": [325, 266, 230, 310, 238, 266, 293, 317, 232, 236, 232, 37]}, {"tag": "여드름주사", "vals": [203, 196, 176, 224, 185, 233, 224, 260, 235, 214, 230, 22]}, {"tag": "한관종제거", "vals": [253, 216, 215, 248, 229, 235, 231, 314, 226, 203, 220, 24]}, {"tag": "리쥬란HBPLUS", "vals": [356, 365, 193, 270, 230, 261, 273, 319, 243, 218, 214, 30]}, {"tag": "듀얼토닝", "vals": [268, 254, 200, 284, 234, 258, 260, 268, 236, 220, 203, 23]}, {"tag": "크라이오셀", "vals": [239, 228, 198, 238, 186, 202, 220, 292, 212, 221, 188, 27]}, {"tag": "겨드랑이미백", "vals": [157, 132, 109, 192, 150, 158, 168, 192, 138, 140, 160, 32]}, {"tag": "흉터제거레이저", "vals": [193, 169, 122, 159, 133, 169, 182, 181, 153, 157, 143, 31]}, {"tag": "레디어스", "vals": [125, 119, 92, 131, 101, 110, 111, 129, 113, 114, 136, 23]}, {"tag": "필링", "vals": [177, 194, 138, 182, 164, 180, 166, 179, 157, 140, 135, 22]}, {"tag": "제네시스", "vals": [183, 150, 138, 192, 140, 160, 163, 166, 142, 152, 132, 17]}, {"tag": "엑셀V", "vals": [209, 202, 108, 180, 136, 150, 154, 173, 138, 130, 129, 20]}, {"tag": "연어주사", "vals": [226, 192, 141, 201, 177, 150, 183, 195, 178, 150, 123, 12]}, {"tag": "CO2레이저", "vals": [152, 146, 118, 130, 128, 122, 165, 172, 136, 96, 119, 20]}, {"tag": "피코슈어", "vals": [159, 136, 111, 192, 163, 149, 139, 126, 100, 123, 108, 14]}, {"tag": "스킨스케일링", "vals": [120, 139, 119, 109, 107, 104, 116, 130, 112, 85, 89, 9]}, {"tag": "라라필", "vals": [113, 144, 88, 114, 111, 131, 86, 124, 110, 95, 86, 14]}, {"tag": "팔자주름스컬트라", "vals": [183, 161, 84, 145, 97, 106, 90, 118, 94, 67, 86, 6]}, {"tag": "볼스컬트라", "vals": [184, 162, 84, 146, 91, 102, 94, 118, 93, 62, 84, 6]}, {"tag": "여드름침", "vals": [84, 91, 58, 86, 58, 74, 73, 83, 73, 65, 83, 8]}, {"tag": "힐로웨이브", "vals": [135, 107, 85, 100, 87, 57, 87, 95, 97, 89, 79, 11]}, {"tag": "릴리이드", "vals": [115, 81, 52, 100, 75, 86, 102, 90, 84, 46, 70, 11]}, {"tag": "MTS시술", "vals": [71, 69, 63, 66, 52, 74, 73, 51, 62, 56, 70, 8]}, {"tag": "리쥬란시너지스킨부스터", "vals": [119, 84, 67, 107, 52, 74, 94, 102, 96, 79, 69, 9]}, {"tag": "소노케어", "vals": [58, 58, 50, 66, 47, 40, 56, 69, 51, 46, 65, 6]}, {"tag": "피코프락셀", "vals": [120, 100, 84, 101, 87, 80, 80, 105, 71, 61, 59, 6]}, {"tag": "리쥬란에스", "vals": [78, 87, 47, 65, 47, 51, 51, 86, 60, 60, 57, 4]}, {"tag": "카프리레이저", "vals": [60, 59, 49, 76, 54, 65, 68, 80, 77, 51, 57, 9]}, {"tag": "프락셀레이저", "vals": [110, 104, 90, 99, 98, 88, 89, 108, 70, 61, 54, 6]}, {"tag": "레블라이트", "vals": [68, 58, 37, 71, 59, 62, 75, 68, 58, 50, 53, 5]}, {"tag": "점빼기수술", "vals": [75, 45, 39, 42, 51, 45, 60, 84, 44, 46, 48, 6]}, {"tag": "리즈네", "vals": [64, 73, 45, 68, 50, 48, 63, 54, 68, 53, 45, 10]}, {"tag": "스킨바이브", "vals": [53, 43, 36, 53, 27, 44, 46, 57, 28, 40, 44, 6]}, {"tag": "아그네스레이저", "vals": [50, 36, 24, 31, 44, 28, 42, 57, 40, 51, 42, 6]}, {"tag": "블랙필", "vals": [57, 63, 42, 45, 44, 53, 53, 63, 62, 45, 39, 4]}, {"tag": "악센토레이저", "vals": [48, 45, 35, 46, 43, 47, 44, 58, 39, 29, 39, 1]}, {"tag": "눈밑스컬트라", "vals": [80, 83, 49, 59, 45, 51, 45, 51, 46, 41, 38, 1]}, {"tag": "리팟레이저", "vals": [76, 60, 68, 48, 56, 55, 69, 66, 72, 50, 38, 8]}, {"tag": "알렉스토닝", "vals": [56, 45, 34, 64, 40, 58, 47, 43, 40, 44, 36, 7]}, {"tag": "쥬브아셀", "vals": [81, 62, 32, 73, 49, 52, 55, 55, 52, 26, 36, 6]}, {"tag": "PDT레이저", "vals": [48, 48, 35, 33, 42, 30, 43, 51, 39, 48, 36, 4]}, {"tag": "골드PTT", "vals": [51, 36, 37, 52, 35, 33, 35, 50, 36, 29, 35, 5]}, {"tag": "다크서클주사", "vals": [44, 41, 32, 46, 22, 41, 35, 37, 36, 52, 35, 5]}, {"tag": "기미주사", "vals": [43, 22, 32, 40, 25, 34, 50, 38, 31, 34, 34, 4]}, {"tag": "브이빔퍼펙타", "vals": [43, 41, 23, 53, 32, 37, 43, 48, 47, 23, 33, 8]}, {"tag": "토너브레이저", "vals": [19, 19, 15, 28, 17, 17, 27, 31, 21, 34, 33, 3]}, {"tag": "레이저페이셜", "vals": [58, 45, 34, 47, 25, 31, 31, 43, 39, 27, 32, 3]}, {"tag": "플라즈마", "vals": [31, 34, 13, 19, 22, 19, 19, 38, 36, 28, 31, 2]}, {"tag": "PRP피부재생술", "vals": [46, 40, 39, 33, 37, 32, 46, 28, 36, 37, 28, 5]}, {"tag": "엑소좀", "vals": [30, 33, 14, 27, 24, 33, 51, 37, 38, 26, 27, 4]}, {"tag": "버츄RF", "vals": [16, 25, 18, 21, 10, 21, 35, 35, 22, 13, 25, 4]}, {"tag": "팔꿈치미백", "vals": [7, 5, 9, 10, 9, 10, 19, 12, 20, 25, 25, 1]}, {"tag": "레티젠", "vals": [41, 23, 17, 40, 20, 21, 33, 40, 37, 31, 23, 7]}, {"tag": "시너지MPX", "vals": [42, 39, 19, 49, 26, 31, 38, 40, 39, 20, 23, 5]}, {"tag": "아기주사", "vals": [56, 56, 19, 31, 18, 41, 43, 46, 25, 11, 22, 5]}, {"tag": "큐스위치엔디야그레이저", "vals": [30, 30, 25, 36, 29, 35, 22, 26, 26, 32, 22, 5]}, {"tag": "목주름스컬트라", "vals": [36, 40, 35, 15, 21, 15, 14, 16, 24, 19, 21, 0]}, {"tag": "무릎미백", "vals": [4, 5, 3, 6, 7, 6, 14, 8, 16, 16, 20, 0]}, {"tag": "IPL", "vals": [31, 22, 21, 35, 27, 35, 21, 29, 20, 36, 18, 4]}, {"tag": "셀르디엠", "vals": [22, 15, 15, 18, 32, 35, 24, 20, 24, 3, 17, 6]}, {"tag": "플래티넘PTT", "vals": [16, 10, 11, 16, 16, 11, 11, 13, 15, 5, 17, 2]}, {"tag": "흉터제거주사", "vals": [22, 26, 22, 14, 22, 22, 19, 17, 19, 16, 16, 2]}, {"tag": "줄기세포주사", "vals": [6, 3, 4, 9, 8, 4, 6, 10, 19, 12, 15, 2]}, {"tag": "알라딘필링", "vals": [21, 16, 16, 22, 28, 21, 21, 22, 20, 16, 14, 0]}, {"tag": "피코MLA", "vals": [24, 31, 30, 28, 29, 23, 17, 16, 8, 7, 14, 1]}, {"tag": "V레이저", "vals": [15, 21, 12, 25, 19, 13, 14, 17, 14, 24, 14, 1]}, {"tag": "벨로테로리바이브", "vals": [19, 18, 10, 21, 9, 13, 20, 37, 16, 22, 13, 3]}, {"tag": "산소필", "vals": [21, 22, 17, 28, 17, 19, 16, 26, 18, 26, 12, 3]}, {"tag": "에스테필", "vals": [25, 16, 6, 13, 10, 16, 6, 15, 12, 7, 12, 0]}, {"tag": "네오빔", "vals": [1, 3, 1, 1, 2, 7, 5, 12, 5, 9, 11, 1]}, {"tag": "항문미백", "vals": [50, 55, 41, 71, 51, 31, 17, 20, 13, 15, 11, 2]}, {"tag": "모반제거", "vals": [15, 19, 11, 15, 15, 14, 23, 17, 20, 13, 10, 1]}, {"tag": "미라젯", "vals": [14, 22, 12, 14, 24, 35, 17, 16, 10, 10, 10, 0]}, {"tag": "인텐스울트라", "vals": [29, 13, 6, 11, 24, 12, 16, 2, 24, 21, 9, 1]}, {"tag": "콜라레쥬", "vals": [8, 4, 4, 10, 15, 9, 13, 12, 13, 1, 9, 5]}, {"tag": "고우리", "vals": [8, 10, 3, 5, 3, 7, 8, 13, 8, 13, 8, 2]}, {"tag": "레가토레이저", "vals": [18, 12, 7, 9, 4, 11, 11, 17, 10, 4, 8, 3]}, {"tag": "밀크필", "vals": [16, 16, 12, 17, 15, 12, 11, 18, 17, 22, 8, 2]}, {"tag": "튼살제거", "vals": [5, 6, 7, 9, 11, 17, 13, 11, 7, 5, 8, 0]}, {"tag": "서브시전", "vals": [26, 20, 9, 15, 13, 7, 16, 20, 17, 12, 7, 3]}, {"tag": "시크릿레이저", "vals": [3, 8, 5, 14, 8, 5, 6, 8, 7, 6, 7, 2]}, {"tag": "인트라셀레이저", "vals": [6, 1, 5, 9, 5, 10, 9, 13, 4, 6, 6, 0]}, {"tag": "쥬브젠", "vals": [3, 4, 10, 8, 8, 5, 7, 6, 4, 5, 6, 5]}, {"tag": "플라필", "vals": [18, 17, 7, 5, 6, 7, 8, 10, 3, 10, 6, 1]}, {"tag": "HP비타란", "vals": [3, 0, 1, 0, 5, 1, 3, 2, 1, 14, 6, 1]}, {"tag": "리쥬란시너지톤업부스터", "vals": [12, 14, 9, 10, 8, 10, 25, 15, 14, 13, 5, 0]}, {"tag": "필로드", "vals": [11, 8, 2, 10, 4, 4, 4, 3, 5, 6, 5, 0]}, {"tag": "135부스터", "vals": [2, 3, 5, 4, 2, 3, 5, 5, 4, 4, 4, 0]}, {"tag": "라비앙", "vals": [9, 9, 11, 4, 4, 5, 6, 5, 10, 2, 4, 2]}, {"tag": "쎄라필", "vals": [8, 4, 2, 2, 1, 3, 4, 5, 3, 6, 4, 1]}, {"tag": "줄기세포배양상청액", "vals": [8, 11, 11, 4, 8, 4, 6, 5, 7, 3, 4, 0]}, {"tag": "큐어젯", "vals": [6, 3, 3, 4, 0, 1, 6, 3, 4, 2, 4, 2]}, {"tag": "아꼴레이드", "vals": [3, 5, 5, 2, 2, 4, 3, 6, 1, 2, 3, 0]}, {"tag": "이온영동치료법", "vals": [0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 3, 0]}, {"tag": "PTT레이저", "vals": [5, 7, 11, 6, 12, 8, 6, 7, 5, 5, 3, 2]}, {"tag": "리제반힐러", "vals": [0, 3, 2, 0, 0, 0, 2, 1, 1, 1, 2, 0]}, {"tag": "벨벳스킨", "vals": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2, 0]}, {"tag": "실펌레이저", "vals": [8, 7, 3, 6, 4, 3, 5, 7, 8, 5, 2, 0]}, {"tag": "어븀프락셀", "vals": [0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 2, 0]}, {"tag": "에토좀PTT", "vals": [1, 1, 2, 1, 5, 6, 2, 4, 5, 3, 2, 0]}, {"tag": "팡시스", "vals": [8, 8, 2, 3, 3, 5, 6, 4, 2, 3, 2, 1]}, {"tag": "힐라이트", "vals": [1, 2, 2, 3, 3, 2, 2, 2, 1, 1, 2, 0]}, {"tag": "바이리즌", "vals": [3, 3, 2, 3, 2, 4, 1, 0, 0, 0, 1, 0]}, {"tag": "엉덩이미백", "vals": [1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0]}, {"tag": "울트라클리어", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]}, {"tag": "쥬비덤볼라이트", "vals": [2, 3, 0, 0, 1, 1, 2, 0, 1, 2, 1, 0]}, {"tag": "PHA필링", "vals": [3, 5, 0, 6, 0, 4, 1, 5, 2, 0, 1, 1]}, {"tag": "글리에보", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "글리쥬라보떼", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "뉴스무스빔", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "더마딜라이트", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "더마아크네", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "더블타이트", "vals": [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "디오레듀얼", "vals": [1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0]}, {"tag": "로리앙엘레멘트", "vals": [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "리들부스터", "vals": [0, 1, 3, 2, 1, 2, 2, 0, 0, 0, 0, 0]}, {"tag": "매쿰7", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "모자이크", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "밀라노주사(잘루프로)", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "블레싱", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "스피큘링", "vals": [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "시카레이저", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "아큐토닝", "vals": [0, 0, 1, 1, 2, 0, 2, 2, 0, 1, 0, 0]}, {"tag": "아피니트", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "애플레이저", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "에포렉스", "vals": [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]}, {"tag": "엠줄레이저", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "예스필", "vals": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]}, {"tag": "울블랑", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "위코우노", "vals": [0, 0, 0, 0, 3, 2, 2, 0, 0, 2, 0, 0]}, {"tag": "유리본NMN", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "유산균필", "vals": [6, 16, 14, 13, 10, 10, 1, 0, 0, 0, 0, 0]}, {"tag": "이온도입법", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "카이저레이저", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "케이부스터", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "코레지셀핏", "vals": [2, 3, 3, 0, 0, 1, 0, 0, 0, 0, 0, 0]}, {"tag": "큐라스하이브리드", "vals": [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "키오머3", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "플루리알", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "피코스팟", "vals": [3, 0, 1, 1, 0, 3, 1, 0, 0, 2, 0, 1]}, {"tag": "핑크주사", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "하이드라페이셜", "vals": [2, 2, 1, 2, 1, 3, 6, 2, 4, 4, 0, 0]}, {"tag": "ECMV", "vals": [2, 0, 0, 1, 2, 0, 0, 0, 1, 1, 0, 0]}, {"tag": "GA필", "vals": [0, 1, 3, 0, 0, 2, 1, 0, 0, 1, 0, 0]}, {"tag": "NDA플러스", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}], "NONSURGICAL_필러": [{"tag": "입술필러", "vals": [1580, 1370, 1144, 1448, 1266, 1238, 1352, 1382, 1310, 1237, 1138, 156]}, {"tag": "입꼬리필러", "vals": [1262, 1076, 903, 1172, 959, 971, 1032, 1028, 941, 944, 863, 128]}, {"tag": "이마필러", "vals": [886, 782, 611, 823, 687, 728, 705, 772, 703, 650, 592, 83]}, {"tag": "팔자주름필러", "vals": [775, 673, 549, 724, 565, 623, 588, 659, 613, 610, 514, 71]}, {"tag": "턱필러", "vals": [514, 457, 345, 506, 388, 418, 401, 448, 434, 400, 368, 57]}, {"tag": "코필러", "vals": [539, 424, 374, 469, 419, 402, 393, 443, 398, 332, 341, 43]}, {"tag": "애교필러", "vals": [425, 414, 302, 397, 351, 342, 369, 381, 330, 345, 293, 45]}, {"tag": "눈밑필러", "vals": [431, 387, 311, 420, 317, 306, 357, 370, 317, 347, 289, 44]}, {"tag": "귀필러", "vals": [384, 320, 274, 340, 302, 280, 329, 317, 294, 279, 274, 38]}, {"tag": "앞광대필러", "vals": [389, 330, 227, 358, 266, 316, 249, 330, 300, 297, 252, 33]}, {"tag": "관자놀이필러", "vals": [346, 322, 224, 328, 241, 305, 251, 298, 266, 282, 241, 27]}, {"tag": "턱끝필러", "vals": [344, 281, 237, 303, 253, 249, 261, 308, 278, 241, 238, 35]}, {"tag": "옆볼필러", "vals": [341, 308, 222, 292, 228, 283, 231, 277, 262, 254, 210, 24]}, {"tag": "볼필러", "vals": [302, 277, 189, 278, 188, 253, 192, 242, 224, 213, 184, 27]}, {"tag": "필러제거주사", "vals": [146, 159, 109, 140, 156, 164, 167, 194, 144, 149, 124, 14]}, {"tag": "풀페이스필러", "vals": [200, 154, 110, 152, 132, 145, 128, 161, 128, 123, 112, 19]}, {"tag": "귓볼필러", "vals": [107, 95, 77, 95, 78, 93, 89, 115, 94, 77, 82, 14]}, {"tag": "코끝필러", "vals": [127, 101, 102, 120, 105, 77, 89, 115, 97, 76, 82, 9]}, {"tag": "다크서클필러", "vals": [110, 99, 55, 99, 72, 64, 82, 72, 85, 84, 77, 16]}, {"tag": "어깨필러", "vals": [94, 71, 64, 69, 81, 53, 54, 68, 69, 65, 75, 7]}, {"tag": "목주름필러", "vals": [143, 121, 100, 92, 80, 94, 97, 102, 92, 68, 66, 12]}, {"tag": "눈꺼풀필러", "vals": [84, 79, 63, 89, 59, 61, 68, 74, 64, 63, 60, 8]}, {"tag": "골반필러", "vals": [36, 46, 31, 42, 39, 38, 49, 51, 48, 51, 56, 4]}, {"tag": "엉덩이필러", "vals": [32, 41, 31, 42, 40, 37, 51, 52, 52, 55, 56, 7]}, {"tag": "미간주름필러", "vals": [34, 39, 34, 41, 24, 35, 45, 32, 47, 29, 37, 1]}, {"tag": "쇄골필러", "vals": [28, 22, 26, 20, 25, 27, 12, 29, 31, 25, 27, 0]}, {"tag": "마리오네트필러", "vals": [28, 26, 20, 32, 18, 26, 24, 23, 34, 19, 24, 4]}, {"tag": "가슴필러", "vals": [7, 15, 12, 11, 14, 17, 21, 16, 19, 8, 19, 0]}, {"tag": "눈두덩필러", "vals": [15, 16, 15, 14, 5, 11, 16, 21, 15, 16, 12, 0]}, {"tag": "큐오필", "vals": [15, 14, 12, 13, 9, 7, 9, 12, 15, 12, 11, 1]}, {"tag": "인디언주름필러", "vals": [1, 0, 1, 7, 2, 8, 5, 6, 6, 3, 9, 1]}, {"tag": "다리필러", "vals": [2, 0, 1, 0, 1, 1, 2, 4, 3, 0, 2, 0]}, {"tag": "두상필러", "vals": [0, 1, 1, 5, 5, 0, 1, 4, 5, 1, 1, 2]}, {"tag": "손등필러", "vals": [0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 0]}], "NONSURGICAL_한방": [{"tag": "침술", "vals": [73, 79, 62, 64, 58, 60, 66, 89, 67, 47, 69, 8]}, {"tag": "다이어트한약", "vals": [46, 55, 47, 44, 47, 55, 52, 45, 65, 80, 65, 4]}, {"tag": "한약", "vals": [39, 41, 43, 41, 40, 47, 47, 41, 59, 75, 61, 4]}, {"tag": "새살침", "vals": [62, 59, 47, 56, 47, 44, 64, 59, 55, 38, 58, 8]}, {"tag": "매선리프팅", "vals": [64, 66, 57, 43, 48, 41, 45, 59, 40, 42, 50, 2]}, {"tag": "지방분해약침", "vals": [7, 17, 17, 9, 17, 12, 14, 12, 13, 14, 9, 2]}, {"tag": "여드름치료(한약)", "vals": [0, 2, 1, 1, 2, 4, 5, 6, 3, 3, 7, 1]}], "SURGICAL_가슴성형": [{"tag": "가슴(보형물)", "vals": [434, 388, 378, 459, 484, 489, 480, 406, 415, 515, 412, 45]}, {"tag": "가슴재수술", "vals": [195, 190, 195, 197, 215, 232, 265, 202, 199, 218, 191, 27]}, {"tag": "가슴(보형물+지방이식)", "vals": [50, 70, 63, 56, 73, 95, 98, 100, 106, 87, 108, 7]}, {"tag": "가슴(지방이식)", "vals": [63, 55, 54, 81, 59, 63, 80, 58, 80, 60, 59, 7]}, {"tag": "가슴거상술", "vals": [78, 60, 78, 61, 63, 54, 65, 55, 80, 66, 58, 14]}, {"tag": "가슴거상술+확대", "vals": [62, 54, 71, 55, 53, 45, 50, 46, 67, 51, 49, 13]}, {"tag": "가슴축소", "vals": [37, 24, 28, 23, 23, 32, 29, 27, 31, 32, 30, 2]}, {"tag": "가슴보형물제거", "vals": [41, 31, 26, 27, 24, 25, 31, 29, 32, 33, 25, 1]}, {"tag": "여유증수술", "vals": [25, 6, 26, 12, 26, 25, 27, 20, 19, 25, 23, 2]}, {"tag": "가슴이물질제거", "vals": [20, 18, 15, 13, 17, 15, 13, 16, 17, 16, 16, 0]}, {"tag": "유륜축소", "vals": [18, 10, 13, 19, 8, 17, 15, 13, 13, 23, 16, 4]}, {"tag": "함몰유두교정", "vals": [17, 9, 10, 20, 9, 12, 12, 18, 11, 22, 15, 3]}, {"tag": "유두축소", "vals": [13, 5, 11, 17, 7, 14, 9, 14, 14, 18, 13, 4]}], "SURGICAL_기타": [{"tag": "인중축소술", "vals": [148, 150, 103, 96, 55, 71, 84, 68, 66, 79, 106, 9]}, {"tag": "소음순성형", "vals": [50, 49, 60, 47, 43, 45, 54, 61, 39, 49, 52, 4]}, {"tag": "종아리신경차단술", "vals": [17, 13, 19, 19, 18, 11, 13, 12, 19, 25, 19, 0]}, {"tag": "입꼬리성형", "vals": [16, 19, 20, 8, 13, 16, 18, 18, 20, 17, 14, 1]}, {"tag": "레이저소음순성형", "vals": [11, 13, 14, 15, 12, 7, 16, 17, 11, 9, 12, 2]}, {"tag": "구순구개열수술", "vals": [6, 5, 8, 7, 6, 10, 14, 12, 9, 12, 11, 2]}, {"tag": "귀성형", "vals": [10, 10, 17, 17, 16, 12, 15, 9, 11, 11, 9, 1]}, {"tag": "미간신경차단술", "vals": [4, 3, 1, 8, 4, 5, 5, 1, 7, 5, 9, 0]}, {"tag": "음핵성형", "vals": [8, 2, 11, 5, 4, 3, 2, 5, 5, 8, 6, 0]}, {"tag": "음핵이상주름수술", "vals": [5, 1, 6, 4, 3, 2, 0, 4, 4, 7, 6, 0]}, {"tag": "입술축소술", "vals": [7, 9, 10, 2, 10, 8, 6, 7, 9, 11, 5, 1]}, {"tag": "질성형", "vals": [13, 6, 10, 12, 11, 10, 15, 16, 16, 9, 5, 0]}, {"tag": "대음순성형", "vals": [3, 3, 1, 3, 6, 2, 6, 8, 2, 1, 4, 0]}, {"tag": "엉덩이보형물", "vals": [5, 5, 3, 2, 2, 1, 2, 3, 1, 5, 4, 0]}, {"tag": "캘로이드귀성형", "vals": [0, 6, 4, 6, 4, 5, 1, 1, 2, 2, 4, 0]}, {"tag": "큐피트라인성형", "vals": [7, 8, 10, 2, 9, 8, 5, 7, 9, 9, 4, 0]}, {"tag": "입술확대술", "vals": [3, 4, 1, 6, 3, 0, 3, 3, 5, 1, 3, 0]}, {"tag": "다한증수술", "vals": [1, 0, 0, 0, 0, 2, 0, 1, 0, 0, 1, 0]}, {"tag": "돌출귀성형", "vals": [3, 2, 8, 6, 4, 3, 2, 5, 8, 6, 1, 0]}, {"tag": "배꼽수술", "vals": [0, 0, 0, 1, 1, 1, 0, 0, 1, 2, 1, 0]}, {"tag": "액취증수술", "vals": [1, 0, 1, 0, 0, 2, 2, 5, 1, 1, 1, 0]}, {"tag": "엉덩이이물질제거", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]}, {"tag": "입술재수술", "vals": [5, 2, 7, 0, 2, 4, 4, 2, 3, 1, 1, 0]}, {"tag": "귓볼성형", "vals": [0, 0, 1, 1, 1, 1, 0, 0, 3, 1, 0, 0]}, {"tag": "입술이물질제거", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "휜다리수술", "vals": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]}], "SURGICAL_눈성형": [{"tag": "쌍꺼풀(자연유착)", "vals": [1761, 1746, 1699, 1595, 1732, 1695, 1745, 1551, 1408, 1617, 1599, 177]}, {"tag": "쌍꺼풀(매몰)", "vals": [1586, 1531, 1506, 1420, 1562, 1499, 1484, 1325, 1213, 1394, 1379, 157]}, {"tag": "눈재수술", "vals": [1376, 1424, 1368, 1284, 1379, 1378, 1378, 1279, 1141, 1312, 1290, 137]}, {"tag": "눈매교정", "vals": [1416, 1396, 1361, 1297, 1373, 1355, 1403, 1312, 1166, 1245, 1255, 158]}, {"tag": "앞트임", "vals": [1293, 1320, 1265, 1193, 1243, 1229, 1239, 1161, 1034, 1174, 1111, 138]}, {"tag": "쌍꺼풀(절개)", "vals": [971, 989, 954, 950, 1033, 1042, 1005, 886, 817, 928, 968, 96]}, {"tag": "뒤트임", "vals": [1215, 1203, 1156, 1062, 1077, 1068, 1116, 1038, 936, 1017, 965, 125]}, {"tag": "밑트임", "vals": [910, 903, 875, 777, 798, 833, 896, 797, 683, 794, 754, 93]}, {"tag": "윗트임", "vals": [786, 791, 785, 686, 726, 732, 763, 721, 594, 702, 674, 78]}, {"tag": "눈밑지방재배치", "vals": [691, 635, 643, 648, 660, 745, 751, 724, 663, 628, 596, 47]}, {"tag": "쌍꺼풀(부분절개)", "vals": [457, 448, 424, 451, 552, 550, 526, 484, 424, 488, 505, 57]}, {"tag": "몽고트임", "vals": [373, 421, 404, 409, 421, 444, 411, 411, 405, 376, 382, 57]}, {"tag": "눈밑지방제거", "vals": [417, 377, 383, 413, 399, 449, 440, 459, 398, 389, 345, 33]}, {"tag": "하안검성형", "vals": [253, 232, 207, 259, 209, 253, 240, 235, 226, 221, 199, 27]}, {"tag": "트임재수술", "vals": [226, 186, 171, 161, 164, 185, 174, 153, 132, 160, 147, 21]}, {"tag": "상안검성형", "vals": [168, 141, 133, 169, 147, 167, 167, 146, 159, 138, 132, 24]}, {"tag": "눈물골지방이식", "vals": [111, 88, 131, 104, 88, 128, 94, 109, 114, 91, 93, 6]}, {"tag": "눈꺼풀지방이식", "vals": [69, 66, 63, 80, 111, 106, 93, 88, 95, 81, 89, 12]}, {"tag": "트임복원", "vals": [88, 64, 69, 57, 64, 68, 70, 55, 60, 78, 69, 7]}, {"tag": "눈꺼풀지방제거", "vals": [53, 49, 56, 45, 48, 47, 40, 47, 41, 50, 47, 10]}, {"tag": "라식/라섹", "vals": [34, 33, 29, 31, 35, 35, 46, 45, 36, 44, 34, 0]}, {"tag": "돌출눈수술", "vals": [4, 3, 4, 6, 3, 5, 8, 5, 5, 8, 9, 1]}, {"tag": "애교살지방이식", "vals": [7, 6, 6, 9, 6, 9, 12, 3, 6, 7, 6, 1]}, {"tag": "스마일라식", "vals": [3, 2, 4, 8, 5, 4, 5, 9, 6, 9, 5, 0]}, {"tag": "ICL렌즈삽입술", "vals": [4, 3, 6, 6, 5, 6, 4, 4, 5, 6, 5, 0]}, {"tag": "스마일프로", "vals": [0, 0, 0, 0, 0, 0, 0, 3, 1, 0, 1, 0]}, {"tag": "아이링", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}], "SURGICAL_리프팅": [{"tag": "안면거상술", "vals": [187, 189, 188, 193, 224, 198, 188, 190, 174, 220, 196, 16]}, {"tag": "이마거상술", "vals": [204, 217, 164, 159, 207, 174, 173, 167, 166, 175, 178, 21]}, {"tag": "미니거상", "vals": [172, 175, 178, 186, 195, 169, 163, 159, 146, 194, 173, 18]}, {"tag": "눈썹거상술", "vals": [186, 168, 138, 162, 152, 159, 185, 167, 174, 146, 140, 26]}, {"tag": "이마거상술(엔도타인)", "vals": [145, 158, 124, 113, 139, 133, 134, 126, 119, 122, 132, 15]}, {"tag": "목주름거상술", "vals": [21, 24, 31, 16, 30, 24, 20, 22, 19, 44, 28, 1]}, {"tag": "눈썹거상술(내시경)", "vals": [48, 45, 21, 28, 23, 29, 43, 41, 30, 30, 25, 5]}, {"tag": "복부거상술", "vals": [12, 8, 9, 7, 10, 7, 11, 11, 6, 15, 10, 0]}, {"tag": "팔거상술", "vals": [2, 7, 4, 2, 5, 2, 8, 4, 8, 11, 8, 1]}, {"tag": "리뉴비온", "vals": [0, 0, 2, 1, 4, 1, 0, 1, 1, 2, 2, 0]}, {"tag": "복부피부지방절제술", "vals": [1, 1, 1, 2, 3, 1, 3, 1, 2, 2, 1, 0]}], "SURGICAL_모발이식": [{"tag": "머리모발이식", "vals": [66, 78, 69, 71, 83, 98, 86, 78, 65, 72, 73, 7]}, {"tag": "헤어라인모발이식", "vals": [66, 77, 67, 71, 81, 97, 83, 77, 65, 71, 71, 7]}, {"tag": "구레나룻모발이식", "vals": [43, 51, 44, 43, 41, 51, 51, 51, 41, 41, 42, 6]}, {"tag": "수염모발이식", "vals": [2, 8, 2, 8, 2, 2, 6, 2, 2, 5, 6, 0]}, {"tag": "눈썹모발이식", "vals": [1, 0, 0, 2, 0, 0, 0, 0, 1, 0, 1, 1]}, {"tag": "귀밑모발이식", "vals": [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0]}], "SURGICAL_안면윤곽/양악": [{"tag": "사각턱수술", "vals": [494, 454, 438, 404, 424, 439, 363, 367, 319, 360, 364, 40]}, {"tag": "광대축소(전체)", "vals": [475, 459, 430, 392, 415, 421, 369, 364, 316, 341, 363, 38]}, {"tag": "턱끝축소", "vals": [497, 461, 443, 416, 415, 433, 376, 367, 321, 361, 356, 39]}, {"tag": "광대축소(옆광대)", "vals": [477, 459, 413, 380, 398, 406, 364, 354, 315, 336, 345, 40]}, {"tag": "이중턱근육묶기", "vals": [351, 362, 387, 392, 392, 396, 352, 323, 307, 336, 334, 32]}, {"tag": "광대축소(앞광대)", "vals": [459, 436, 399, 373, 389, 386, 341, 332, 296, 321, 330, 37]}, {"tag": "턱끝수술", "vals": [366, 363, 346, 309, 312, 351, 274, 287, 233, 249, 266, 27]}, {"tag": "안면윤곽재수술", "vals": [323, 295, 274, 263, 267, 277, 232, 223, 201, 223, 245, 26]}, {"tag": "퀵광대", "vals": [257, 252, 236, 208, 228, 239, 203, 208, 205, 199, 198, 28]}, {"tag": "양악수술", "vals": [147, 114, 110, 102, 119, 114, 108, 100, 107, 104, 116, 16]}, {"tag": "이마축소", "vals": [102, 104, 76, 72, 110, 93, 86, 84, 76, 72, 91, 10]}, {"tag": "V라인축소술", "vals": [51, 59, 64, 64, 60, 52, 57, 50, 55, 65, 72, 4]}, {"tag": "피질절골", "vals": [27, 20, 32, 30, 22, 22, 27, 21, 24, 35, 33, 2]}, {"tag": "턱끝이물질제거", "vals": [26, 28, 23, 27, 26, 25, 21, 23, 15, 19, 24, 2]}, {"tag": "귀족수술(보형물)", "vals": [19, 21, 18, 12, 8, 11, 15, 6, 14, 19, 18, 0]}, {"tag": "턱끝보형물제거", "vals": [12, 15, 12, 12, 12, 9, 9, 14, 6, 16, 18, 1]}, {"tag": "관자놀이이물질제거", "vals": [20, 23, 18, 20, 18, 21, 16, 15, 10, 11, 16, 1]}, {"tag": "교근축소술", "vals": [8, 6, 6, 14, 7, 9, 9, 7, 14, 15, 14, 0]}, {"tag": "턱끝보형물", "vals": [3, 7, 6, 3, 3, 6, 3, 5, 3, 5, 8, 1]}, {"tag": "광대이물질제거", "vals": [5, 4, 3, 6, 6, 2, 4, 7, 3, 5, 6, 1]}, {"tag": "이마보형물", "vals": [4, 7, 3, 2, 3, 2, 2, 3, 1, 6, 4, 0]}, {"tag": "귀족수술(자가연골)", "vals": [2, 0, 1, 2, 1, 2, 1, 1, 1, 3, 3, 0]}, {"tag": "눈썹뼈축소술", "vals": [1, 2, 2, 0, 3, 2, 4, 1, 1, 0, 2, 0]}, {"tag": "광대보형물", "vals": [1, 3, 0, 0, 2, 1, 1, 0, 0, 1, 1, 0]}, {"tag": "상악수술", "vals": [1, 0, 2, 0, 0, 1, 1, 0, 1, 0, 1, 0]}, {"tag": "이마이물질제거", "vals": [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0]}, {"tag": "하악수술", "vals": [7, 5, 7, 3, 7, 5, 12, 2, 2, 0, 1, 0]}, {"tag": "뒤통수보형물", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]}, {"tag": "비절개턱성형", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}], "SURGICAL_지방성형": [{"tag": "팔지방흡입", "vals": [512, 589, 516, 485, 468, 554, 580, 517, 492, 585, 554, 53]}, {"tag": "복부지방흡입", "vals": [448, 519, 460, 443, 416, 500, 470, 453, 415, 490, 477, 39]}, {"tag": "이중턱지방흡입", "vals": [519, 544, 527, 526, 526, 564, 495, 455, 447, 476, 445, 42]}, {"tag": "허벅지지방흡입", "vals": [359, 406, 419, 401, 382, 429, 450, 399, 373, 429, 407, 38]}, {"tag": "러브핸들지방흡입", "vals": [370, 446, 364, 360, 324, 398, 396, 361, 354, 422, 382, 34]}, {"tag": "옆구리지방흡입", "vals": [332, 382, 330, 302, 292, 348, 326, 306, 300, 356, 335, 28]}, {"tag": "얼굴지방흡입", "vals": [379, 405, 392, 386, 399, 410, 368, 369, 351, 349, 328, 33]}, {"tag": "지방흡입재수술", "vals": [236, 298, 256, 222, 239, 253, 253, 253, 232, 261, 261, 13]}, {"tag": "등지방흡입", "vals": [231, 285, 225, 226, 202, 224, 217, 188, 205, 240, 225, 18]}, {"tag": "부유방흡입", "vals": [223, 268, 213, 172, 168, 206, 226, 166, 167, 221, 218, 13]}, {"tag": "종아리지방흡입", "vals": [198, 192, 199, 205, 187, 202, 220, 181, 186, 234, 217, 23]}, {"tag": "눈밑지방이식", "vals": [267, 234, 256, 260, 239, 290, 239, 277, 252, 221, 209, 18]}, {"tag": "팔자주름지방흡입", "vals": [233, 218, 225, 199, 235, 235, 193, 196, 214, 207, 199, 20]}, {"tag": "볼지방흡입", "vals": [234, 243, 266, 249, 275, 276, 235, 216, 225, 217, 195, 19]}, {"tag": "광대지방흡입", "vals": [176, 157, 163, 142, 189, 171, 153, 140, 149, 134, 132, 12]}, {"tag": "전신지방흡입", "vals": [73, 105, 105, 111, 107, 115, 125, 132, 117, 121, 121, 11]}, {"tag": "얼굴지방이식", "vals": [133, 94, 107, 116, 112, 122, 103, 101, 88, 93, 88, 4]}, {"tag": "심부볼제거", "vals": [100, 107, 76, 69, 77, 88, 85, 76, 75, 70, 78, 7]}, {"tag": "PRP자가지방이식", "vals": [68, 57, 65, 64, 79, 76, 89, 75, 82, 68, 75, 6]}, {"tag": "허리지방흡입", "vals": [49, 46, 46, 70, 45, 72, 55, 61, 62, 69, 69, 7]}, {"tag": "풀페이스지방이식", "vals": [93, 66, 69, 73, 69, 79, 53, 66, 49, 57, 67, 5]}, {"tag": "엉덩이지방흡입", "vals": [61, 74, 88, 66, 67, 74, 83, 60, 52, 80, 66, 7]}, {"tag": "이마지방이식", "vals": [88, 57, 63, 65, 73, 75, 48, 70, 49, 48, 66, 5]}, {"tag": "볼지방이식", "vals": [82, 55, 62, 63, 66, 71, 46, 64, 49, 46, 61, 5]}, {"tag": "어깨지방흡입", "vals": [40, 47, 30, 46, 31, 34, 44, 33, 34, 42, 56, 4]}, {"tag": "턱끝지방이식", "vals": [66, 47, 55, 51, 52, 64, 35, 49, 37, 40, 50, 5]}, {"tag": "무릎지방흡입", "vals": [27, 36, 41, 30, 41, 31, 43, 22, 18, 27, 44, 4]}, {"tag": "앞광대지방이식", "vals": [52, 42, 45, 37, 45, 53, 29, 35, 26, 30, 43, 5]}, {"tag": "팔자주름지방이식", "vals": [47, 33, 40, 35, 33, 39, 21, 27, 22, 24, 35, 0]}, {"tag": "엉덩이지방이식", "vals": [27, 33, 29, 29, 23, 25, 34, 35, 24, 22, 33, 1]}, {"tag": "골반지방이식", "vals": [28, 31, 26, 26, 23, 26, 35, 36, 23, 19, 31, 4]}, {"tag": "턱지방이식", "vals": [38, 21, 19, 26, 31, 30, 25, 30, 21, 23, 25, 1]}, {"tag": "관자놀이지방이식", "vals": [23, 20, 14, 23, 25, 25, 21, 25, 18, 24, 22, 5]}, {"tag": "힙업성형", "vals": [14, 17, 18, 14, 14, 13, 25, 20, 12, 12, 18, 1]}, {"tag": "광대지방이식", "vals": [22, 12, 13, 14, 22, 23, 19, 22, 16, 13, 17, 0]}, {"tag": "발목지방흡입", "vals": [15, 14, 16, 17, 18, 19, 23, 12, 7, 17, 15, 4]}, {"tag": "심부볼지방재배치", "vals": [2, 6, 2, 6, 8, 13, 11, 12, 9, 10, 12, 1]}, {"tag": "부유방제거수술", "vals": [6, 6, 10, 7, 6, 7, 18, 13, 7, 13, 8, 3]}, {"tag": "울트라젯", "vals": [1, 0, 0, 0, 0, 2, 0, 1, 0, 0, 1, 0]}, {"tag": "손등지방이식", "vals": [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, {"tag": "콧대지방이식", "vals": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}], "SURGICAL_치아": [{"tag": "치아교정", "vals": [93, 83, 89, 62, 73, 72, 90, 83, 60, 59, 91, 5]}, {"tag": "돌출입교정", "vals": [74, 66, 61, 50, 57, 58, 69, 48, 51, 39, 65, 5]}, {"tag": "투명교정", "vals": [50, 45, 48, 33, 35, 38, 52, 32, 27, 26, 46, 2]}, {"tag": "2D부분교정", "vals": [46, 35, 35, 29, 41, 29, 43, 33, 28, 23, 36, 1]}, {"tag": "설측교정", "vals": [38, 29, 29, 26, 33, 21, 39, 30, 19, 19, 35, 3]}, {"tag": "클리피씨교정", "vals": [21, 15, 24, 19, 21, 19, 18, 20, 10, 14, 29, 3]}, {"tag": "세라믹교정", "vals": [37, 23, 26, 19, 32, 19, 36, 26, 22, 18, 23, 3]}, {"tag": "잇몸성형", "vals": [7, 2, 10, 3, 9, 18, 13, 10, 13, 13, 12, 1]}, {"tag": "메탈교정", "vals": [32, 20, 17, 14, 22, 14, 27, 15, 17, 11, 11, 1]}, {"tag": "임플란트", "vals": [13, 13, 4, 6, 5, 4, 5, 5, 6, 10, 9, 0]}, {"tag": "MTA교정", "vals": [3, 5, 5, 1, 5, 2, 3, 1, 3, 3, 3, 0]}, {"tag": "올세라믹크라운", "vals": [0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0]}], "SURGICAL_코성형": [{"tag": "코끝(자가연골)", "vals": [1545, 1497, 1409, 1321, 1330, 1371, 1346, 1211, 1168, 1377, 1306, 150]}, {"tag": "콧대(자가조직)", "vals": [1312, 1272, 1201, 1103, 1082, 1102, 1087, 991, 969, 1111, 1074, 127]}, {"tag": "콧대(보형물)", "vals": [1152, 1133, 1081, 1000, 1008, 1005, 977, 895, 873, 1002, 997, 117]}, {"tag": "코끝(보형물)", "vals": [964, 990, 946, 895, 863, 921, 864, 804, 760, 870, 829, 105]}, {"tag": "코재수술", "vals": [932, 959, 888, 827, 773, 843, 794, 713, 674, 850, 822, 91]}, {"tag": "복코교정(수술)", "vals": [805, 823, 755, 739, 701, 727, 702, 605, 626, 746, 722, 87]}, {"tag": "코끝(기증연골)", "vals": [844, 845, 789, 702, 677, 716, 696, 623, 601, 744, 693, 85]}, {"tag": "콧볼축소", "vals": [671, 621, 592, 594, 596, 652, 693, 602, 584, 664, 637, 82]}, {"tag": "비후성비염수술", "vals": [343, 343, 354, 330, 346, 354, 371, 359, 338, 359, 344, 51]}, {"tag": "콧대(인공조직)", "vals": [369, 335, 315, 314, 300, 330, 315, 320, 316, 352, 323, 44]}, {"tag": "코절골술", "vals": [231, 275, 246, 210, 250, 240, 238, 192, 228, 260, 251, 27]}, {"tag": "비중격만곡증수술", "vals": [212, 249, 286, 270, 269, 261, 277, 243, 212, 266, 250, 34]}, {"tag": "코재수술(실리콘제거)", "vals": [226, 216, 176, 134, 81, 127, 116, 119, 101, 143, 146, 14]}, {"tag": "코길이연장술", "vals": [157, 173, 166, 121, 177, 159, 154, 133, 132, 132, 126, 17]}, {"tag": "코끝(기증진피)", "vals": [118, 108, 90, 83, 102, 94, 84, 85, 90, 111, 104, 7]}, {"tag": "콧날개수술", "vals": [74, 71, 67, 60, 71, 85, 78, 71, 76, 81, 102, 7]}, {"tag": "코이물질제거", "vals": [51, 56, 58, 49, 58, 43, 59, 43, 57, 66, 70, 4]}, {"tag": "코재수술(고어텍스제거)", "vals": [99, 94, 81, 62, 49, 60, 52, 57, 54, 74, 69, 7]}, {"tag": "비벨브협착증수술", "vals": [75, 91, 88, 72, 61, 86, 83, 76, 59, 74, 64, 12]}, {"tag": "비주연장술", "vals": [45, 32, 34, 30, 24, 23, 25, 22, 35, 42, 40, 2]}, {"tag": "비공내리기", "vals": [7, 9, 5, 5, 5, 5, 5, 3, 3, 4, 5, 1]}, {"tag": "고양이수술", "vals": [4, 0, 3, 5, 1, 2, 2, 2, 3, 4, 0, 0]}, {"tag": "코(귀연골)", "vals": [1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0]}], "SURGICAL_피부": [{"tag": "흉터제거수술", "vals": [17, 19, 16, 17, 25, 21, 16, 7, 15, 16, 15, 1]}], "SURGICAL_필러": [{"tag": "필러제거수술", "vals": [1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 2, 0]}]};
+const recentLabels = ["03-09", "03-16", "03-23", "03-30", "04-06", "04-13", "04-20", "04-27", "05-04", "05-11", "05-18", "05-25"];
+const nonsurgCats = ["보톡스", "피부", "지방성형", "제모", "리프팅", "필러", "기타", "코성형", "치아", "한방", "눈성형", "모발이식", "가슴성형"];
+const surgCats = ["눈성형", "코성형", "지방성형", "안면윤곽/양악", "가슴성형", "리프팅", "치아", "기타", "모발이식", "피부", "필러"];
+
+
+const colorMap = {
+  '보톡스': '#E63946', '필러': '#F4A261', '지방성형': '#2A9D8F',
+  '리프팅': '#9C6ADE', '피부': '#264653', '제모': '#E07A5F',
+  '눈성형': '#81B29A', '코성형': '#F2CC8F', '안면윤곽/양악': '#3D5A80',
+  '가슴성형': '#EE6C4D', '모발이식': '#98C1D9', '치아': '#5BC0EB',
+  '기타': '#9BA17B', '한방': '#A98467'
+};
+
+let currentType = 'NONSURGICAL';
+let currentView = 'split';
+let currentRange = 8;
+let selectedCats = new Set();
+const splitCharts = {};
+let overlayChart = null;
+let totalChartNs = null, totalChartS = null;
+
+function currentCats() {
+  return currentType === 'NONSURGICAL' ? nonsurgCats : surgCats;
+}
+function rangeData() {
+  const completed = dataAll.slice(0, -1);
+  return completed.slice(-currentRange);
+}
+function rangeTotal() {
+  const completed = dataTotal.slice(0, -1);
+  return completed.slice(-currentRange);
+}
+function fmtChange(p) {
+  if (p === null || p === undefined || !isFinite(p)) return { text: '—', cls: 'change-na' };
+  const sign = p > 0 ? '+' : '';
+  const cls = p > 0.5 ? 'change-up' : p < -0.5 ? 'change-down' : 'change-flat';
+  return { text: `${sign}${p.toFixed(1)}%`, cls };
+}
+function calcPct(arr, stepsAgo) {
+  if (!arr || arr.length < stepsAgo + 1) return null;
+  const last = arr[arr.length - 1];
+  const prev = arr[arr.length - 1 - stepsAgo];
+  return prev ? ((last - prev) / prev) * 100 : null;
+}
+function updateMeta() {
+  const d = rangeData();
+  document.getElementById('kr-meta-line').textContent =
+    `${d[0].period} ~ ${d[d.length - 1].period} · 주간 추이 (${d.length}주) · 1주·4주 전 대비 성장률 · 상대 스케일만 표시 · 진행 중 주차 제외`;
+}
+
+// ===== 시술/수술 전체 합산 카드 =====
+function buildTotalCards() {
+  const d = rangeTotal();
+  const fullTotal = dataTotal.slice(0, -1);
+
+  ['NONSURGICAL', 'SURGICAL'].forEach((op, idx) => {
+    const values = d.map(r => r[op]);
+    const fullVals = fullTotal.map(r => r[op]);
+    const w1 = fmtChange(calcPct(values, 1));
+    const w4 = fmtChange(calcPct(fullVals, 4));
+    const color = op === 'NONSURGICAL' ? '#2A9D8F' : '#E63946';
+
+    const target = document.getElementById(idx === 0 ? 'total-changes-ns' : 'total-changes-s');
+    target.innerHTML = `
+      <div class="change-item">
+        <div class="change-value ${w1.cls}">${w1.text}</div>
+        <div class="change-label">vs 1주 전</div>
+      </div>
+      <div class="change-item">
+        <div class="change-value ${w4.cls}">${w4.text}</div>
+        <div class="change-label">vs 4주 전</div>
+      </div>
+    `;
+
+    const peak = Math.max(...values) || 1;
+    const pctValues = values.map(v => (v / peak) * 100);
+
+    const canvasId = idx === 0 ? 'total-chart-ns' : 'total-chart-s';
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    const existingChart = idx === 0 ? totalChartNs : totalChartS;
+    if (existingChart) existingChart.destroy();
+
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: d.map(r => r.period),
+        datasets: [{
+          data: pctValues,
+          borderColor: color, backgroundColor: color + '20',
+          borderWidth: 3, pointRadius: 4, pointBackgroundColor: color, pointBorderWidth: 0,
+          tension: 0.35, fill: true,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#fff', borderColor: '#e5e3da', borderWidth: 1, padding: 10,
+            titleColor: '#888', titleFont: { size: 10 }, bodyColor: '#222', bodyFont: { size: 11 },
+            callbacks: {
+              title: (items) => `WEEK OF ${items[0].label}`,
+              label: (ctx) => `  ${ctx.parsed.y.toFixed(0)}% of peak`
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { color: '#999', font: { size: 10 } }, grid: { display: false }, border: { color: '#e5e3da' } },
+          y: { display: false, min: Math.min(...pctValues) * 0.9, max: 105 }
+        }
+      }
+    });
+    if (idx === 0) totalChartNs = chart; else totalChartS = chart;
+  });
+}
+
+// ===== 카테고리 칩 =====
+function renderChips() {
+  const container = document.getElementById('cat-chips');
+  container.querySelectorAll('.chip, .chip-actions').forEach(el => el.remove());
+
+  const cats = currentCats();
+  cats.forEach(c => {
+    const chip = document.createElement('button');
+    chip.className = 'chip';
+    chip.dataset.cat = c;
+    chip.textContent = c;
+    if (selectedCats.has(c)) {
+      chip.classList.add('active');
+      chip.style.background = colorMap[c] || '#888';
+      chip.style.borderColor = colorMap[c] || '#888';
+    }
+    chip.addEventListener('click', () => {
+      if (selectedCats.has(c)) selectedCats.delete(c);
+      else selectedCats.add(c);
+      renderChips();
+      render();
+    });
+    container.appendChild(chip);
+  });
+
+  const actions = document.createElement('div');
+  actions.className = 'chip-actions';
+  actions.innerHTML = `
+    <button id="select-all">전체 선택</button>
+    <button id="select-top5">상위 5개</button>
+    <button id="select-none">선택 해제</button>
+  `;
+  container.appendChild(actions);
+  document.getElementById('select-all').onclick = () => {
+    selectedCats = new Set(cats);
+    renderChips(); render();
+  };
+  document.getElementById('select-top5').onclick = () => {
+    selectedCats = new Set(cats.slice(0, 5));
+    renderChips(); render();
+  };
+  document.getElementById('select-none').onclick = () => {
+    selectedCats = new Set();
+    renderChips(); render();
+  };
+}
+
+// ===== Split View =====
+function buildSplitView() {
+  const data = rangeData();
+  const fullData = dataAll.slice(0, -1);
+  const container = document.getElementById('kr-split-view');
+  container.innerHTML = '';
+  Object.values(splitCharts).forEach(c => c.destroy());
+  Object.keys(splitCharts).forEach(k => delete splitCharts[k]);
+
+  if (selectedCats.size === 0) {
+    container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 60px; color: #999;">위에서 카테고리를 선택해주세요</div>';
+    return;
+  }
+
+  const cats = currentCats().filter(c => selectedCats.has(c));
+  const color = (c) => colorMap[c] || '#888';
+
+  cats.forEach(c => {
+    const key = `${currentType}_${c}`;
+    const values = data.map(r => r[key] || 0);
+    const fullValues = fullData.map(r => r[key] || 0);
+    const pct1 = calcPct(values, 1);
+    const pct4 = calcPct(fullValues, 4);
+    const w1 = fmtChange(pct1);
+    const w4 = fmtChange(pct4);
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="accent" style="background:${color(c)}"></div>
+      <div class="card-head">
+        <div>
+          <div class="card-title">${c}</div>
+          <div class="card-sub">${currentType === 'NONSURGICAL' ? '시술' : '수술'} · SU</div>
+        </div>
+        <div class="change-wrap">
+          <div class="change-item">
+            <div class="change-value ${w1.cls}">${w1.text}</div>
+            <div class="change-label">vs 1주 전</div>
+          </div>
+          <div class="change-item">
+            <div class="change-value ${w4.cls}">${w4.text}</div>
+            <div class="change-label">vs 4주 전</div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas></canvas></div>
+    `;
+    container.appendChild(card);
+
+    const ctx = card.querySelector('canvas').getContext('2d');
+    const peak = Math.max(...values) || 1;
+    const pctValues = values.map(v => (v / peak) * 100);
+
+    splitCharts[c] = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: data.map(r => r.period),
+        datasets: [{
+          data: pctValues,
+          borderColor: color(c), backgroundColor: color(c) + '15',
+          borderWidth: 2.5, pointRadius: 3,
+          pointBackgroundColor: color(c), pointBorderWidth: 0,
+          tension: 0.35, fill: false,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#fff', borderColor: '#e5e3da', borderWidth: 1, padding: 10,
+            titleColor: '#888', titleFont: { size: 10 }, bodyColor: '#222', bodyFont: { size: 11 },
+            callbacks: {
+              title: (items) => `WEEK OF ${items[0].label}`,
+              label: (ctx) => `  ${ctx.parsed.y.toFixed(0)}% of peak`
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { color: '#999', font: { size: 10 } }, grid: { display: false }, border: { color: '#e5e3da' } },
+          y: { display: false, min: Math.min(...pctValues) * 0.9, max: 105 }
+        }
+      }
+    });
+  });
+}
+
+// ===== Overlay View — 카테고리 + TOP5 태그 종합 =====
+function buildOverlayView() {
+  const data = rangeData();
+  const label = document.getElementById('kr-overlay-label');
+  const typeLabel = currentType === 'NONSURGICAL' ? '시술' : '수술';
+  label.textContent = `${typeLabel} · 선택 카테고리 ${selectedCats.size}개 (실선) + 각 카테고리 TOP5 태그 종합 (점선) · 각자 자체 피크 100% 기준 · 최근 ${data.length}주`;
+
+  const cats = currentCats().filter(c => selectedCats.has(c));
+  const color = (c) => colorMap[c] || '#888';
+
+  const datasets = [];
+
+  cats.forEach(c => {
+    // 1. 카테고리 전체 SU (실선)
+    const key = `${currentType}_${c}`;
+    const values = data.map(r => r[key] || 0);
+    const peak = Math.max(...values) || 1;
+    datasets.push({
+      label: c + ' (전체)',
+      data: values.map(v => (v / peak) * 100),
+      borderColor: color(c), backgroundColor: color(c) + '15',
+      borderWidth: 2.5, pointRadius: 3,
+      pointBackgroundColor: color(c), pointBorderWidth: 0,
+      tension: 0.35, fill: false,
+    });
+
+    // 2. TOP5 태그 종합 SU (점선)
+    const tags = (tagsByGroup[key] || []).slice(0, 5);
+    if (tags.length > 0) {
+      // recentLabels 기준 12주에서 currentRange만큼 자르고, 진행중 주차(마지막) 제외
+      const startIdx = recentLabels.length - 1 - currentRange; // 진행중 빼고 currentRange만큼
+      const endIdx = recentLabels.length - 1; // 진행중 직전까지
+      const top5Sum = [];
+      for (let i = startIdx; i < endIdx; i++) {
+        let s = 0;
+        tags.forEach(t => { s += t.vals[i]; });
+        top5Sum.push(s);
+      }
+      const peakT5 = Math.max(...top5Sum) || 1;
+      datasets.push({
+        label: c + ' TOP5 합산',
+        data: top5Sum.map(v => (v / peakT5) * 100),
+        borderColor: color(c), backgroundColor: 'transparent',
+        borderWidth: 1.8, borderDash: [5, 4], pointRadius: 2,
+        pointBackgroundColor: color(c), pointBorderWidth: 0,
+        tension: 0.35, fill: false,
+      });
+    }
+  });
+
+  if (overlayChart) overlayChart.destroy();
+  const ctx = document.getElementById('kr-overlay-chart').getContext('2d');
+  overlayChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: data.map(r => r.period), datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom',
+          labels: { color: '#555', usePointStyle: true, pointStyle: 'circle', padding: 12, font: { family: 'Georgia, serif', size: 12 } }
+        },
+        tooltip: {
+          backgroundColor: '#fff', borderColor: '#e5e3da', borderWidth: 1, padding: 12,
+          titleColor: '#888', titleFont: { size: 11 }, bodyColor: '#222',
+          callbacks: {
+            title: (items) => `WEEK OF ${items[0].label}`,
+            label: (ctx) => `  ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(0)}% of peak`
+          }
+        }
+      },
+      scales: {
+        x: { ticks: { color: '#666', font: { size: 11 } }, grid: { display: false }, border: { color: '#ddd' } },
+        y: { min: 0, max: 105,
+          ticks: { color: '#999', font: { size: 10 }, callback: (v) => v + '%' },
+          grid: { color: '#f0eee6' }, border: { display: false }
+        }
+      }
+    }
+  });
+}
+
+// ===== 세부 태그 WOW 증감 =====
+function buildWowSection() {
+  const cats = currentCats().filter(c => selectedCats.has(c));
+  const typeLabel = currentType === 'NONSURGICAL' ? '시술' : '수술';
+  const lastIdx = recentLabels.length - 2; // 진행중 직전 (5/18)
+  const prevIdx = lastIdx - 1; // 1주 전 (5/11)
+  const lastDate = recentLabels[lastIdx];
+  const prevDate = recentLabels[prevIdx];
+
+  document.getElementById('wow-title').textContent =
+    `세부 태그 WOW 증감 — 기준주 SU 상위 5개 (${prevDate}→${lastDate})`;
+  document.getElementById('wow-subtitle').textContent =
+    `${typeLabel} · 선택 카테고리 ${cats.length}개 · 각 카테고리에서 기준주(${lastDate}) SU 상위 5개 태그의 전주 대비 변화율`;
+
+  const grid = document.getElementById('wow-grid');
+  grid.innerHTML = '';
+
+  if (cats.length === 0) {
+    grid.innerHTML = '<div style="text-align: center; padding: 30px; color: #999;">위에서 카테고리를 선택해주세요</div>';
+    return;
+  }
+
+  const color = (c) => colorMap[c] || '#888';
+
+  cats.forEach(c => {
+    const key = `${currentType}_${c}`;
+    const tags = (tagsByGroup[key] || []).slice(0, 5);
+    if (tags.length === 0) return;
+
+    const block = document.createElement('div');
+    block.className = 'wow-cat-block';
+    block.innerHTML = `
+      <div class="wow-cat-header">
+        <div class="wow-cat-tick" style="background: ${color(c)}"></div>
+        <div class="wow-cat-name">${c}</div>
+      </div>
+    `;
+
+    tags.forEach(t => {
+      const cur = t.vals[lastIdx];
+      const prev = t.vals[prevIdx];
+      const pct = prev ? ((cur - prev) / prev) * 100 : null;
+
+      // 막대: 좌-우 ±20% 풀스케일, 중앙 0
+      const clamped = pct === null ? 0 : Math.max(-20, Math.min(20, pct));
+      const widthPct = Math.abs(clamped) / 20 * 50; // 50%가 풀 길이
+      const isPositive = (pct || 0) > 0;
+      const isFlat = pct !== null && Math.abs(pct) < 0.5;
+      const barColor = isFlat || pct === null ? '#d4d0c2' : (isPositive ? '#16a34a' : '#dc2626');
+      const left = isPositive ? '50%' : `${50 - widthPct}%`;
+
+      const pctText = pct === null ? '—' :
+        (isFlat ? '±0%' : `${pct > 0 ? '+' : ''}${pct.toFixed(0)}%`);
+      const pctCls = isFlat || pct === null ? 'change-flat' : (isPositive ? 'change-up' : 'change-down');
+
+      const row = document.createElement('div');
+      row.className = 'wow-tag-row';
+      row.innerHTML = `
+        <div class="wow-tag-name" title="${t.tag}">${t.tag}</div>
+        <div class="wow-bar-track">
+          <div class="wow-bar-center"></div>
+          <div class="wow-bar-fill" style="left: ${left}; width: ${widthPct}%; background: ${barColor};"></div>
+        </div>
+        <div class="wow-pct ${pctCls}">${pctText}</div>
+      `;
+      block.appendChild(row);
+    });
+
+    grid.appendChild(block);
+  });
+}
+
+// ===== Controls =====
+function setupToggle(id, handler) {
+  document.getElementById(id).addEventListener('click', (e) => {
+    if (e.target.tagName !== 'BUTTON') return;
+    document.querySelectorAll(`#${id} button`).forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    handler(e.target);
+  });
+}
+
+setupToggle('type-toggle', (btn) => {
+  currentType = btn.dataset.type;
+  selectedCats = new Set(currentCats().slice(0, 5));
+  renderChips();
+  render();
+});
+
+setupToggle('kr-view-toggle', (btn) => { currentView = btn.dataset.view; render(); });
+
+document.getElementById('kr-range-number').addEventListener('input', (e) => {
+  const v = parseInt(e.target.value);
+  if (!isNaN(v) && v >= 2 && v <= 12) {
+    currentRange = v;
+    render();
+  }
+});
+
+function render() {
+  updateMeta();
+  buildTotalCards();
+  const split = document.getElementById('kr-split-view');
+  const overlay = document.getElementById('kr-overlay-view');
+  split.classList.toggle('hidden', currentView !== 'split');
+  overlay.classList.toggle('hidden', currentView !== 'overlay');
+
+  if (currentView === 'split') buildSplitView();
+  else buildOverlayView();
+
+  buildWowSection();
+}
+
+selectedCats = new Set(nonsurgCats.slice(0, 5));
+renderChips();
+render();
+
+})();
+
 </script>
 
 </body>
