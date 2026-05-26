@@ -151,6 +151,12 @@
     <button data-metric="SU">SU</button>
   </div>
 
+  <span class="group-label">SU Scope</span>
+  <div class="toggle" id="scope-toggle">
+    <button data-scope="all" class="active">전체</button>
+    <button data-scope="inbound">KR → JP 인바운드</button>
+  </div>
+
   <div class="range-input">
     <label for="range-number">최근</label>
     <input type="number" id="range-number" value="8" min="2" max="12">
@@ -176,41 +182,42 @@
 <div id="combined-view" class="grid hidden"></div>
 
 <footer>
-  Source · TRANSDATA.HA_DATAMART.HA_TOTAL · weekly_active / weekly_select / monthly_active / monthly_select · HOSPITAL_COUNTRY = 'all' (자국+인바운드 전체)<br>
+  Source · TRANSDATA.HA_DATAMART.HA_TOTAL · weekly_active / weekly_select / monthly_active / monthly_select<br>
+  SU Scope · '전체' = HOSPITAL_COUNTRY='all' (자국+인바운드) / 'KR → JP 인바운드' = HOSPITAL_COUNTRY='KR' (각국 유저가 한국 병원 선택)<br>
   Service grouping · JP / TH / TW / CN / 영어권(US·GB·CA·AU·NZ·SG·IE·IN·PH·MY·HK) · Last updated: 2026-05-26
 </footer>
 
 <script>
-// ===== Data: 주간 12주 (HOSPITAL_COUNTRY = 'all', 2026-05-26 기준) =====
+// ===== Data: 주간 12주 (HOSPITAL_COUNTRY = 'all'은 전체, _SU_inbound는 HOSPITAL_COUNTRY='KR'만) =====
 const weeklyData = [
-  { period: '03-02', 일본_MAU: 90429,  태국_MAU: 5621, 대만_MAU: 5656, 중국_MAU: 644, 영어권_MAU: 5605, 일본_SU: 26347, 태국_SU: 753, 대만_SU: 806,  중국_SU: 174, 영어권_SU: 1099 },
-  { period: '03-09', 일본_MAU: 99352,  태국_MAU: 6383, 대만_MAU: 5835, 중국_MAU: 936, 영어권_MAU: 5870, 일본_SU: 27126, 태국_SU: 830, 대만_SU: 839,  중국_SU: 314, 영어권_SU: 1153 },
-  { period: '03-16', 일본_MAU: 98227,  태국_MAU: 5878, 대만_MAU: 6496, 중국_MAU: 965, 영어권_MAU: 5357, 일본_SU: 26508, 태국_SU: 742, 대만_SU: 922,  중국_SU: 316, 영어권_SU: 1000 },
-  { period: '03-23', 일본_MAU: 98866,  태국_MAU: 5873, 대만_MAU: 6567, 중국_MAU: 802, 영어권_MAU: 5709, 일본_SU: 26280, 태국_SU: 775, 대만_SU: 956,  중국_SU: 280, 영어권_SU: 1094 },
-  { period: '03-30', 일본_MAU: 101602, 태국_MAU: 5868, 대만_MAU: 5989, 중국_MAU: 799, 영어권_MAU: 5768, 일본_SU: 28528, 태국_SU: 920, 대만_SU: 1154, 중국_SU: 353, 영어권_SU: 1292 },
-  { period: '04-06', 일본_MAU: 110873, 태국_MAU: 5483, 대만_MAU: 6011, 중국_MAU: 872, 영어권_MAU: 5611, 일본_SU: 30549, 태국_SU: 935, 대만_SU: 1190, 중국_SU: 375, 영어권_SU: 1264 },
-  { period: '04-13', 일본_MAU: 112726, 태국_MAU: 5547, 대만_MAU: 6709, 중국_MAU: 822, 영어권_MAU: 5274, 일본_SU: 32341, 태국_SU: 887, 대만_SU: 1160, 중국_SU: 319, 영어권_SU: 1282 },
-  { period: '04-20', 일본_MAU: 113571, 태국_MAU: 4882, 대만_MAU: 7256, 중국_MAU: 815, 영어권_MAU: 5162, 일본_SU: 33112, 태국_SU: 700, 대만_SU: 1262, 중국_SU: 343, 영어권_SU: 1143 },
-  { period: '04-27', 일본_MAU: 106857, 태국_MAU: 4963, 대만_MAU: 7725, 중국_MAU: 762, 영어권_MAU: 5253, 일본_SU: 31897, 태국_SU: 688, 대만_SU: 1326, 중국_SU: 261, 영어권_SU: 1258 },
-  { period: '05-04', 일본_MAU: 109068, 태국_MAU: 5597, 대만_MAU: 7314, 중국_MAU: 648, 영어권_MAU: 5498, 일본_SU: 31464, 태국_SU: 676, 대만_SU: 1360, 중국_SU: 204, 영어권_SU: 1217 },
-  { period: '05-11', 일본_MAU: 108445, 태국_MAU: 5381, 대만_MAU: 6722, 중국_MAU: 708, 영어권_MAU: 6250, 일본_SU: 31260, 태국_SU: 722, 대만_SU: 1305, 중국_SU: 268, 영어권_SU: 1220 },
-  { period: '05-18', 일본_MAU: 113043, 태국_MAU: 5214, 대만_MAU: 6432, 중국_MAU: 737, 영어권_MAU: 5669, 일본_SU: 32501, 태국_SU: 753, 대만_SU: 1433, 중국_SU: 287, 영어권_SU: 1231 },
+  { period: '03-02', 일본_MAU: 90429,  태국_MAU: 5621, 대만_MAU: 5656, 중국_MAU: 644, 영어권_MAU: 5605, 일본_SU: 26347, 태국_SU: 753, 대만_SU: 806,  중국_SU: 174, 영어권_SU: 1099, 일본_SU_inbound: 6252, 태국_SU_inbound: 753, 대만_SU_inbound: 806,  중국_SU_inbound: 174, 영어권_SU_inbound: 1099 },
+  { period: '03-09', 일본_MAU: 99352,  태국_MAU: 6383, 대만_MAU: 5835, 중국_MAU: 936, 영어권_MAU: 5870, 일본_SU: 27126, 태국_SU: 830, 대만_SU: 839,  중국_SU: 314, 영어권_SU: 1153, 일본_SU_inbound: 6112, 태국_SU_inbound: 830, 대만_SU_inbound: 839,  중국_SU_inbound: 314, 영어권_SU_inbound: 1153 },
+  { period: '03-16', 일본_MAU: 98227,  태국_MAU: 5878, 대만_MAU: 6496, 중국_MAU: 965, 영어권_MAU: 5357, 일본_SU: 26508, 태국_SU: 742, 대만_SU: 922,  중국_SU: 316, 영어권_SU: 1000, 일본_SU_inbound: 5644, 태국_SU_inbound: 742, 대만_SU_inbound: 922,  중국_SU_inbound: 316, 영어권_SU_inbound: 1000 },
+  { period: '03-23', 일본_MAU: 98866,  태국_MAU: 5873, 대만_MAU: 6567, 중국_MAU: 802, 영어권_MAU: 5709, 일본_SU: 26280, 태국_SU: 775, 대만_SU: 956,  중국_SU: 280, 영어권_SU: 1094, 일본_SU_inbound: 5176, 태국_SU_inbound: 775, 대만_SU_inbound: 956,  중국_SU_inbound: 280, 영어권_SU_inbound: 1094 },
+  { period: '03-30', 일본_MAU: 101602, 태국_MAU: 5868, 대만_MAU: 5989, 중국_MAU: 799, 영어권_MAU: 5768, 일본_SU: 28528, 태국_SU: 920, 대만_SU: 1154, 중국_SU: 353, 영어권_SU: 1292, 일본_SU_inbound: 6400, 태국_SU_inbound: 920, 대만_SU_inbound: 1154, 중국_SU_inbound: 353, 영어권_SU_inbound: 1292 },
+  { period: '04-06', 일본_MAU: 110873, 태국_MAU: 5483, 대만_MAU: 6011, 중국_MAU: 872, 영어권_MAU: 5611, 일본_SU: 30549, 태국_SU: 935, 대만_SU: 1190, 중국_SU: 375, 영어권_SU: 1264, 일본_SU_inbound: 7327, 태국_SU_inbound: 935, 대만_SU_inbound: 1190, 중국_SU_inbound: 375, 영어권_SU_inbound: 1264 },
+  { period: '04-13', 일본_MAU: 112726, 태국_MAU: 5547, 대만_MAU: 6709, 중국_MAU: 822, 영어권_MAU: 5274, 일본_SU: 32341, 태국_SU: 887, 대만_SU: 1160, 중국_SU: 319, 영어권_SU: 1282, 일본_SU_inbound: 7498, 태국_SU_inbound: 887, 대만_SU_inbound: 1160, 중국_SU_inbound: 319, 영어권_SU_inbound: 1282 },
+  { period: '04-20', 일본_MAU: 113571, 태국_MAU: 4882, 대만_MAU: 7256, 중국_MAU: 815, 영어권_MAU: 5162, 일본_SU: 33112, 태국_SU: 700, 대만_SU: 1262, 중국_SU: 343, 영어권_SU: 1143, 일본_SU_inbound: 7611, 태국_SU_inbound: 700, 대만_SU_inbound: 1262, 중국_SU_inbound: 343, 영어권_SU_inbound: 1143 },
+  { period: '04-27', 일본_MAU: 106857, 태국_MAU: 4963, 대만_MAU: 7725, 중국_MAU: 762, 영어권_MAU: 5253, 일본_SU: 31897, 태국_SU: 688, 대만_SU: 1326, 중국_SU: 261, 영어권_SU: 1258, 일본_SU_inbound: 7534, 태국_SU_inbound: 688, 대만_SU_inbound: 1326, 중국_SU_inbound: 261, 영어권_SU_inbound: 1258 },
+  { period: '05-04', 일본_MAU: 109068, 태국_MAU: 5597, 대만_MAU: 7314, 중국_MAU: 648, 영어권_MAU: 5498, 일본_SU: 31464, 태국_SU: 676, 대만_SU: 1360, 중국_SU: 204, 영어권_SU: 1217, 일본_SU_inbound: 7518, 태국_SU_inbound: 676, 대만_SU_inbound: 1360, 중국_SU_inbound: 204, 영어권_SU_inbound: 1217 },
+  { period: '05-11', 일본_MAU: 108445, 태국_MAU: 5381, 대만_MAU: 6722, 중국_MAU: 708, 영어권_MAU: 6250, 일본_SU: 31260, 태국_SU: 722, 대만_SU: 1305, 중국_SU: 268, 영어권_SU: 1220, 일본_SU_inbound: 7437, 태국_SU_inbound: 722, 대만_SU_inbound: 1305, 중국_SU_inbound: 268, 영어권_SU_inbound: 1220 },
+  { period: '05-18', 일본_MAU: 113043, 태국_MAU: 5214, 대만_MAU: 6432, 중국_MAU: 737, 영어권_MAU: 5669, 일본_SU: 32501, 태국_SU: 753, 대만_SU: 1433, 중국_SU: 287, 영어권_SU: 1231, 일본_SU_inbound: 7396, 태국_SU_inbound: 753, 대만_SU_inbound: 1433, 중국_SU_inbound: 287, 영어권_SU_inbound: 1231 },
 ];
 
-// ===== Data: 월간 12개월 (HOSPITAL_COUNTRY = 'all', 2026-05-06 기준) =====
+// ===== Data: 월간 12개월 (HOSPITAL_COUNTRY = 'all' 전체, _SU_inbound는 'KR'만) =====
 const monthlyData = [
-  { period: '2025-05', 일본_MAU: 178862, 태국_MAU: 7587,  대만_MAU: 415,   중국_MAU: 1339, 영어권_MAU: 7665,  일본_SU: 60270,  태국_SU: 465,  대만_SU: 32,   중국_SU: 120,  영어권_SU: 1477 },
-  { period: '2025-06', 일본_MAU: 195696, 태국_MAU: 9796,  대만_MAU: 396,   중국_MAU: 1376, 영어권_MAU: 6349,  일본_SU: 71828,  태국_SU: 630,  대만_SU: 25,   중국_SU: 81,   영어권_SU: 1437 },
-  { period: '2025-07', 일본_MAU: 213170, 태국_MAU: 9815,  대만_MAU: 437,   중국_MAU: 1392, 영어권_MAU: 6383,  일본_SU: 82177,  태국_SU: 678,  대만_SU: 37,   중국_SU: 160,  영어권_SU: 1247 },
-  { period: '2025-08', 일본_MAU: 213687, 태국_MAU: 10948, 대만_MAU: 624,   중국_MAU: 1351, 영어권_MAU: 8849,  일본_SU: 80187,  태국_SU: 1042, 대만_SU: 53,   중국_SU: 129,  영어권_SU: 1676 },
-  { period: '2025-09', 일본_MAU: 216082, 태국_MAU: 13998, 대만_MAU: 994,   중국_MAU: 1472, 영어권_MAU: 13421, 일본_SU: 80882,  태국_SU: 1142, 대만_SU: 87,   중국_SU: 129,  영어권_SU: 2935 },
-  { period: '2025-10', 일본_MAU: 225279, 태국_MAU: 16530, 대만_MAU: 2435,  중국_MAU: 1449, 영어권_MAU: 16394, 일본_SU: 87134,  태국_SU: 1477, 대만_SU: 423,  중국_SU: 283,  영어권_SU: 3334 },
-  { period: '2025-11', 일본_MAU: 205523, 태국_MAU: 13031, 대만_MAU: 4040,  중국_MAU: 1283, 영어권_MAU: 15148, 일본_SU: 81306,  태국_SU: 1414, 대만_SU: 773,  중국_SU: 254,  영어권_SU: 3481 },
-  { period: '2025-12', 일본_MAU: 208628, 태국_MAU: 16001, 대만_MAU: 9553,  중국_MAU: 1373, 영어권_MAU: 13457, 일본_SU: 83618,  태국_SU: 1710, 대만_SU: 1336, 중국_SU: 374,  영어권_SU: 3166 },
-  { period: '2026-01', 일본_MAU: 225213, 태국_MAU: 17248, 대만_MAU: 13239, 중국_MAU: 1382, 영어권_MAU: 14182, 일본_SU: 90392,  태국_SU: 1677, 대만_SU: 1673, 중국_SU: 322,  영어권_SU: 3209 },
-  { period: '2026-02', 일본_MAU: 206908, 태국_MAU: 13550, 대만_MAU: 15193, 중국_MAU: 2164, 영어권_MAU: 13292, 일본_SU: 81728,  태국_SU: 1800, 대만_SU: 2138, 중국_SU: 456,  영어권_SU: 3129 },
-  { period: '2026-03', 일본_MAU: 231395, 태국_MAU: 19330, 대만_MAU: 19603, 중국_MAU: 2639, 영어권_MAU: 15492, 일본_SU: 98570,  태국_SU: 3086, 대만_SU: 3613, 중국_SU: 1073, 영어권_SU: 4315 },
-  { period: '2026-04', 일본_MAU: 259170, 태국_MAU: 17329, 대만_MAU: 20826, 중국_MAU: 2530, 영어권_MAU: 14324, 일본_SU: 113544, 태국_SU: 3309, 대만_SU: 4666, 중국_SU: 1331, 영어권_SU: 4630 },
+  { period: '2025-05', 일본_MAU: 178862, 태국_MAU: 7587,  대만_MAU: 415,   중국_MAU: 1339, 영어권_MAU: 7665,  일본_SU: 60270,  태국_SU: 465,  대만_SU: 32,   중국_SU: 120,  영어권_SU: 1477, 일본_SU_inbound: 19332, 태국_SU_inbound: 465,  대만_SU_inbound: 32,   중국_SU_inbound: 120,  영어권_SU_inbound: 1477 },
+  { period: '2025-06', 일본_MAU: 195696, 태국_MAU: 9796,  대만_MAU: 396,   중국_MAU: 1376, 영어권_MAU: 6349,  일본_SU: 71828,  태국_SU: 630,  대만_SU: 25,   중국_SU: 81,   영어권_SU: 1437, 일본_SU_inbound: 19044, 태국_SU_inbound: 630,  대만_SU_inbound: 25,   중국_SU_inbound: 81,   영어권_SU_inbound: 1437 },
+  { period: '2025-07', 일본_MAU: 213170, 태국_MAU: 9815,  대만_MAU: 437,   중국_MAU: 1392, 영어권_MAU: 6383,  일본_SU: 82177,  태국_SU: 678,  대만_SU: 37,   중국_SU: 160,  영어권_SU: 1247, 일본_SU_inbound: 20717, 태국_SU_inbound: 678,  대만_SU_inbound: 37,   중국_SU_inbound: 160,  영어권_SU_inbound: 1247 },
+  { period: '2025-08', 일본_MAU: 213687, 태국_MAU: 10948, 대만_MAU: 624,   중국_MAU: 1351, 영어권_MAU: 8849,  일본_SU: 80187,  태국_SU: 1042, 대만_SU: 53,   중국_SU: 129,  영어권_SU: 1676, 일본_SU_inbound: 24935, 태국_SU_inbound: 1042, 대만_SU_inbound: 53,   중국_SU_inbound: 129,  영어권_SU_inbound: 1676 },
+  { period: '2025-09', 일본_MAU: 216082, 태국_MAU: 13998, 대만_MAU: 994,   중국_MAU: 1472, 영어권_MAU: 13421, 일본_SU: 80882,  태국_SU: 1142, 대만_SU: 87,   중국_SU: 129,  영어권_SU: 2935, 일본_SU_inbound: 23222, 태국_SU_inbound: 1142, 대만_SU_inbound: 87,   중국_SU_inbound: 129,  영어권_SU_inbound: 2935 },
+  { period: '2025-10', 일본_MAU: 225279, 태국_MAU: 16530, 대만_MAU: 2435,  중국_MAU: 1449, 영어권_MAU: 16394, 일본_SU: 87134,  태국_SU: 1477, 대만_SU: 423,  중국_SU: 283,  영어권_SU: 3334, 일본_SU_inbound: 22277, 태국_SU_inbound: 1477, 대만_SU_inbound: 423,  중국_SU_inbound: 283,  영어권_SU_inbound: 3334 },
+  { period: '2025-11', 일본_MAU: 205523, 태국_MAU: 13031, 대만_MAU: 4040,  중국_MAU: 1283, 영어권_MAU: 15148, 일본_SU: 81306,  태국_SU: 1414, 대만_SU: 773,  중국_SU: 254,  영어권_SU: 3481, 일본_SU_inbound: 19378, 태국_SU_inbound: 1414, 대만_SU_inbound: 773,  중국_SU_inbound: 254,  영어권_SU_inbound: 3481 },
+  { period: '2025-12', 일본_MAU: 208628, 태국_MAU: 16001, 대만_MAU: 9553,  중국_MAU: 1373, 영어권_MAU: 13457, 일본_SU: 83618,  태국_SU: 1710, 대만_SU: 1336, 중국_SU: 374,  영어권_SU: 3166, 일본_SU_inbound: 16333, 태국_SU_inbound: 1710, 대만_SU_inbound: 1336, 중국_SU_inbound: 374,  영어권_SU_inbound: 3166 },
+  { period: '2026-01', 일본_MAU: 225213, 태국_MAU: 17248, 대만_MAU: 13239, 중국_MAU: 1382, 영어권_MAU: 14182, 일본_SU: 90392,  태국_SU: 1677, 대만_SU: 1673, 중국_SU: 322,  영어권_SU: 3209, 일본_SU_inbound: 18473, 태국_SU_inbound: 1677, 대만_SU_inbound: 1673, 중국_SU_inbound: 322,  영어권_SU_inbound: 3209 },
+  { period: '2026-02', 일본_MAU: 206908, 태국_MAU: 13550, 대만_MAU: 15193, 중국_MAU: 2164, 영어권_MAU: 13292, 일본_SU: 81728,  태국_SU: 1800, 대만_SU: 2138, 중국_SU: 456,  영어권_SU: 3129, 일본_SU_inbound: 17809, 태국_SU_inbound: 1800, 대만_SU_inbound: 2138, 중국_SU_inbound: 456,  영어권_SU_inbound: 3129 },
+  { period: '2026-03', 일본_MAU: 231395, 태국_MAU: 19330, 대만_MAU: 19603, 중국_MAU: 2639, 영어권_MAU: 15492, 일본_SU: 98570,  태국_SU: 3086, 대만_SU: 3613, 중국_SU: 1073, 영어권_SU: 4315, 일본_SU_inbound: 22627, 태국_SU_inbound: 3086, 대만_SU_inbound: 3613, 중국_SU_inbound: 1073, 영어권_SU_inbound: 4315 },
+  { period: '2026-04', 일본_MAU: 259170, 태국_MAU: 17329, 대만_MAU: 20826, 중국_MAU: 2530, 영어권_MAU: 14324, 일본_SU: 113544, 태국_SU: 3309, 대만_SU: 4666, 중국_SU: 1331, 영어권_SU: 4630, 일본_SU_inbound: 27941, 태국_SU_inbound: 3309, 대만_SU_inbound: 4666, 중국_SU_inbound: 1331, 영어권_SU_inbound: 4630 },
 ];
 
 const services = [
@@ -226,9 +233,19 @@ let currentFreq = 'weekly';
 let currentMetric = 'MAU';
 let currentView = 'split';
 let currentRange = 8;
+let currentScope = 'all';  // 'all' | 'inbound'
 const splitCharts = {};
 const combinedCharts = {};
 let overlayChart = null;
+
+// SU 필드 이름 (scope에 따라 달라짐). MAU는 scope 무관 (인바운드 분해 불가).
+function suField(serviceKey) {
+  return currentScope === 'inbound' ? `${serviceKey}_SU_inbound` : `${serviceKey}_SU`;
+}
+function fieldFor(serviceKey, metric) {
+  if (metric === 'SU') return suField(serviceKey);
+  return `${serviceKey}_${metric}`;
+}
 
 function fullDataset() { return currentFreq === 'weekly' ? weeklyData : monthlyData; }
 function rangeData() {
@@ -269,13 +286,15 @@ function buildSplitView() {
   Object.keys(splitCharts).forEach(k => delete splitCharts[k]);
 
   services.forEach(s => {
-    const values = data.map(r => r[`${s.key}_${currentMetric}`]);
-    const fullValues = full.map(r => r[`${s.key}_${currentMetric}`]);
+    const fld = fieldFor(s.key, currentMetric);
+    const values = data.map(r => r[fld]);
+    const fullValues = full.map(r => r[fld]);
     const pct1 = calcPct(values, 1);
     const pct4 = calcPct(fullValues, 4);
     const w1 = fmtChange(pct1);
     const w4 = fmtChange(pct4);
 
+    const scopeBadge = (currentMetric === 'SU' && currentScope === 'inbound') ? ' · KR 인바운드' : '';
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
@@ -283,7 +302,7 @@ function buildSplitView() {
       <div class="card-head">
         <div>
           <div class="card-title">${s.key}</div>
-          <div class="card-sub">${s.code} · ${currentMetric}</div>
+          <div class="card-sub">${s.code} · ${currentMetric}${scopeBadge}</div>
         </div>
         <div class="change-wrap">
           <div class="change-item">
@@ -341,10 +360,12 @@ function buildSplitView() {
 function buildOverlayView() {
   const data = rangeData();
   const label = document.getElementById('overlay-label');
-  label.textContent = `ALL SERVICES · ${currentMetric} · NORMALIZED TO EACH SERVICE'S PEAK (100%) · LAST ${data.length} ${unitLabelEn().toUpperCase()}`;
+  const scopeLabel = (currentMetric === 'SU' && currentScope === 'inbound') ? ' · KR INBOUND' : '';
+  label.textContent = `ALL SERVICES · ${currentMetric}${scopeLabel} · NORMALIZED TO EACH SERVICE'S PEAK (100%) · LAST ${data.length} ${unitLabelEn().toUpperCase()}`;
 
   const datasets = services.map(s => {
-    const values = data.map(r => r[`${s.key}_${currentMetric}`]);
+    const fld = fieldFor(s.key, currentMetric);
+    const values = data.map(r => r[fld]);
     const peak = Math.max(...values);
     return {
       label: s.key,
@@ -396,10 +417,11 @@ function buildCombinedView() {
   Object.keys(combinedCharts).forEach(k => delete combinedCharts[k]);
 
   services.forEach(s => {
+    const suFld = suField(s.key);
     const mauValues = data.map(r => r[`${s.key}_MAU`]);
-    const suValues = data.map(r => r[`${s.key}_SU`]);
+    const suValues = data.map(r => r[suFld]);
     const fullMau = full.map(r => r[`${s.key}_MAU`]);
-    const fullSu = full.map(r => r[`${s.key}_SU`]);
+    const fullSu = full.map(r => r[suFld]);
 
     const mauPeak = Math.max(...mauValues);
     const suPeak = Math.max(...suValues);
@@ -411,6 +433,7 @@ function buildCombinedView() {
     const su1 = fmtChange(calcPct(suValues, 1));
     const su4 = fmtChange(calcPct(fullSu, 4));
 
+    const scopeBadge = currentScope === 'inbound' ? ' · KR 인바운드 SU만' : '';
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
@@ -418,7 +441,7 @@ function buildCombinedView() {
       <div class="card-head">
         <div>
           <div class="card-title">${s.key}</div>
-          <div class="card-sub">${s.code} · MAU + SU</div>
+          <div class="card-sub">${s.code} · MAU + SU${scopeBadge}</div>
         </div>
       </div>
       <div class="combined-stats">
@@ -512,6 +535,7 @@ setupToggle('freq-toggle', (btn) => {
 
 setupToggle('metric-toggle', (btn) => { currentMetric = btn.dataset.metric; render(); });
 setupToggle('view-toggle', (btn) => { currentView = btn.dataset.view; render(); });
+setupToggle('scope-toggle', (btn) => { currentScope = btn.dataset.scope; render(); });
 
 document.getElementById('range-number').addEventListener('input', (e) => {
   const v = parseInt(e.target.value);
@@ -528,6 +552,8 @@ function render() {
   const combined = document.getElementById('combined-view');
   const metricToggle = document.getElementById('metric-toggle');
   const metricLabel = metricToggle.previousElementSibling;
+  const scopeToggle = document.getElementById('scope-toggle');
+  const scopeLabel = scopeToggle.previousElementSibling;
 
   if (currentView === 'combined') {
     metricToggle.style.display = 'none';
@@ -535,6 +561,13 @@ function render() {
   } else {
     metricToggle.style.display = '';
     if (metricLabel && metricLabel.classList.contains('group-label')) metricLabel.style.display = '';
+  }
+
+  // SU Scope 토글: SU가 관련된 뷰일 때만 표시 (Combined는 항상, split/overlay는 metric=SU일 때만)
+  const showScope = currentView === 'combined' || currentMetric === 'SU';
+  scopeToggle.style.display = showScope ? '' : 'none';
+  if (scopeLabel && scopeLabel.classList.contains('group-label')) {
+    scopeLabel.style.display = showScope ? '' : 'none';
   }
 
   split.classList.toggle('hidden', currentView !== 'split');
