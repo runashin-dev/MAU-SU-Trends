@@ -89,6 +89,44 @@
   .big-card .label { font-size: 12px; color: #777; margin-bottom: 16px; letter-spacing: 0.1em; }
   .big-chart-wrap { height: 480px; }
 
+  /* === Combined card layout === */
+  .combined-card .combined-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 16px; margin-bottom: 8px;
+  }
+  .combined-head-left { flex: 0 0 auto; }
+  .combined-head-right {
+    display: flex; flex-direction: column; gap: 4px;
+    font-size: 12px; align-items: flex-end;
+  }
+  .combined-stat-row {
+    display: grid;
+    grid-template-columns: 14px 32px 48px 48px;
+    gap: 6px; align-items: center;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  .combined-stat-row .change-value {
+    text-align: right; font-size: 12px; line-height: 1;
+  }
+  .series-marker {
+    width: 12px; height: 3px; border-radius: 1px;
+  }
+  .series-marker-bar { height: 8px; border-radius: 2px; }
+  .series-marker-spacer { width: 12px; height: 1px; }
+  .series-name {
+    font-size: 10px; color: #888; letter-spacing: 0.1em;
+    font-family: -apple-system, sans-serif; font-weight: 600;
+  }
+  .combined-stat-header {
+    border-top: 1px solid #f0eee6; padding-top: 4px; margin-top: 2px;
+  }
+  .combined-stat-header .period-label {
+    font-size: 9px; color: #aaa; letter-spacing: 0.1em;
+    text-align: right; text-transform: uppercase;
+    font-family: -apple-system, sans-serif;
+  }
+  .chart-wrap-combined { height: 220px; margin-top: 12px; }
+
   /* KR-tab specific styles */
   .totals-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
   .total-card {
@@ -102,10 +140,12 @@
   .total-sub { font-size: 10px; color: #999; letter-spacing: 0.2em; margin-top: 2px; }
   .total-chart-wrap { height: 180px; }
 
-  .cat-chips {
+  .cat-chips,
+  .svc-chips {
     display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px;
     padding: 16px; background: #f5f3ea; border-radius: 12px;
   }
+  .svc-chips { margin-bottom: 16px; }
   .cat-chips-label { width: 100%; font-size: 10px; color: #888; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px; }
   .chip {
     background: #fff; border: 1px solid #dcd9ce; color: #555;
@@ -234,6 +274,9 @@
 
 <div id="split-view" class="grid"></div>
 <div id="overlay-view" class="big-card hidden">
+  <div class="svc-chips" id="svc-chips">
+    <div class="cat-chips-label">국가/서비스 선택 (클릭으로 토글)</div>
+  </div>
   <div class="label" id="overlay-label"></div>
   <div class="big-chart-wrap"><canvas id="overlay-chart"></canvas></div>
 </div>
@@ -387,6 +430,7 @@ let currentMetric = 'MAU';
 let currentView = 'split';
 let currentRange = 8;
 let currentScope = 'all';  // 'all' | 'inbound'
+let selectedServices = new Set(['일본', '태국', '대만', '중국', '영어권']); // 기본 전체 선택
 const splitCharts = {};
 const combinedCharts = {};
 let overlayChart = null;
@@ -514,15 +558,20 @@ function buildOverlayView() {
   const data = rangeData();
   const label = document.getElementById('overlay-label');
   const scopeLabel = (currentMetric === 'SU' && currentScope === 'inbound') ? ' · KR INBOUND' : '';
-  label.textContent = `ALL SERVICES · ${currentMetric}${scopeLabel} · NORMALIZED TO EACH SERVICE'S PEAK (100%) · LAST ${data.length} ${unitLabelEn().toUpperCase()}`;
+  label.textContent = `${selectedServices.size}개 서비스 · ${currentMetric}${scopeLabel} · 실제 수치 · LAST ${data.length} ${unitLabelEn().toUpperCase()}`;
 
-  const datasets = services.map(s => {
+  // 선택된 서비스만, 그리고 마지막 시점 값 큰 순으로 정렬
+  const lastRow = data[data.length - 1];
+  const activeServices = services
+    .filter(s => selectedServices.has(s.key))
+    .sort((a, b) => (lastRow[fieldFor(b.key, currentMetric)] || 0) - (lastRow[fieldFor(a.key, currentMetric)] || 0));
+
+  const datasets = activeServices.map(s => {
     const fld = fieldFor(s.key, currentMetric);
     const values = data.map(r => r[fld]);
-    const peak = Math.max(...values);
     return {
       label: s.key,
-      data: values.map(v => (v / peak) * 100),
+      data: values,
       borderColor: s.color, backgroundColor: s.color + '15',
       borderWidth: 2.5, pointRadius: 3,
       pointBackgroundColor: s.color, pointBorderWidth: 0,
@@ -537,6 +586,7 @@ function buildOverlayView() {
     data: { labels: data.map(r => r.period), datasets },
     options: {
       responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { position: 'bottom',
           labels: { color: '#555', usePointStyle: true, pointStyle: 'circle', padding: 18, font: { family: 'Georgia, serif', size: 13 } }
@@ -546,14 +596,15 @@ function buildOverlayView() {
           titleColor: '#888', titleFont: { size: 11 }, bodyColor: '#222',
           callbacks: {
             title: (items) => `${periodPrefix()} ${items[0].label}`,
-            label: (ctx) => `  ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(0)}% of peak`
+            label: (ctx) => `  ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}`
           }
         }
       },
       scales: {
         x: { ticks: { color: '#666', font: { size: 11 } }, grid: { display: false }, border: { color: '#ddd' } },
-        y: { min: 0, max: 105,
-          ticks: { color: '#999', font: { size: 10 }, callback: (v) => v + '%' },
+        y: {
+          beginAtZero: true,
+          ticks: { color: '#999', font: { size: 10 }, callback: (v) => v >= 1000 ? (v/1000).toFixed(0) + 'k' : v },
           grid: { color: '#f0eee6' }, border: { display: false }
         }
       }
@@ -588,28 +639,32 @@ function buildCombinedView() {
 
     const scopeBadge = currentScope === 'inbound' ? ' · KR 인바운드 SU만' : '';
     const card = document.createElement('div');
-    card.className = 'card';
+    card.className = 'card combined-card';
     card.innerHTML = `
       <div class="accent" style="background:${s.color}"></div>
-      <div class="card-head">
-        <div>
+      <div class="combined-head">
+        <div class="combined-head-left">
           <div class="card-title">${s.key}</div>
           <div class="card-sub">${s.code} · MAU + SU${scopeBadge}</div>
         </div>
-      </div>
-      <div class="combined-stats">
-        <div class="stat-block">
-          <div class="stat-label">─ MAU (선)</div>
-          <div class="stat-row">
-            <div><span class="change-value ${mau1.cls}">${mau1.text}</span> <span class="period">1${unitLabel()}</span></div>
-            <div><span class="change-value ${mau4.cls}">${mau4.text}</span> <span class="period">4${unitLabel()}</span></div>
+        <div class="combined-head-right">
+          <div class="combined-stat-row">
+            <span class="series-marker series-marker-line" style="background:${s.color}"></span>
+            <span class="series-name">MAU</span>
+            <span class="change-value ${mau1.cls}">${mau1.text}</span>
+            <span class="change-value ${mau4.cls}">${mau4.text}</span>
           </div>
-        </div>
-        <div class="stat-block">
-          <div class="stat-label">▬ SU (막대)</div>
-          <div class="stat-row">
-            <div><span class="change-value ${su1.cls}">${su1.text}</span> <span class="period">1${unitLabel()}</span></div>
-            <div><span class="change-value ${su4.cls}">${su4.text}</span> <span class="period">4${unitLabel()}</span></div>
+          <div class="combined-stat-row">
+            <span class="series-marker series-marker-bar" style="background:${s.color}80"></span>
+            <span class="series-name">SU</span>
+            <span class="change-value ${su1.cls}">${su1.text}</span>
+            <span class="change-value ${su4.cls}">${su4.text}</span>
+          </div>
+          <div class="combined-stat-row combined-stat-header">
+            <span class="series-marker-spacer"></span>
+            <span class="series-name"></span>
+            <span class="period-label">1${unitLabel()}</span>
+            <span class="period-label">4${unitLabel()}</span>
           </div>
         </div>
       </div>
@@ -618,14 +673,22 @@ function buildCombinedView() {
     container.appendChild(card);
 
     const ctx = card.querySelector('canvas').getContext('2d');
+
+    // MAU(선)와 SU(막대)의 Y축 범위를 다르게 설정해서 시각적으로 분리:
+    // - MAU: 데이터 최저값 근처 ~ 105 (위쪽 영역에 그려짐)
+    // - SU: 0 ~ 데이터 최고값보다 살짝 위 (아래쪽 영역에 그려짐, 막대가 바닥에서 올라옴)
+    const mauMin = Math.min(...mauPct);
+    const yMauMin = Math.max(0, Math.floor((mauMin - 10) / 5) * 5);
+
     combinedCharts[s.key] = new Chart(ctx, {
       data: {
         labels: data.map(r => r.period),
         datasets: [
           {
             type: 'bar', label: 'SU', data: suPct,
-            backgroundColor: s.color + '55', borderColor: s.color + '88',
+            backgroundColor: s.color + '40', borderColor: s.color + '70',
             borderWidth: 1, yAxisID: 'ySU', order: 2,
+            borderRadius: 3, maxBarThickness: 28,
           },
           {
             type: 'line', label: 'MAU', data: mauPct,
@@ -638,6 +701,7 @@ function buildCombinedView() {
       },
       options: {
         responsive: true, maintainAspectRatio: false,
+        layout: { padding: { top: 10, bottom: 4 } },
         plugins: {
           legend: { display: false },
           tooltip: {
@@ -651,13 +715,15 @@ function buildCombinedView() {
         },
         scales: {
           x: { ticks: { color: '#999', font: { size: 10 } }, grid: { display: false }, border: { color: '#e5e3da' } },
+          // MAU 축: 위쪽 영역(약 60~105%) — 선이 차트 상단부에서 변동을 보여줌
           yMAU: {
-            type: 'linear', position: 'left', min: 0, max: 110,
+            type: 'linear', position: 'left', min: yMauMin, max: 105,
             ticks: { display: false }, grid: { color: '#f5f3ea' }, border: { display: false },
             title: { display: true, text: 'MAU', color: s.color, font: { size: 9, weight: '600' } }
           },
+          // SU 축: 0~165% (max를 부풀려서 막대 높이가 차트의 아래 ~60% 영역에만 그려지게)
           ySU: {
-            type: 'linear', position: 'right', min: 0, max: 110,
+            type: 'linear', position: 'right', min: 0, max: 165,
             ticks: { display: false }, grid: { display: false }, border: { display: false },
             title: { display: true, text: 'SU', color: '#888', font: { size: 9, weight: '600' } }
           }
@@ -732,6 +798,51 @@ function render() {
   else buildCombinedView();
 }
 
+// ===== 국가/서비스 칩 렌더링 =====
+function renderSvcChips() {
+  const container = document.getElementById('svc-chips');
+  container.querySelectorAll('.chip, .chip-actions').forEach(el => el.remove());
+
+  services.forEach(s => {
+    const chip = document.createElement('button');
+    chip.className = 'chip';
+    chip.dataset.svc = s.key;
+    chip.textContent = s.key;
+    if (selectedServices.has(s.key)) {
+      chip.classList.add('active');
+      chip.style.background = s.color;
+      chip.style.borderColor = s.color;
+    }
+    chip.addEventListener('click', () => {
+      if (selectedServices.has(s.key)) selectedServices.delete(s.key);
+      else selectedServices.add(s.key);
+      renderSvcChips();
+      // Overlay 뷰일 때만 차트 다시 그리면 됨
+      if (currentView === 'overlay') buildOverlayView();
+    });
+    container.appendChild(chip);
+  });
+
+  const actions = document.createElement('div');
+  actions.className = 'chip-actions';
+  actions.innerHTML = `
+    <button id="svc-select-all">전체 선택</button>
+    <button id="svc-select-none">선택 해제</button>
+  `;
+  container.appendChild(actions);
+  document.getElementById('svc-select-all').onclick = () => {
+    selectedServices = new Set(services.map(s => s.key));
+    renderSvcChips();
+    if (currentView === 'overlay') buildOverlayView();
+  };
+  document.getElementById('svc-select-none').onclick = () => {
+    selectedServices = new Set();
+    renderSvcChips();
+    if (currentView === 'overlay') buildOverlayView();
+  };
+}
+
+renderSvcChips();
 render();
 
 })();
@@ -999,50 +1110,40 @@ function buildOverlayView() {
   const data = rangeData();
   const label = document.getElementById('kr-overlay-label');
   const typeLabel = currentType === 'NONSURGICAL' ? '시술' : '수술';
-  label.textContent = `${typeLabel} · 선택 카테고리 ${selectedCats.size}개 (실선) + 각 카테고리 TOP5 태그 종합 (점선) · 각자 자체 피크 100% 기준 · 최근 ${data.length}주`;
+  label.textContent = `${typeLabel} · 선택 카테고리 ${selectedCats.size}개 · 실제 SU 수치 (로그 스케일) · 최근 ${data.length}주`;
 
-  const cats = currentCats().filter(c => selectedCats.has(c));
+  // 선택된 카테고리를 마지막 주 SU 큰 순으로 정렬 (큰 게 위에)
+  const cats = currentCats().filter(c => selectedCats.has(c)).sort((a, b) => {
+    const aVal = data[data.length - 1][`${currentType}_${a}`] || 0;
+    const bVal = data[data.length - 1][`${currentType}_${b}`] || 0;
+    return bVal - aVal;
+  });
   const color = (c) => colorMap[c] || '#888';
 
-  const datasets = [];
-
-  cats.forEach(c => {
-    // 1. 카테고리 전체 SU (실선)
+  // 전체 값 범위 계산 (로그 스케일 줌용)
+  let globalMin = Infinity, globalMax = 0;
+  const datasets = cats.map(c => {
     const key = `${currentType}_${c}`;
     const values = data.map(r => r[key] || 0);
-    const peak = Math.max(...values) || 1;
-    datasets.push({
-      label: c + ' (전체)',
-      data: values.map(v => (v / peak) * 100),
+    values.forEach(v => {
+      if (v > 0) globalMin = Math.min(globalMin, v);
+      globalMax = Math.max(globalMax, v);
+    });
+    return {
+      label: c,
+      // 로그 스케일은 0 처리 불가 → 0인 값은 그래프에서 끊김 (null)
+      data: values.map(v => v > 0 ? v : null),
       borderColor: color(c), backgroundColor: color(c) + '15',
       borderWidth: 2.5, pointRadius: 3,
       pointBackgroundColor: color(c), pointBorderWidth: 0,
       tension: 0.35, fill: false,
-    });
-
-    // 2. TOP5 태그 종합 SU (점선)
-    const tags = (tagsByGroup[key] || []).slice(0, 5);
-    if (tags.length > 0) {
-      // recentLabels 기준 12주에서 currentRange만큼 자르고, 진행중 주차(마지막) 제외
-      const startIdx = recentLabels.length - 1 - currentRange; // 진행중 빼고 currentRange만큼
-      const endIdx = recentLabels.length - 1; // 진행중 직전까지
-      const top5Sum = [];
-      for (let i = startIdx; i < endIdx; i++) {
-        let s = 0;
-        tags.forEach(t => { s += t.vals[i]; });
-        top5Sum.push(s);
-      }
-      const peakT5 = Math.max(...top5Sum) || 1;
-      datasets.push({
-        label: c + ' TOP5 합산',
-        data: top5Sum.map(v => (v / peakT5) * 100),
-        borderColor: color(c), backgroundColor: 'transparent',
-        borderWidth: 1.8, borderDash: [5, 4], pointRadius: 2,
-        pointBackgroundColor: color(c), pointBorderWidth: 0,
-        tension: 0.35, fill: false,
-      });
-    }
+      spanGaps: true, // 0인 구간을 건너뛰고 연결
+    };
   });
+
+  // Y축 범위: 데이터 최저값에서 약간 아래 ~ 최대값보다 약간 위 (변동 폭 강조)
+  const yMin = Math.max(1, Math.pow(10, Math.floor(Math.log10(globalMin) * 1.1) / 1.1) * 0.85);
+  const yMax = globalMax * 1.15;
 
   if (overlayChart) overlayChart.destroy();
   const ctx = document.getElementById('kr-overlay-chart').getContext('2d');
@@ -1051,24 +1152,48 @@ function buildOverlayView() {
     data: { labels: data.map(r => r.period), datasets },
     options: {
       responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { position: 'bottom',
-          labels: { color: '#555', usePointStyle: true, pointStyle: 'circle', padding: 12, font: { family: 'Georgia, serif', size: 12 } }
+          labels: { color: '#555', usePointStyle: true, pointStyle: 'circle', padding: 14, font: { family: 'Georgia, serif', size: 12 } }
         },
         tooltip: {
           backgroundColor: '#fff', borderColor: '#e5e3da', borderWidth: 1, padding: 12,
           titleColor: '#888', titleFont: { size: 11 }, bodyColor: '#222',
           callbacks: {
             title: (items) => `WEEK OF ${items[0].label}`,
-            label: (ctx) => `  ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(0)}% of peak`
+            label: (ctx) => `  ${ctx.dataset.label}: ${ctx.parsed.y == null ? '-' : ctx.parsed.y.toLocaleString()}`
           }
         }
       },
       scales: {
         x: { ticks: { color: '#666', font: { size: 11 } }, grid: { display: false }, border: { color: '#ddd' } },
-        y: { min: 0, max: 105,
-          ticks: { color: '#999', font: { size: 10 }, callback: (v) => v + '%' },
-          grid: { color: '#f0eee6' }, border: { display: false }
+        y: {
+          type: 'logarithmic',
+          min: yMin,
+          max: yMax,
+          ticks: {
+            color: '#999', font: { size: 10 },
+            // 주요 눈금만 표시: 1, 2, 5, 10, 20, 50, 100, 200, 500, 1k, 2k, 5k, 10k, 20k, 50k
+            callback: (v) => {
+              const log = Math.log10(v);
+              const mantissa = v / Math.pow(10, Math.floor(log));
+              const isMajor = Math.abs(mantissa - 1) < 0.01 || Math.abs(mantissa - 2) < 0.01 || Math.abs(mantissa - 5) < 0.01;
+              if (!isMajor) return '';
+              if (v >= 1000) return (v/1000) + 'k';
+              return v;
+            },
+            maxTicksLimit: 12,
+          },
+          grid: {
+            color: (ctx) => {
+              // 주 눈금(1, 10, 100, 1k...)은 진하게, 보조는 옅게
+              const v = ctx.tick.value;
+              const log = Math.log10(v);
+              return Math.abs(log - Math.round(log)) < 0.01 ? '#e5e3da' : '#f5f3ea';
+            },
+          },
+          border: { display: false },
         }
       }
     }
