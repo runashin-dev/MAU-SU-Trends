@@ -366,7 +366,7 @@
 
 <footer>
   Source · 태그별 일간 SU (자체 업로드) · 카테고리 매핑: 카테고리_데이터_260414.xlsx (656/660 = 99.4% 매칭)<br>
-  시술/수술 분류 · operation_type · 14개 대분류 · 진행 중 주차(05-25) 자동 제외<br>
+  시술/수술 분류 · operation_type · 14개 대분류 · 진행 중 주차 자동 감지·제외<br>
   Last updated: 2026-06-01
 </footer>
 </div>
@@ -880,12 +880,27 @@ let totalChartNs = null, totalChartS = null;
 function currentCats() {
   return currentType === 'NONSURGICAL' ? nonsurgCats : surgCats;
 }
+
+// 마지막 주차가 진짜 끝났는지 판단 (오늘 > 주차 마지막 날)
+function isLastWeekComplete() {
+  if (!dataAll.length) return true;
+  const last = dataAll[dataAll.length - 1];
+  if (!last.fullDate) return true; // fullDate 없으면 끝난 걸로 가정 (안 잘림)
+  const parts = last.fullDate.replace(/\./g, '').trim().split(/\s+/).map(Number);
+  if (parts.length < 3) return true;
+  const start = new Date(parts[0], parts[1] - 1, parts[2]);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 6);
+  end.setHours(23, 59, 59, 999);
+  return new Date() > end;
+}
+
 function rangeData() {
-  const completed = dataAll.slice(0, -1);
+  const completed = isLastWeekComplete() ? dataAll : dataAll.slice(0, -1);
   return completed.slice(-currentRange);
 }
 function rangeTotal() {
-  const completed = dataTotal.slice(0, -1);
+  const completed = isLastWeekComplete() ? dataTotal : dataTotal.slice(0, -1);
   return completed.slice(-currentRange);
 }
 function fmtChange(p) {
@@ -909,7 +924,7 @@ function updateMeta() {
 // ===== 시술/수술 전체 합산 카드 =====
 function buildTotalCards() {
   const d = rangeTotal();
-  const fullTotal = dataTotal.slice(0, -1);
+  const fullTotal = isLastWeekComplete() ? dataTotal : dataTotal.slice(0, -1);
 
   ['NONSURGICAL', 'SURGICAL'].forEach((op, idx) => {
     const values = d.map(r => r[op]);
@@ -1022,7 +1037,7 @@ function renderChips() {
 // ===== Split View =====
 function buildSplitView() {
   const data = rangeData();
-  const fullData = dataAll.slice(0, -1);
+  const fullData = isLastWeekComplete() ? dataAll : dataAll.slice(0, -1);
   const container = document.getElementById('kr-split-view');
   container.innerHTML = '';
   Object.values(splitCharts).forEach(c => c.destroy());
@@ -1206,8 +1221,9 @@ function buildOverlayView() {
 function buildWowSection() {
   const cats = currentCats().filter(c => selectedCats.has(c));
   const typeLabel = currentType === 'NONSURGICAL' ? '시술' : '수술';
-  const lastIdx = recentLabels.length - 2; // 진행중 직전 (5/18)
-  const prevIdx = lastIdx - 1; // 1주 전 (5/11)
+  // 마지막 주가 완료됐으면 그 주가 기준주, 진행 중이면 그 직전 주가 기준주
+  const lastIdx = isLastWeekComplete() ? recentLabels.length - 1 : recentLabels.length - 2;
+  const prevIdx = lastIdx - 1;
   const lastDate = recentLabels[lastIdx];
   const prevDate = recentLabels[prevIdx];
 
