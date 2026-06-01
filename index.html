@@ -231,10 +231,6 @@
     국내 카테고리 SU
     <span class="tab-sub">KR · 시술/수술 14개 대분류</span>
   </button>
-  <button data-tab="krregion">
-    국내 지역별 MAU / SU
-    <span class="tab-sub">KR · 17개 시·도</span>
-  </button>
 </nav>
 
 <!-- ============ Overseas Tab ============ -->
@@ -292,7 +288,7 @@
 <footer>
   Source · TRANSDATA.HA_DATAMART.HA_TOTAL · weekly_active / weekly_select / monthly_active / monthly_select<br>
   SU Scope · '전체' = HOSPITAL_COUNTRY='all' (자국+인바운드) / 'KR → JP 인바운드' = HOSPITAL_COUNTRY='KR' (각국 유저가 한국 병원 선택)<br>
-  Service grouping · JP / TH / TW / CN / 영어권(US·GB·CA·AU·NZ·SG·IE·IN·PH·MY·HK) · Last updated: 2026-05-26
+  Service grouping · JP / TH / TW / CN / 영어권(US·GB·CA·AU·NZ·SG·IE·IN·PH·MY·HK) · Last updated: 2026-06-01
 </footer>
 </div>
 
@@ -329,12 +325,6 @@
 </div>
 
 <div class="controls">
-  <span class="group-label">Frequency</span>
-  <div class="toggle" id="kr-freq-toggle">
-    <button data-freq="weekly" class="active">Weekly</button>
-    <button data-freq="monthly">Monthly</button>
-  </div>
-
   <span class="group-label">Type</span>
   <div class="toggle" id="type-toggle">
     <button data-type="NONSURGICAL" class="active">시술</button>
@@ -342,11 +332,11 @@
   </div>
 
   <div class="range-input">
-    <label for="kr-range-number">최근</label>
+    <label for="range-number">최근</label>
     <input type="number" id="kr-range-number" value="8" min="2" max="12">
-    <span class="unit-label" id="kr-range-unit">주</span>
+    <span class="unit-label">주</span>
   </div>
-  <span class="range-hint">weekly 최대 12 · monthly 최대 14</span>
+  <span class="range-hint">최대 12까지 입력 가능</span>
 
   <span class="group-label">View</span>
   <div class="toggle" id="kr-view-toggle">
@@ -377,53 +367,7 @@
 <footer>
   Source · 태그별 일간 SU (자체 업로드) · 카테고리 매핑: 카테고리_데이터_260414.xlsx (663/665 = 99.7% 매칭)<br>
   시술/수술 분류 · operation_type · 14개 대분류 · 진행 중 주차(05-25) 자동 제외<br>
-  Monthly · 주간 데이터를 월 단위 합산한 근사치 (카테고리 월간 소스 없음) · 경계 월 제외 · 세부 태그 WOW는 weekly 전용<br>
   Last updated: 2026-05-26
-</footer>
-</div>
-
-<!-- ============ KR Region Tab ============ -->
-<div id="tab-krregion" class="tab-page">
-<div class="kicker">Healing Paper · 강남언니 · KR Domestic</div>
-<h1>지역별 MAU / SU 트렌드 <span class="sub">국내 시·도</span></h1>
-<div class="meta" id="rg-meta-line"></div>
-
-<div class="controls">
-  <span class="group-label">Frequency</span>
-  <div class="toggle" id="rg-freq-toggle">
-    <button data-freq="weekly" class="active">Weekly</button>
-    <button data-freq="monthly">Monthly</button>
-  </div>
-
-  <span class="group-label">Metric</span>
-  <div class="toggle" id="rg-metric-toggle">
-    <button data-metric="MAU" class="active">MAU</button>
-    <button data-metric="SU">SU</button>
-  </div>
-
-  <span class="group-label">View</span>
-  <div class="toggle" id="rg-view-toggle">
-    <button data-view="combined" class="active">Combined</button>
-    <button data-view="split">Small Multiples</button>
-  </div>
-
-  <div class="range-input">
-    <label for="rg-range-number">최근</label>
-    <input type="number" id="rg-range-number" value="12" min="2" max="12">
-    <span class="unit-label" id="rg-range-unit">주</span>
-  </div>
-  <span class="range-hint">weekly 최대 12 · monthly 최대 14</span>
-
-  <div class="disclaimer">RELATIVE SCALE · TREND ONLY</div>
-</div>
-
-<div id="rg-combined-view" class="grid"></div>
-<div id="rg-split-view" class="grid hidden"></div>
-
-<footer>
-  Source · TRANSDATA.HA_DATAMART.HA_TOTAL · weekly_active(MAU) / weekly_select(SU) · COUNTRY='KR'<br>
-  필터 · APP_TYPE='all' · PARAM_NAME='all' · HOSPITAL_COUNTRY='all' · OPERATION_TYPE='all' · 17개 시·도(LOCATION_REGION) · 진행 중 주차(05-25) 제외<br>
-  MAU=주간 활성유저, SU=주간 선택 건수 · 각 지역 자체 피크=100 정규화(절대수치 비표시) · Last updated: 2026-05-29
 </footer>
 </div>
 
@@ -445,7 +389,6 @@ document.querySelector('.tab-bar').addEventListener('click', (e) => {
 
 // ===== Data: 주간 12주 (HOSPITAL_COUNTRY = 'all'은 전체, _SU_inbound는 HOSPITAL_COUNTRY='KR'만) =====
 const weeklyData = [
-  { period: '03-02', 일본_MAU: 90429,  태국_MAU: 5621, 대만_MAU: 5656, 중국_MAU: 644, 영어권_MAU: 5605, 일본_SU: 26347, 태국_SU: 753, 대만_SU: 806,  중국_SU: 174, 영어권_SU: 1099, 일본_SU_inbound: 6252, 태국_SU_inbound: 753, 대만_SU_inbound: 806,  중국_SU_inbound: 174, 영어권_SU_inbound: 1099 },
   { period: '03-09', 일본_MAU: 99352,  태국_MAU: 6383, 대만_MAU: 5835, 중국_MAU: 936, 영어권_MAU: 5870, 일본_SU: 27126, 태국_SU: 830, 대만_SU: 839,  중국_SU: 314, 영어권_SU: 1153, 일본_SU_inbound: 6112, 태국_SU_inbound: 830, 대만_SU_inbound: 839,  중국_SU_inbound: 314, 영어권_SU_inbound: 1153 },
   { period: '03-16', 일본_MAU: 98227,  태국_MAU: 5878, 대만_MAU: 6496, 중국_MAU: 965, 영어권_MAU: 5357, 일본_SU: 26508, 태국_SU: 742, 대만_SU: 922,  중국_SU: 316, 영어권_SU: 1000, 일본_SU_inbound: 5644, 태국_SU_inbound: 742, 대만_SU_inbound: 922,  중국_SU_inbound: 316, 영어권_SU_inbound: 1000 },
   { period: '03-23', 일본_MAU: 98866,  태국_MAU: 5873, 대만_MAU: 6567, 중국_MAU: 802, 영어권_MAU: 5709, 일본_SU: 26280, 태국_SU: 775, 대만_SU: 956,  중국_SU: 280, 영어권_SU: 1094, 일본_SU_inbound: 5176, 태국_SU_inbound: 775, 대만_SU_inbound: 956,  중국_SU_inbound: 280, 영어권_SU_inbound: 1094 },
@@ -457,22 +400,23 @@ const weeklyData = [
   { period: '05-04', 일본_MAU: 109068, 태국_MAU: 5597, 대만_MAU: 7314, 중국_MAU: 648, 영어권_MAU: 5498, 일본_SU: 31464, 태국_SU: 676, 대만_SU: 1360, 중국_SU: 204, 영어권_SU: 1217, 일본_SU_inbound: 7518, 태국_SU_inbound: 676, 대만_SU_inbound: 1360, 중국_SU_inbound: 204, 영어권_SU_inbound: 1217 },
   { period: '05-11', 일본_MAU: 108445, 태국_MAU: 5381, 대만_MAU: 6722, 중국_MAU: 708, 영어권_MAU: 6250, 일본_SU: 31260, 태국_SU: 722, 대만_SU: 1305, 중국_SU: 268, 영어권_SU: 1220, 일본_SU_inbound: 7437, 태국_SU_inbound: 722, 대만_SU_inbound: 1305, 중국_SU_inbound: 268, 영어권_SU_inbound: 1220 },
   { period: '05-18', 일본_MAU: 113043, 태국_MAU: 5214, 대만_MAU: 6432, 중국_MAU: 737, 영어권_MAU: 5669, 일본_SU: 32501, 태국_SU: 753, 대만_SU: 1433, 중국_SU: 287, 영어권_SU: 1231, 일본_SU_inbound: 7396, 태국_SU_inbound: 753, 대만_SU_inbound: 1433, 중국_SU_inbound: 287, 영어권_SU_inbound: 1231 },
+  { period: '05-25', 일본_MAU: 111811, 태국_MAU: 4705, 대만_MAU: 6945, 중국_MAU: 701, 영어권_MAU: 5810, 일본_SU: 32619, 태국_SU: 616, 대만_SU: 1580, 중국_SU: 327, 영어권_SU: 1240, 일본_SU_inbound: 6942, 태국_SU_inbound: 616, 대만_SU_inbound: 1580, 중국_SU_inbound: 327, 영어권_SU_inbound: 1240 },
 ];
 
 // ===== Data: 월간 12개월 (HOSPITAL_COUNTRY = 'all' 전체, _SU_inbound는 'KR'만) =====
 const monthlyData = [
-  { period: '2025-05', 일본_MAU: 178862, 태국_MAU: 7587,  대만_MAU: 415,   중국_MAU: 1339, 영어권_MAU: 7665,  일본_SU: 60270,  태국_SU: 465,  대만_SU: 32,   중국_SU: 120,  영어권_SU: 1477, 일본_SU_inbound: 19332, 태국_SU_inbound: 465,  대만_SU_inbound: 32,   중국_SU_inbound: 120,  영어권_SU_inbound: 1477 },
-  { period: '2025-06', 일본_MAU: 195696, 태국_MAU: 9796,  대만_MAU: 396,   중국_MAU: 1376, 영어권_MAU: 6349,  일본_SU: 71828,  태국_SU: 630,  대만_SU: 25,   중국_SU: 81,   영어권_SU: 1437, 일본_SU_inbound: 19044, 태국_SU_inbound: 630,  대만_SU_inbound: 25,   중국_SU_inbound: 81,   영어권_SU_inbound: 1437 },
-  { period: '2025-07', 일본_MAU: 213170, 태국_MAU: 9815,  대만_MAU: 437,   중국_MAU: 1392, 영어권_MAU: 6383,  일본_SU: 82177,  태국_SU: 678,  대만_SU: 37,   중국_SU: 160,  영어권_SU: 1247, 일본_SU_inbound: 20717, 태국_SU_inbound: 678,  대만_SU_inbound: 37,   중국_SU_inbound: 160,  영어권_SU_inbound: 1247 },
-  { period: '2025-08', 일본_MAU: 213687, 태국_MAU: 10948, 대만_MAU: 624,   중국_MAU: 1351, 영어권_MAU: 8849,  일본_SU: 80187,  태국_SU: 1042, 대만_SU: 53,   중국_SU: 129,  영어권_SU: 1676, 일본_SU_inbound: 24935, 태국_SU_inbound: 1042, 대만_SU_inbound: 53,   중국_SU_inbound: 129,  영어권_SU_inbound: 1676 },
-  { period: '2025-09', 일본_MAU: 216082, 태국_MAU: 13998, 대만_MAU: 994,   중국_MAU: 1472, 영어권_MAU: 13421, 일본_SU: 80882,  태국_SU: 1142, 대만_SU: 87,   중국_SU: 129,  영어권_SU: 2935, 일본_SU_inbound: 23222, 태국_SU_inbound: 1142, 대만_SU_inbound: 87,   중국_SU_inbound: 129,  영어권_SU_inbound: 2935 },
-  { period: '2025-10', 일본_MAU: 225279, 태국_MAU: 16530, 대만_MAU: 2435,  중국_MAU: 1449, 영어권_MAU: 16394, 일본_SU: 87134,  태국_SU: 1477, 대만_SU: 423,  중국_SU: 283,  영어권_SU: 3334, 일본_SU_inbound: 22277, 태국_SU_inbound: 1477, 대만_SU_inbound: 423,  중국_SU_inbound: 283,  영어권_SU_inbound: 3334 },
-  { period: '2025-11', 일본_MAU: 205523, 태국_MAU: 13031, 대만_MAU: 4040,  중국_MAU: 1283, 영어권_MAU: 15148, 일본_SU: 81306,  태국_SU: 1414, 대만_SU: 773,  중국_SU: 254,  영어권_SU: 3481, 일본_SU_inbound: 19378, 태국_SU_inbound: 1414, 대만_SU_inbound: 773,  중국_SU_inbound: 254,  영어권_SU_inbound: 3481 },
-  { period: '2025-12', 일본_MAU: 208628, 태국_MAU: 16001, 대만_MAU: 9553,  중국_MAU: 1373, 영어권_MAU: 13457, 일본_SU: 83618,  태국_SU: 1710, 대만_SU: 1336, 중국_SU: 374,  영어권_SU: 3166, 일본_SU_inbound: 16333, 태국_SU_inbound: 1710, 대만_SU_inbound: 1336, 중국_SU_inbound: 374,  영어권_SU_inbound: 3166 },
-  { period: '2026-01', 일본_MAU: 225213, 태국_MAU: 17248, 대만_MAU: 13239, 중국_MAU: 1382, 영어권_MAU: 14182, 일본_SU: 90392,  태국_SU: 1677, 대만_SU: 1673, 중국_SU: 322,  영어권_SU: 3209, 일본_SU_inbound: 18473, 태국_SU_inbound: 1677, 대만_SU_inbound: 1673, 중국_SU_inbound: 322,  영어권_SU_inbound: 3209 },
-  { period: '2026-02', 일본_MAU: 206908, 태국_MAU: 13550, 대만_MAU: 15193, 중국_MAU: 2164, 영어권_MAU: 13292, 일본_SU: 81728,  태국_SU: 1800, 대만_SU: 2138, 중국_SU: 456,  영어권_SU: 3129, 일본_SU_inbound: 17809, 태국_SU_inbound: 1800, 대만_SU_inbound: 2138, 중국_SU_inbound: 456,  영어권_SU_inbound: 3129 },
-  { period: '2026-03', 일본_MAU: 231395, 태국_MAU: 19330, 대만_MAU: 19603, 중국_MAU: 2639, 영어권_MAU: 15492, 일본_SU: 98570,  태국_SU: 3086, 대만_SU: 3613, 중국_SU: 1073, 영어권_SU: 4315, 일본_SU_inbound: 22627, 태국_SU_inbound: 3086, 대만_SU_inbound: 3613, 중국_SU_inbound: 1073, 영어권_SU_inbound: 4315 },
-  { period: '2026-04', 일본_MAU: 259170, 태국_MAU: 17329, 대만_MAU: 20826, 중국_MAU: 2530, 영어권_MAU: 14324, 일본_SU: 113544, 태국_SU: 3309, 대만_SU: 4666, 중국_SU: 1331, 영어권_SU: 4630, 일본_SU_inbound: 27941, 태국_SU_inbound: 3309, 대만_SU_inbound: 4666, 중국_SU_inbound: 1331, 영어권_SU_inbound: 4630 },
+  { period: '2025-06', 일본_MAU: 195727, 태국_MAU: 9799,  대만_MAU: 397,   중국_MAU: 1376, 영어권_MAU: 6350,  일본_SU: 90872,  태국_SU: 1260, 대만_SU: 50,    중국_SU: 162,  영어권_SU: 2874, 일본_SU_inbound: 19044, 태국_SU_inbound: 630,  대만_SU_inbound: 25,   중국_SU_inbound: 81,   영어권_SU_inbound: 1437 },
+  { period: '2025-07', 일본_MAU: 213197, 태국_MAU: 9819,  대만_MAU: 438,   중국_MAU: 1393, 영어권_MAU: 6384,  일본_SU: 102894, 태국_SU: 1356, 대만_SU: 74,    중국_SU: 320,  영어권_SU: 2494, 일본_SU_inbound: 20717, 태국_SU_inbound: 678,  대만_SU_inbound: 37,   중국_SU_inbound: 160,  영어권_SU_inbound: 1247 },
+  { period: '2025-08', 일본_MAU: 213745, 태국_MAU: 10954, 대만_MAU: 624,   중국_MAU: 1351, 영어권_MAU: 8852,  일본_SU: 105122, 태국_SU: 2084, 대만_SU: 106,   중국_SU: 258,  영어권_SU: 3352, 일본_SU_inbound: 24935, 태국_SU_inbound: 1042, 대만_SU_inbound: 53,   중국_SU_inbound: 129,  영어권_SU_inbound: 1676 },
+  { period: '2025-09', 일본_MAU: 216121, 태국_MAU: 14003, 대만_MAU: 994,   중국_MAU: 1473, 영어권_MAU: 13425, 일본_SU: 104104, 태국_SU: 2284, 대만_SU: 174,   중국_SU: 258,  영어권_SU: 5870, 일본_SU_inbound: 23222, 태국_SU_inbound: 1142, 대만_SU_inbound: 87,   중국_SU_inbound: 129,  영어권_SU_inbound: 2935 },
+  { period: '2025-10', 일본_MAU: 225315, 태국_MAU: 16537, 대만_MAU: 2434,  중국_MAU: 1449, 영어권_MAU: 16400, 일본_SU: 109411, 태국_SU: 2954, 대만_SU: 846,   중국_SU: 566,  영어권_SU: 6668, 일본_SU_inbound: 22277, 태국_SU_inbound: 1477, 대만_SU_inbound: 423,  중국_SU_inbound: 283,  영어권_SU_inbound: 3334 },
+  { period: '2025-11', 일본_MAU: 205594, 태국_MAU: 13038, 대만_MAU: 4040,  중국_MAU: 1284, 영어권_MAU: 15153, 일본_SU: 100684, 태국_SU: 2828, 대만_SU: 1546,  중국_SU: 508,  영어권_SU: 6962, 일본_SU_inbound: 19378, 태국_SU_inbound: 1414, 대만_SU_inbound: 773,  중국_SU_inbound: 254,  영어권_SU_inbound: 3481 },
+  { period: '2025-12', 일본_MAU: 208717, 태국_MAU: 16009, 대만_MAU: 9552,  중국_MAU: 1376, 영어권_MAU: 13468, 일본_SU: 99951,  태국_SU: 3420, 대만_SU: 2672,  중국_SU: 748,  영어권_SU: 6332, 일본_SU_inbound: 16333, 태국_SU_inbound: 1710, 대만_SU_inbound: 1336, 중국_SU_inbound: 374,  영어권_SU_inbound: 3166 },
+  { period: '2026-01', 일본_MAU: 225364, 태국_MAU: 17264, 대만_MAU: 13247, 중국_MAU: 1383, 영어권_MAU: 14194, 일본_SU: 108865, 태국_SU: 3354, 대만_SU: 3346,  중국_SU: 644,  영어권_SU: 6418, 일본_SU_inbound: 18473, 태국_SU_inbound: 1677, 대만_SU_inbound: 1673, 중국_SU_inbound: 322,  영어권_SU_inbound: 3209 },
+  { period: '2026-02', 일본_MAU: 207210, 태국_MAU: 13579, 대만_MAU: 15235, 중국_MAU: 2167, 영어권_MAU: 13310, 일본_SU: 99537,  태국_SU: 3600, 대만_SU: 4276,  중국_SU: 912,  영어권_SU: 6258, 일본_SU_inbound: 17809, 태국_SU_inbound: 1800, 대만_SU_inbound: 2138, 중국_SU_inbound: 456,  영어권_SU_inbound: 3129 },
+  { period: '2026-03', 일본_MAU: 232459, 태국_MAU: 19384, 대만_MAU: 19678, 중국_MAU: 2644, 영어권_MAU: 15544, 일본_SU: 121197, 태국_SU: 6172, 대만_SU: 7226,  중국_SU: 2146, 영어권_SU: 8630, 일본_SU_inbound: 22627, 태국_SU_inbound: 3086, 대만_SU_inbound: 3613, 중국_SU_inbound: 1073, 영어권_SU_inbound: 4315 },
+  { period: '2026-04', 일본_MAU: 260149, 태국_MAU: 17447, 대만_MAU: 20890, 중국_MAU: 2532, 영어권_MAU: 14377, 일본_SU: 141485, 태국_SU: 6618, 대만_SU: 9332,  중국_SU: 2662, 영어권_SU: 9260, 일본_SU_inbound: 27941, 태국_SU_inbound: 3309, 대만_SU_inbound: 4666, 중국_SU_inbound: 1331, 영어권_SU_inbound: 4630 },
+  { period: '2026-05', 일본_MAU: 269848, 태국_MAU: 18247, 대만_MAU: 22745, 중국_MAU: 2257, 영어권_MAU: 15817, 일본_SU: 145863, 태국_SU: 5588, 대만_SU: 11294, 중국_SU: 2154, 영어권_SU: 9508, 일본_SU_inbound: 28213, 태국_SU_inbound: 2794, 대만_SU_inbound: 5647, 중국_SU_inbound: 1077, 영어권_SU_inbound: 4754 },
 ];
 
 const services = [
@@ -935,52 +879,16 @@ const splitCharts = {};
 let overlayChart = null;
 let totalChartNs = null, totalChartS = null;
 
-let currentFreq = 'weekly';
-
-// ===== weekly → monthly 집계 (카테고리 월간 소스가 없어 자체 업로드 주간 데이터를 월 단위 합산) =====
-function inferYearMonths(arr) {
-  let yr = 2000, prevM = null;
-  const tagged = arr.map(r => {
-    const m = parseInt(r.period.slice(0, 2), 10);
-    if (prevM !== null && m < prevM) yr++;
-    prevM = m;
-    return { ym: yr + '-' + r.period.slice(0, 2), row: r };
-  });
-  const lastYr = parseInt(tagged[tagged.length - 1].ym.slice(0, 4), 10);
-  const shift = 2026 - lastYr;
-  tagged.forEach(t => { t.ym = (parseInt(t.ym.slice(0, 4), 10) + shift) + t.ym.slice(4); });
-  return tagged;
-}
-function aggregateMonthly(arr) {
-  const tagged = inferYearMonths(arr);
-  const buckets = {}; const order = [];
-  tagged.forEach(({ ym, row }) => {
-    if (!buckets[ym]) { buckets[ym] = { period: ym }; order.push(ym); }
-    Object.keys(row).forEach(k => {
-      if (k === 'period') return;
-      buckets[ym][k] = (buckets[ym][k] || 0) + row[k];
-    });
-  });
-  // 경계 월(부분 집계) 제거: 첫 달(초반 1주만 포함) + 마지막 달(진행 중)
-  return order.slice(1, -1).map(ym => buckets[ym]);
-}
-const monthlyAll = aggregateMonthly(dataAll);
-const monthlyTotal = aggregateMonthly(dataTotal);
-
-function completedAll() { return currentFreq === 'weekly' ? dataAll.slice(0, -1) : monthlyAll; }
-function completedTotal() { return currentFreq === 'weekly' ? dataTotal.slice(0, -1) : monthlyTotal; }
-function uLabel() { return currentFreq === 'weekly' ? '주' : '개월'; }
-function pPrefix() { return currentFreq === 'weekly' ? 'WEEK OF' : 'MONTH OF'; }
-function rangeMax() { return currentFreq === 'weekly' ? 12 : monthlyAll.length; }
-
 function currentCats() {
   return currentType === 'NONSURGICAL' ? nonsurgCats : surgCats;
 }
 function rangeData() {
-  return completedAll().slice(-currentRange);
+  const completed = dataAll.slice(0, -1);
+  return completed.slice(-currentRange);
 }
 function rangeTotal() {
-  return completedTotal().slice(-currentRange);
+  const completed = dataTotal.slice(0, -1);
+  return completed.slice(-currentRange);
 }
 function fmtChange(p) {
   if (p === null || p === undefined || !isFinite(p)) return { text: '—', cls: 'change-na' };
@@ -997,13 +905,13 @@ function calcPct(arr, stepsAgo) {
 function updateMeta() {
   const d = rangeData();
   document.getElementById('kr-meta-line').textContent =
-    `${d[0].period} ~ ${d[d.length - 1].period} · ${currentFreq === 'weekly' ? '주간' : '월간'} 추이 (${d.length}${uLabel()}) · 1${uLabel()}·4${uLabel()} 전 대비 성장률 · 상대 스케일만 표시 · 진행 중 ${currentFreq === 'weekly' ? '주차' : '월'} 제외`;
+    `${d[0].period} ~ ${d[d.length - 1].period} · 주간 추이 (${d.length}주) · 1주·4주 전 대비 성장률 · 상대 스케일만 표시 · 진행 중 주차 제외`;
 }
 
 // ===== 시술/수술 전체 합산 카드 =====
 function buildTotalCards() {
   const d = rangeTotal();
-  const fullTotal = completedTotal();
+  const fullTotal = dataTotal.slice(0, -1);
 
   ['NONSURGICAL', 'SURGICAL'].forEach((op, idx) => {
     const values = d.map(r => r[op]);
@@ -1016,11 +924,11 @@ function buildTotalCards() {
     target.innerHTML = `
       <div class="change-item">
         <div class="change-value ${w1.cls}">${w1.text}</div>
-        <div class="change-label">vs 1${uLabel()} 전</div>
+        <div class="change-label">vs 1주 전</div>
       </div>
       <div class="change-item">
         <div class="change-value ${w4.cls}">${w4.text}</div>
-        <div class="change-label">vs 4${uLabel()} 전</div>
+        <div class="change-label">vs 4주 전</div>
       </div>
     `;
 
@@ -1051,7 +959,7 @@ function buildTotalCards() {
             backgroundColor: '#fff', borderColor: '#e5e3da', borderWidth: 1, padding: 10,
             titleColor: '#888', titleFont: { size: 10 }, bodyColor: '#222', bodyFont: { size: 11 },
             callbacks: {
-              title: (items) => `${pPrefix()} ${items[0].label}`,
+              title: (items) => `WEEK OF ${items[0].label}`,
               label: (ctx) => `  ${ctx.parsed.y.toFixed(0)}% of peak`
             }
           }
@@ -1116,7 +1024,7 @@ function renderChips() {
 // ===== Split View =====
 function buildSplitView() {
   const data = rangeData();
-  const fullData = completedAll();
+  const fullData = dataAll.slice(0, -1);
   const container = document.getElementById('kr-split-view');
   container.innerHTML = '';
   Object.values(splitCharts).forEach(c => c.destroy());
@@ -1151,11 +1059,11 @@ function buildSplitView() {
         <div class="change-wrap">
           <div class="change-item">
             <div class="change-value ${w1.cls}">${w1.text}</div>
-            <div class="change-label">vs 1${uLabel()} 전</div>
+            <div class="change-label">vs 1주 전</div>
           </div>
           <div class="change-item">
             <div class="change-value ${w4.cls}">${w4.text}</div>
-            <div class="change-label">vs 4${uLabel()} 전</div>
+            <div class="change-label">vs 4주 전</div>
           </div>
         </div>
       </div>
@@ -1187,7 +1095,7 @@ function buildSplitView() {
             backgroundColor: '#fff', borderColor: '#e5e3da', borderWidth: 1, padding: 10,
             titleColor: '#888', titleFont: { size: 10 }, bodyColor: '#222', bodyFont: { size: 11 },
             callbacks: {
-              title: (items) => `${pPrefix()} ${items[0].label}`,
+              title: (items) => `WEEK OF ${items[0].label}`,
               label: (ctx) => `  ${ctx.parsed.y.toFixed(0)}% of peak`
             }
           }
@@ -1206,7 +1114,7 @@ function buildOverlayView() {
   const data = rangeData();
   const label = document.getElementById('kr-overlay-label');
   const typeLabel = currentType === 'NONSURGICAL' ? '시술' : '수술';
-  label.textContent = `${typeLabel} · 선택 카테고리 ${selectedCats.size}개 · 실제 SU 수치 (로그 스케일) · 최근 ${data.length}${uLabel()}`;
+  label.textContent = `${typeLabel} · 선택 카테고리 ${selectedCats.size}개 · 실제 SU 수치 (로그 스케일) · 최근 ${data.length}주`;
 
   // 선택된 카테고리를 마지막 주 SU 큰 순으로 정렬 (큰 게 위에)
   const cats = currentCats().filter(c => selectedCats.has(c)).sort((a, b) => {
@@ -1257,7 +1165,7 @@ function buildOverlayView() {
           backgroundColor: '#fff', borderColor: '#e5e3da', borderWidth: 1, padding: 12,
           titleColor: '#888', titleFont: { size: 11 }, bodyColor: '#222',
           callbacks: {
-            title: (items) => `${pPrefix()} ${items[0].label}`,
+            title: (items) => `WEEK OF ${items[0].label}`,
             label: (ctx) => `  ${ctx.dataset.label}: ${ctx.parsed.y == null ? '-' : ctx.parsed.y.toLocaleString()}`
           }
         }
@@ -1387,18 +1295,9 @@ setupToggle('type-toggle', (btn) => {
 
 setupToggle('kr-view-toggle', (btn) => { currentView = btn.dataset.view; render(); });
 
-setupToggle('kr-freq-toggle', (btn) => {
-  currentFreq = btn.dataset.freq;
-  const inp = document.getElementById('kr-range-number');
-  inp.max = rangeMax();
-  if (parseInt(inp.value) > rangeMax()) { inp.value = rangeMax(); currentRange = rangeMax(); }
-  document.getElementById('kr-range-unit').textContent = uLabel();
-  render();
-});
-
 document.getElementById('kr-range-number').addEventListener('input', (e) => {
   const v = parseInt(e.target.value);
-  if (!isNaN(v) && v >= 2 && v <= rangeMax()) {
+  if (!isNaN(v) && v >= 2 && v <= 12) {
     currentRange = v;
     render();
   }
@@ -1406,7 +1305,6 @@ document.getElementById('kr-range-number').addEventListener('input', (e) => {
 
 function render() {
   updateMeta();
-  document.getElementById('kr-range-unit').textContent = uLabel();
   buildTotalCards();
   const split = document.getElementById('kr-split-view');
   const overlay = document.getElementById('kr-overlay-view');
@@ -1416,249 +1314,11 @@ function render() {
   if (currentView === 'split') buildSplitView();
   else buildOverlayView();
 
-  const wow = document.querySelector('.wow-section');
-  if (currentFreq === 'weekly') {
-    if (wow) wow.classList.remove('hidden');
-    buildWowSection();
-  } else {
-    if (wow) wow.classList.add('hidden');
-  }
+  buildWowSection();
 }
 
 selectedCats = new Set(nonsurgCats.slice(0, 5));
 renderChips();
-render();
-
-})();
-
-
-// ===== KR Region Tab Script (isolated) =====
-(function() {
-
-const regions = [
-  { key: "서울", color: "#E63946", code: "SEL" },
-  { key: "경기", color: "#2A9D8F", code: "GGI" },
-  { key: "부산", color: "#F4A261", code: "BSN" },
-  { key: "인천", color: "#264653", code: "ICN" },
-  { key: "대구", color: "#9C6ADE", code: "TGU" },
-  { key: "충남", color: "#E07A5F", code: "CHN" },
-  { key: "경남", color: "#81B29A", code: "GNM" },
-  { key: "대전", color: "#3D5A80", code: "DJN" },
-  { key: "경북", color: "#EE6C4D", code: "GBK" },
-  { key: "충북", color: "#98C1D9", code: "CHB" },
-  { key: "전북", color: "#5BC0EB", code: "JBK" },
-  { key: "광주", color: "#C9A227", code: "GWJ" },
-  { key: "강원", color: "#A98467", code: "GWN" },
-  { key: "전남", color: "#9BA17B", code: "JNM" },
-  { key: "울산", color: "#6D6875", code: "USN" },
-  { key: "세종", color: "#B5838D", code: "SEJ" },
-  { key: "제주", color: "#457B9D", code: "JJU" },
-];
-
-const weeklyData = [
-  { period: "03-02", 서울_MAU: 126158, 서울_SU: 22377, 경기_MAU: 40384, 경기_SU: 5940, 부산_MAU: 9598, 부산_SU: 1320, 인천_MAU: 8290, 인천_SU: 1198, 대구_MAU: 5784, 대구_SU: 598, 충남_MAU: 3409, 충남_SU: 448, 경남_MAU: 3400, 경남_SU: 384, 대전_MAU: 3065, 대전_SU: 331, 경북_MAU: 2418, 경북_SU: 226, 충북_MAU: 2195, 충북_SU: 246, 전북_MAU: 2141, 전북_SU: 299, 광주_MAU: 2135, 광주_SU: 200, 강원_MAU: 2003, 강원_SU: 234, 전남_MAU: 1184, 전남_SU: 134, 울산_MAU: 1149, 울산_SU: 102, 세종_MAU: 829, 세종_SU: 110, 제주_MAU: 670, 제주_SU: 52 },
-  { period: "03-09", 서울_MAU: 135903, 서울_SU: 26077, 경기_MAU: 42607, 경기_SU: 6735, 부산_MAU: 9856, 부산_SU: 1434, 인천_MAU: 8963, 인천_SU: 1402, 대구_MAU: 6131, 대구_SU: 751, 충남_MAU: 3720, 충남_SU: 473, 경남_MAU: 3613, 경남_SU: 453, 대전_MAU: 3221, 대전_SU: 378, 경북_MAU: 2537, 경북_SU: 246, 충북_MAU: 2341, 충북_SU: 248, 전북_MAU: 2329, 전북_SU: 369, 광주_MAU: 2185, 광주_SU: 202, 강원_MAU: 2146, 강원_SU: 303, 전남_MAU: 1246, 전남_SU: 120, 울산_MAU: 1132, 울산_SU: 96, 세종_MAU: 916, 세종_SU: 114, 제주_MAU: 678, 제주_SU: 68 },
-  { period: "03-16", 서울_MAU: 134118, 서울_SU: 24889, 경기_MAU: 41899, 경기_SU: 6164, 부산_MAU: 9828, 부산_SU: 1302, 인천_MAU: 8925, 인천_SU: 1404, 대구_MAU: 6013, 대구_SU: 688, 충남_MAU: 3554, 충남_SU: 412, 경남_MAU: 3453, 경남_SU: 408, 대전_MAU: 3031, 대전_SU: 310, 경북_MAU: 2491, 경북_SU: 252, 충북_MAU: 2232, 충북_SU: 238, 전북_MAU: 2267, 전북_SU: 362, 광주_MAU: 2212, 광주_SU: 225, 강원_MAU: 2089, 강원_SU: 291, 전남_MAU: 1231, 전남_SU: 106, 울산_MAU: 1168, 울산_SU: 118, 세종_MAU: 854, 세종_SU: 111, 제주_MAU: 636, 제주_SU: 65 },
-  { period: "03-23", 서울_MAU: 126755, 서울_SU: 20760, 경기_MAU: 39183, 경기_SU: 5292, 부산_MAU: 9044, 부산_SU: 1052, 인천_MAU: 8321, 인천_SU: 1114, 대구_MAU: 5791, 대구_SU: 634, 충남_MAU: 3343, 충남_SU: 384, 경남_MAU: 3193, 경남_SU: 315, 대전_MAU: 2955, 대전_SU: 295, 경북_MAU: 2307, 경북_SU: 212, 충북_MAU: 2083, 충북_SU: 218, 전북_MAU: 2302, 전북_SU: 348, 광주_MAU: 2011, 광주_SU: 159, 강원_MAU: 1971, 강원_SU: 226, 전남_MAU: 1137, 전남_SU: 114, 울산_MAU: 1085, 울산_SU: 124, 세종_MAU: 768, 세종_SU: 108, 제주_MAU: 597, 제주_SU: 41 },
-  { period: "03-30", 서울_MAU: 129637, 서울_SU: 25045, 경기_MAU: 39426, 경기_SU: 5963, 부산_MAU: 9202, 부산_SU: 1209, 인천_MAU: 8452, 인천_SU: 1407, 대구_MAU: 6057, 대구_SU: 699, 충남_MAU: 3337, 충남_SU: 397, 경남_MAU: 3359, 경남_SU: 441, 대전_MAU: 3044, 대전_SU: 360, 경북_MAU: 2428, 경북_SU: 303, 충북_MAU: 2147, 충북_SU: 263, 전북_MAU: 2002, 전북_SU: 314, 광주_MAU: 2014, 광주_SU: 205, 강원_MAU: 1975, 강원_SU: 282, 전남_MAU: 1124, 전남_SU: 92, 울산_MAU: 1069, 울산_SU: 97, 세종_MAU: 908, 세종_SU: 120, 제주_MAU: 629, 제주_SU: 46 },
-  { period: "04-06", 서울_MAU: 128157, 서울_SU: 22681, 경기_MAU: 38766, 경기_SU: 5443, 부산_MAU: 9089, 부산_SU: 1171, 인천_MAU: 8168, 인천_SU: 1180, 대구_MAU: 5942, 대구_SU: 632, 충남_MAU: 3328, 충남_SU: 372, 경남_MAU: 3244, 경남_SU: 372, 대전_MAU: 2963, 대전_SU: 363, 경북_MAU: 2330, 경북_SU: 212, 충북_MAU: 2155, 충북_SU: 252, 전북_MAU: 2041, 전북_SU: 239, 광주_MAU: 2036, 광주_SU: 180, 강원_MAU: 1889, 강원_SU: 227, 전남_MAU: 1098, 전남_SU: 113, 울산_MAU: 1094, 울산_SU: 106, 세종_MAU: 820, 세종_SU: 105, 제주_MAU: 576, 제주_SU: 64 },
-  { period: "04-13", 서울_MAU: 131147, 서울_SU: 24177, 경기_MAU: 39605, 경기_SU: 5766, 부산_MAU: 9455, 부산_SU: 1181, 인천_MAU: 8497, 인천_SU: 1298, 대구_MAU: 5903, 대구_SU: 590, 충남_MAU: 3390, 충남_SU: 402, 경남_MAU: 3356, 경남_SU: 433, 대전_MAU: 2999, 대전_SU: 310, 경북_MAU: 2372, 경북_SU: 268, 충북_MAU: 2182, 충북_SU: 251, 전북_MAU: 2011, 전북_SU: 262, 광주_MAU: 2053, 광주_SU: 196, 강원_MAU: 1935, 강원_SU: 209, 전남_MAU: 1197, 전남_SU: 144, 울산_MAU: 1129, 울산_SU: 101, 세종_MAU: 787, 세종_SU: 79, 제주_MAU: 541, 제주_SU: 62 },
-  { period: "04-20", 서울_MAU: 130266, 서울_SU: 24394, 경기_MAU: 39944, 경기_SU: 5815, 부산_MAU: 9474, 부산_SU: 1347, 인천_MAU: 8571, 인천_SU: 1237, 대구_MAU: 6052, 대구_SU: 720, 충남_MAU: 3623, 충남_SU: 472, 경남_MAU: 3381, 경남_SU: 398, 대전_MAU: 3083, 대전_SU: 367, 경북_MAU: 2424, 경북_SU: 320, 충북_MAU: 2127, 충북_SU: 261, 전북_MAU: 1987, 전북_SU: 225, 광주_MAU: 2077, 광주_SU: 181, 강원_MAU: 1967, 강원_SU: 259, 전남_MAU: 1121, 전남_SU: 115, 울산_MAU: 1118, 울산_SU: 106, 세종_MAU: 791, 세종_SU: 112, 제주_MAU: 555, 제주_SU: 43 },
-  { period: "04-27", 서울_MAU: 131005, 서울_SU: 25569, 경기_MAU: 39635, 경기_SU: 6104, 부산_MAU: 9358, 부산_SU: 1318, 인천_MAU: 8590, 인천_SU: 1352, 대구_MAU: 6111, 대구_SU: 740, 충남_MAU: 3501, 충남_SU: 512, 경남_MAU: 3397, 경남_SU: 420, 대전_MAU: 3109, 대전_SU: 395, 경북_MAU: 2427, 경북_SU: 257, 충북_MAU: 2145, 충북_SU: 262, 전북_MAU: 2096, 전북_SU: 280, 광주_MAU: 1991, 광주_SU: 180, 강원_MAU: 1920, 강원_SU: 225, 전남_MAU: 1089, 전남_SU: 106, 울산_MAU: 1144, 울산_SU: 122, 세종_MAU: 728, 세종_SU: 84, 제주_MAU: 572, 제주_SU: 39 },
-  { period: "05-04", 서울_MAU: 121704, 서울_SU: 22447, 경기_MAU: 37092, 경기_SU: 5669, 부산_MAU: 8925, 부산_SU: 1367, 인천_MAU: 7909, 인천_SU: 1185, 대구_MAU: 5463, 대구_SU: 674, 충남_MAU: 3223, 충남_SU: 422, 경남_MAU: 3103, 경남_SU: 356, 대전_MAU: 2808, 대전_SU: 315, 경북_MAU: 2240, 경북_SU: 260, 충북_MAU: 1989, 충북_SU: 250, 전북_MAU: 1841, 전북_SU: 208, 광주_MAU: 1871, 광주_SU: 211, 강원_MAU: 1741, 강원_SU: 235, 전남_MAU: 1068, 전남_SU: 133, 울산_MAU: 1037, 울산_SU: 113, 세종_MAU: 727, 세종_SU: 97, 제주_MAU: 551, 제주_SU: 69 },
-  { period: "05-11", 서울_MAU: 120628, 서울_SU: 22798, 경기_MAU: 35736, 경기_SU: 5448, 부산_MAU: 9026, 부산_SU: 1336, 인천_MAU: 7715, 인천_SU: 1226, 대구_MAU: 5197, 대구_SU: 563, 충남_MAU: 3170, 충남_SU: 453, 경남_MAU: 3012, 경남_SU: 404, 대전_MAU: 3020, 대전_SU: 374, 경북_MAU: 2104, 경북_SU: 254, 충북_MAU: 1905, 충북_SU: 239, 전북_MAU: 1798, 전북_SU: 259, 광주_MAU: 1802, 광주_SU: 178, 강원_MAU: 1723, 강원_SU: 251, 전남_MAU: 997, 전남_SU: 104, 울산_MAU: 960, 울산_SU: 98, 세종_MAU: 648, 세종_SU: 74, 제주_MAU: 507, 제주_SU: 75 },
-  { period: "05-18", 서울_MAU: 116594, 서울_SU: 22401, 경기_MAU: 35084, 경기_SU: 5201, 부산_MAU: 8460, 부산_SU: 1199, 인천_MAU: 7677, 인천_SU: 1160, 대구_MAU: 5164, 대구_SU: 596, 충남_MAU: 3009, 충남_SU: 352, 경남_MAU: 2965, 경남_SU: 401, 대전_MAU: 2794, 대전_SU: 312, 경북_MAU: 2067, 경북_SU: 268, 충북_MAU: 1905, 충북_SU: 236, 전북_MAU: 1779, 전북_SU: 258, 광주_MAU: 1773, 광주_SU: 179, 강원_MAU: 1693, 강원_SU: 190, 전남_MAU: 962, 전남_SU: 92, 울산_MAU: 901, 울산_SU: 92, 세종_MAU: 719, 세종_SU: 85, 제주_MAU: 533, 제주_SU: 74 },
-];
-
-const monthlyData = [
-  { period: "2025-03", 서울_MAU: 287012, 서울_SU: 91143, 경기_MAU: 86992, 경기_SU: 21974, 부산_MAU: 20839, 부산_SU: 4442, 인천_MAU: 18358, 인천_SU: 4267, 대구_MAU: 13816, 대구_SU: 2372, 충남_MAU: 7627, 충남_SU: 1308, 경남_MAU: 7165, 경남_SU: 1148, 대전_MAU: 8926, 대전_SU: 1506, 경북_MAU: 5071, 경북_SU: 780, 충북_MAU: 5304, 충북_SU: 873, 전북_MAU: 4760, 전북_SU: 863, 광주_MAU: 5969, 광주_SU: 931, 강원_MAU: 4692, 강원_SU: 957, 전남_MAU: 3067, 전남_SU: 552, 울산_MAU: 2625, 울산_SU: 349, 세종_MAU: 2353, 세종_SU: 474, 제주_MAU: 2095, 제주_SU: 623 },
-  { period: "2025-04", 서울_MAU: 286046, 서울_SU: 95041, 경기_MAU: 84901, 경기_SU: 21624, 부산_MAU: 20373, 부산_SU: 4805, 인천_MAU: 18019, 인천_SU: 4370, 대구_MAU: 13418, 대구_SU: 2357, 충남_MAU: 7323, 충남_SU: 1458, 경남_MAU: 6914, 경남_SU: 1210, 대전_MAU: 8510, 대전_SU: 1587, 경북_MAU: 4981, 경북_SU: 870, 충북_MAU: 5029, 충북_SU: 956, 전북_MAU: 4667, 전북_SU: 822, 광주_MAU: 5679, 광주_SU: 970, 강원_MAU: 4601, 강원_SU: 940, 전남_MAU: 2834, 전남_SU: 481, 울산_MAU: 2515, 울산_SU: 315, 세종_MAU: 2000, 세종_SU: 319, 제주_MAU: 1796, 제주_SU: 378 },
-  { period: "2025-05", 서울_MAU: 288512, 서울_SU: 88122, 경기_MAU: 85262, 경기_SU: 19965, 부산_MAU: 21514, 부산_SU: 4485, 인천_MAU: 18341, 인천_SU: 4360, 대구_MAU: 13373, 대구_SU: 2342, 충남_MAU: 7244, 충남_SU: 1307, 경남_MAU: 7017, 경남_SU: 1155, 대전_MAU: 8090, 대전_SU: 1368, 경북_MAU: 5033, 경북_SU: 749, 충북_MAU: 5020, 충북_SU: 825, 전북_MAU: 4603, 전북_SU: 788, 광주_MAU: 5489, 광주_SU: 756, 강원_MAU: 4538, 강원_SU: 847, 전남_MAU: 2759, 전남_SU: 448, 울산_MAU: 2516, 울산_SU: 357, 세종_MAU: 2013, 세종_SU: 332, 제주_MAU: 1523, 제주_SU: 222 },
-  { period: "2025-06", 서울_MAU: 292988, 서울_SU: 95142, 경기_MAU: 88855, 경기_SU: 22339, 부산_MAU: 21405, 부산_SU: 5075, 인천_MAU: 19157, 인천_SU: 4885, 대구_MAU: 13530, 대구_SU: 2463, 충남_MAU: 7519, 충남_SU: 1435, 경남_MAU: 7643, 경남_SU: 1374, 대전_MAU: 8770, 대전_SU: 1642, 경북_MAU: 5296, 경북_SU: 943, 충북_MAU: 5132, 충북_SU: 887, 전북_MAU: 4896, 전북_SU: 873, 광주_MAU: 5622, 광주_SU: 796, 강원_MAU: 4543, 강원_SU: 839, 전남_MAU: 2808, 전남_SU: 374, 울산_MAU: 2550, 울산_SU: 400, 세종_MAU: 2155, 세종_SU: 411, 제주_MAU: 1585, 제주_SU: 232 },
-  { period: "2025-07", 서울_MAU: 307862, 서울_SU: 102755, 경기_MAU: 94629, 경기_SU: 24786, 부산_MAU: 22942, 부산_SU: 5622, 인천_MAU: 20390, 인천_SU: 5388, 대구_MAU: 14776, 대구_SU: 2755, 충남_MAU: 8131, 충남_SU: 1689, 경남_MAU: 8327, 경남_SU: 1594, 대전_MAU: 10564, 대전_SU: 2084, 경북_MAU: 5663, 경북_SU: 992, 충북_MAU: 5795, 충북_SU: 1065, 전북_MAU: 5430, 전북_SU: 961, 광주_MAU: 6086, 광주_SU: 941, 강원_MAU: 4932, 강원_SU: 1074, 전남_MAU: 3046, 전남_SU: 433, 울산_MAU: 2891, 울산_SU: 412, 세종_MAU: 2800, 세종_SU: 503, 제주_MAU: 1805, 제주_SU: 340 },
-  { period: "2025-08", 서울_MAU: 295523, 서울_SU: 99634, 경기_MAU: 90606, 경기_SU: 24189, 부산_MAU: 22157, 부산_SU: 5574, 인천_MAU: 19358, 인천_SU: 5125, 대구_MAU: 14507, 대구_SU: 2578, 충남_MAU: 8036, 충남_SU: 1741, 경남_MAU: 8098, 경남_SU: 1634, 대전_MAU: 9883, 대전_SU: 2004, 경북_MAU: 5590, 경북_SU: 1083, 충북_MAU: 5449, 충북_SU: 1012, 전북_MAU: 5044, 전북_SU: 962, 광주_MAU: 5821, 광주_SU: 839, 강원_MAU: 4763, 강원_SU: 896, 전남_MAU: 2933, 전남_SU: 488, 울산_MAU: 2640, 울산_SU: 382, 세종_MAU: 2840, 세종_SU: 544, 제주_MAU: 1698, 제주_SU: 312 },
-  { period: "2025-09", 서울_MAU: 296607, 서울_SU: 98494, 경기_MAU: 89725, 경기_SU: 23051, 부산_MAU: 23517, 부산_SU: 5566, 인천_MAU: 19226, 인천_SU: 4825, 대구_MAU: 13936, 대구_SU: 2490, 충남_MAU: 7754, 충남_SU: 1432, 경남_MAU: 8708, 경남_SU: 1649, 대전_MAU: 9321, 대전_SU: 1836, 경북_MAU: 5550, 경북_SU: 977, 충북_MAU: 6129, 충북_SU: 1048, 전북_MAU: 5088, 전북_SU: 1006, 광주_MAU: 5734, 광주_SU: 734, 강원_MAU: 4782, 강원_SU: 894, 전남_MAU: 2927, 전남_SU: 396, 울산_MAU: 2722, 울산_SU: 360, 세종_MAU: 2730, 세종_SU: 452, 제주_MAU: 1899, 제주_SU: 374 },
-  { period: "2025-10", 서울_MAU: 296520, 서울_SU: 86619, 경기_MAU: 89899, 경기_SU: 20224, 부산_MAU: 23426, 부산_SU: 4978, 인천_MAU: 19189, 인천_SU: 4556, 대구_MAU: 14579, 대구_SU: 2244, 충남_MAU: 7903, 충남_SU: 1305, 경남_MAU: 8416, 경남_SU: 1539, 대전_MAU: 9082, 대전_SU: 1565, 경북_MAU: 5621, 경북_SU: 799, 충북_MAU: 5632, 충북_SU: 968, 전북_MAU: 5352, 전북_SU: 1017, 광주_MAU: 5693, 광주_SU: 771, 강원_MAU: 4754, 강원_SU: 805, 전남_MAU: 2983, 전남_SU: 378, 울산_MAU: 2749, 울산_SU: 391, 세종_MAU: 2661, 세종_SU: 380, 제주_MAU: 1616, 제주_SU: 311 },
-  { period: "2025-11", 서울_MAU: 299837, 서울_SU: 93874, 경기_MAU: 95441, 경기_SU: 24229, 부산_MAU: 23346, 부산_SU: 5465, 인천_MAU: 19590, 인천_SU: 4796, 대구_MAU: 14887, 대구_SU: 2486, 충남_MAU: 8346, 충남_SU: 1639, 경남_MAU: 8921, 경남_SU: 1940, 대전_MAU: 9073, 대전_SU: 1698, 경북_MAU: 5974, 경북_SU: 1056, 충북_MAU: 5750, 충북_SU: 1143, 전북_MAU: 5370, 전북_SU: 1070, 광주_MAU: 6029, 광주_SU: 943, 강원_MAU: 5116, 강원_SU: 1052, 전남_MAU: 3142, 전남_SU: 467, 울산_MAU: 2927, 울산_SU: 473, 세종_MAU: 2610, 세종_SU: 514, 제주_MAU: 1746, 제주_SU: 366 },
-  { period: "2025-12", 서울_MAU: 320617, 서울_SU: 111182, 경기_MAU: 104954, 경기_SU: 29532, 부산_MAU: 24712, 부산_SU: 6100, 인천_MAU: 21779, 인천_SU: 6297, 대구_MAU: 15934, 대구_SU: 2990, 충남_MAU: 9335, 충남_SU: 2062, 경남_MAU: 10002, 경남_SU: 2453, 대전_MAU: 9607, 대전_SU: 2181, 경북_MAU: 6743, 경북_SU: 1297, 충북_MAU: 6395, 충북_SU: 1177, 전북_MAU: 5917, 전북_SU: 1263, 광주_MAU: 6476, 광주_SU: 1440, 강원_MAU: 5661, 강원_SU: 1342, 전남_MAU: 3568, 전남_SU: 564, 울산_MAU: 3293, 울산_SU: 579, 세종_MAU: 2943, 세종_SU: 611, 제주_MAU: 1770, 제주_SU: 332 },
-  { period: "2026-01", 서울_MAU: 354140, 서울_SU: 125464, 경기_MAU: 119688, 경기_SU: 34506, 부산_MAU: 28587, 부산_SU: 7422, 인천_MAU: 25078, 인천_SU: 7141, 대구_MAU: 18710, 대구_SU: 3585, 충남_MAU: 11076, 충남_SU: 2746, 경남_MAU: 11663, 경남_SU: 2437, 대전_MAU: 10616, 대전_SU: 2067, 경북_MAU: 8020, 경북_SU: 1545, 충북_MAU: 7445, 충북_SU: 1583, 전북_MAU: 7140, 전북_SU: 1743, 광주_MAU: 7788, 광주_SU: 1247, 강원_MAU: 6498, 강원_SU: 1580, 전남_MAU: 4265, 전남_SU: 772, 울산_MAU: 4058, 울산_SU: 660, 세종_MAU: 3078, 세종_SU: 726, 제주_MAU: 2146, 제주_SU: 427 },
-  { period: "2026-02", 서울_MAU: 331675, 서울_SU: 102837, 경기_MAU: 112029, 경기_SU: 27672, 부산_MAU: 26423, 부산_SU: 5572, 인천_MAU: 23729, 인천_SU: 5989, 대구_MAU: 17112, 대구_SU: 2942, 충남_MAU: 10433, 충남_SU: 2043, 경남_MAU: 10610, 경남_SU: 2088, 대전_MAU: 9460, 대전_SU: 1570, 경북_MAU: 7419, 경북_SU: 1185, 충북_MAU: 6901, 충북_SU: 1213, 전북_MAU: 6366, 전북_SU: 1288, 광주_MAU: 6840, 광주_SU: 946, 강원_MAU: 6025, 강원_SU: 1168, 전남_MAU: 3912, 전남_SU: 590, 울산_MAU: 3589, 울산_SU: 497, 세종_MAU: 2586, 세종_SU: 442, 제주_MAU: 1977, 제주_SU: 277 },
-  { period: "2026-03", 서울_MAU: 327817, 서울_SU: 103557, 경기_MAU: 105900, 경기_SU: 26343, 부산_MAU: 25303, 부산_SU: 5615, 인천_MAU: 22387, 인천_SU: 5628, 대구_MAU: 15980, 대구_SU: 2938, 충남_MAU: 9481, 충남_SU: 1874, 경남_MAU: 9376, 경남_SU: 1714, 대전_MAU: 8712, 대전_SU: 1441, 경북_MAU: 6689, 경북_SU: 1048, 충북_MAU: 6169, 충북_SU: 1037, 전북_MAU: 6064, 전북_SU: 1516, 광주_MAU: 6108, 광주_SU: 861, 강원_MAU: 5485, 강원_SU: 1175, 전남_MAU: 3401, 전남_SU: 526, 울산_MAU: 3221, 울산_SU: 480, 세종_MAU: 2345, 세종_SU: 478, 제주_MAU: 1836, 제주_SU: 251 },
-  { period: "2026-04", 서울_MAU: 322469, 서울_SU: 106267, 경기_MAU: 101121, 경기_SU: 25248, 부산_MAU: 24396, 부산_SU: 5426, 인천_MAU: 21705, 인천_SU: 5608, 대구_MAU: 16084, 대구_SU: 2901, 충남_MAU: 9285, 충남_SU: 1882, 경남_MAU: 8972, 경남_SU: 1811, 대전_MAU: 8385, 대전_SU: 1554, 경북_MAU: 6405, 경북_SU: 1191, 충북_MAU: 5854, 충북_SU: 1133, 전북_MAU: 5523, 전북_SU: 1122, 광주_MAU: 5759, 광주_SU: 811, 강원_MAU: 5086, 강원_SU: 1022, 전남_MAU: 3155, 전남_SU: 501, 울산_MAU: 3129, 울산_SU: 457, 세종_MAU: 2262, 세종_SU: 439, 제주_MAU: 1646, 제주_SU: 220 },
-];
-
-let currentFreq = 'weekly';
-let currentMetric = 'MAU';
-let currentView = 'combined';
-let currentRange = 12;
-const splitCharts = {};
-const combinedCharts = {};
-
-function fullDataset() { return currentFreq === 'weekly' ? weeklyData : monthlyData; }
-function rangeData() { const f = fullDataset(); return f.slice(-Math.min(currentRange, f.length)); }
-function uLabel() { return currentFreq === 'weekly' ? '주' : '개월'; }
-function pPrefix() { return currentFreq === 'weekly' ? 'WEEK OF' : 'MONTH OF'; }
-function rangeMax() { return fullDataset().length; }
-
-function fmtChange(p) {
-  if (p === null || p === undefined || !isFinite(p)) return { text: '—', cls: 'change-na' };
-  const sign = p > 0 ? '+' : '';
-  const cls = p > 0.5 ? 'change-up' : p < -0.5 ? 'change-down' : 'change-flat';
-  return { text: `${sign}${p.toFixed(1)}%`, cls };
-}
-function calcPct(arr, stepsAgo) {
-  if (!arr || arr.length < stepsAgo + 1) return null;
-  const last = arr[arr.length - 1];
-  const prev = arr[arr.length - 1 - stepsAgo];
-  return prev ? ((last - prev) / prev) * 100 : null;
-}
-function updateMeta() {
-  const d = rangeData();
-  document.getElementById('rg-meta-line').textContent =
-    `${d[0].period} ~ ${d[d.length-1].period} · ${currentFreq === 'weekly' ? '주간' : '월간'} 추이 (${d.length}${uLabel()}) · 1${uLabel()} 전·4${uLabel()} 전 대비 성장률 · 17개 시·도 · 상대 스케일만 표시`;
-}
-
-function buildSplitView() {
-  const data = rangeData();
-  const full = fullDataset();
-  const container = document.getElementById('rg-split-view');
-  container.innerHTML = '';
-  Object.values(splitCharts).forEach(c => c.destroy());
-  Object.keys(splitCharts).forEach(k => delete splitCharts[k]);
-
-  regions.forEach(s => {
-    const fld = `${s.key}_${currentMetric}`;
-    const values = data.map(r => r[fld]);
-    const w1 = fmtChange(calcPct(values, 1));
-    const w4 = fmtChange(calcPct(full.map(r => r[fld]), 4));
-
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <div class="accent" style="background:${s.color}"></div>
-      <div class="card-head">
-        <div>
-          <div class="card-title">${s.key}</div>
-          <div class="card-sub">${s.code} · ${currentMetric}</div>
-        </div>
-        <div class="change-wrap">
-          <div class="change-item"><div class="change-value ${w1.cls}">${w1.text}</div><div class="change-label">vs 1${uLabel()} 전</div></div>
-          <div class="change-item"><div class="change-value ${w4.cls}">${w4.text}</div><div class="change-label">vs 4${uLabel()} 전</div></div>
-        </div>
-      </div>
-      <div class="chart-wrap"><canvas></canvas></div>
-    `;
-    container.appendChild(card);
-
-    const ctx = card.querySelector('canvas').getContext('2d');
-    const peak = Math.max(...values) || 1;
-    const pctValues = values.map(v => (v / peak) * 100);
-    splitCharts[s.key] = new Chart(ctx, {
-      type: 'line',
-      data: { labels: data.map(r => r.period), datasets: [{ data: pctValues, borderColor: s.color, backgroundColor: s.color+'15', borderWidth: 2.5, pointRadius: 3, pointBackgroundColor: s.color, pointBorderWidth: 0, tension: 0.35, fill: false }] },
-      options: { responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { backgroundColor:'#fff', borderColor:'#e5e3da', borderWidth:1, padding:10, titleColor:'#888', titleFont:{size:10}, bodyColor:'#222', bodyFont:{size:11}, callbacks: { title:(it)=>`${pPrefix()} ${it[0].label}`, label:(c)=>`  ${c.parsed.y.toFixed(0)}% of peak` } } },
-        scales: { x: { ticks:{color:'#999',font:{size:10}}, grid:{display:false}, border:{color:'#e5e3da'} }, y: { display:false, min: Math.min(...pctValues)*0.9, max:105 } } }
-    });
-  });
-}
-
-function buildCombinedView() {
-  const data = rangeData();
-  const full = fullDataset();
-  const container = document.getElementById('rg-combined-view');
-  container.innerHTML = '';
-  Object.values(combinedCharts).forEach(c => c.destroy());
-  Object.keys(combinedCharts).forEach(k => delete combinedCharts[k]);
-
-  regions.forEach(s => {
-    const mauValues = data.map(r => r[`${s.key}_MAU`]);
-    const suValues = data.map(r => r[`${s.key}_SU`]);
-    const mauPeak = Math.max(...mauValues) || 1;
-    const suPeak = Math.max(...suValues) || 1;
-    const mauPct = mauValues.map(v => (v/mauPeak)*100);
-    const suPct = suValues.map(v => (v/suPeak)*100);
-    const mau1 = fmtChange(calcPct(mauValues,1));
-    const mau4 = fmtChange(calcPct(full.map(r=>r[`${s.key}_MAU`]),4));
-    const su1 = fmtChange(calcPct(suValues,1));
-    const su4 = fmtChange(calcPct(full.map(r=>r[`${s.key}_SU`]),4));
-
-    const card = document.createElement('div');
-    card.className = 'card combined-card';
-    card.innerHTML = `
-      <div class="accent" style="background:${s.color}"></div>
-      <div class="combined-head">
-        <div class="combined-head-left"><div class="card-title">${s.key}</div><div class="card-sub">${s.code} · MAU + SU</div></div>
-        <div class="combined-head-right">
-          <div class="combined-stat-row"><span class="series-marker series-marker-line" style="background:${s.color}"></span><span class="series-name">MAU</span><span class="change-value ${mau1.cls}">${mau1.text}</span><span class="change-value ${mau4.cls}">${mau4.text}</span></div>
-          <div class="combined-stat-row"><span class="series-marker series-marker-bar" style="background:${s.color}80"></span><span class="series-name">SU</span><span class="change-value ${su1.cls}">${su1.text}</span><span class="change-value ${su4.cls}">${su4.text}</span></div>
-          <div class="combined-stat-row combined-stat-header"><span class="series-marker-spacer"></span><span class="series-name"></span><span class="period-label">1${uLabel()}</span><span class="period-label">4${uLabel()}</span></div>
-        </div>
-      </div>
-      <div class="chart-wrap-combined"><canvas></canvas></div>
-    `;
-    container.appendChild(card);
-
-    const ctx = card.querySelector('canvas').getContext('2d');
-    const mauMin = Math.min(...mauPct);
-    const yMauMin = Math.max(0, Math.floor((mauMin-10)/5)*5);
-    combinedCharts[s.key] = new Chart(ctx, {
-      data: { labels: data.map(r=>r.period), datasets: [
-        { type:'bar', label:'SU', data: suPct, backgroundColor: s.color+'40', borderColor: s.color+'70', borderWidth:1, yAxisID:'ySU', order:2, borderRadius:3, maxBarThickness:28 },
-        { type:'line', label:'MAU', data: mauPct, borderColor: s.color, backgroundColor:'transparent', borderWidth:2.5, pointRadius:3, pointBackgroundColor: s.color, pointBorderColor:'#fff', pointBorderWidth:1.5, tension:0.35, yAxisID:'yMAU', order:1 }
-      ]},
-      options: { responsive:true, maintainAspectRatio:false, layout:{padding:{top:10,bottom:4}},
-        plugins: { legend:{display:false}, tooltip:{ backgroundColor:'#fff', borderColor:'#e5e3da', borderWidth:1, padding:10, titleColor:'#888', titleFont:{size:10}, bodyColor:'#222', bodyFont:{size:11}, callbacks:{ title:(it)=>`${pPrefix()} ${it[0].label}`, label:(c)=>`  ${c.dataset.label}: ${c.parsed.y.toFixed(0)}% of peak` } } },
-        scales: { x:{ ticks:{color:'#999',font:{size:10}}, grid:{display:false}, border:{color:'#e5e3da'} },
-          yMAU:{ type:'linear', position:'left', min:yMauMin, max:105, ticks:{display:false}, grid:{color:'#f5f3ea'}, border:{display:false}, title:{display:true,text:'MAU',color:s.color,font:{size:9,weight:'600'}} },
-          ySU:{ type:'linear', position:'right', min:0, max:165, ticks:{display:false}, grid:{display:false}, border:{display:false}, title:{display:true,text:'SU',color:'#888',font:{size:9,weight:'600'}} } } }
-    });
-  });
-}
-
-function setupToggle(id, handler) {
-  document.getElementById(id).addEventListener('click', (e) => {
-    if (e.target.tagName !== 'BUTTON') return;
-    document.querySelectorAll(`#${id} button`).forEach(b => b.classList.remove('active'));
-    e.target.classList.add('active');
-    handler(e.target);
-  });
-}
-setupToggle('rg-freq-toggle', (btn) => {
-  currentFreq = btn.dataset.freq;
-  const inp = document.getElementById('rg-range-number');
-  inp.max = rangeMax();
-  if (parseInt(inp.value) > rangeMax()) { inp.value = rangeMax(); currentRange = rangeMax(); }
-  document.getElementById('rg-range-unit').textContent = uLabel();
-  render();
-});
-setupToggle('rg-metric-toggle', (btn) => { currentMetric = btn.dataset.metric; render(); });
-setupToggle('rg-view-toggle', (btn) => { currentView = btn.dataset.view; render(); });
-document.getElementById('rg-range-number').addEventListener('input', (e) => {
-  const v = parseInt(e.target.value);
-  if (!isNaN(v) && v >= 2 && v <= rangeMax()) { currentRange = v; render(); }
-});
-
-function render() {
-  updateMeta();
-  document.getElementById('rg-range-unit').textContent = uLabel();
-  const split = document.getElementById('rg-split-view');
-  const combined = document.getElementById('rg-combined-view');
-  const metricToggle = document.getElementById('rg-metric-toggle');
-  const metricLabel = metricToggle.previousElementSibling;
-  if (currentView === 'combined') {
-    metricToggle.style.display = 'none';
-    if (metricLabel && metricLabel.classList.contains('group-label')) metricLabel.style.display = 'none';
-  } else {
-    metricToggle.style.display = '';
-    if (metricLabel && metricLabel.classList.contains('group-label')) metricLabel.style.display = '';
-  }
-  split.classList.toggle('hidden', currentView !== 'split');
-  combined.classList.toggle('hidden', currentView !== 'combined');
-  if (currentView === 'split') buildSplitView();
-  else buildCombinedView();
-}
-
 render();
 
 })();
