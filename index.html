@@ -549,7 +549,7 @@ function updateMeta() {
 
 function buildSplitView() {
   const data = rangeData();
-  const full = fullDataset();
+  const full = isOverseasLastComplete() ? fullDataset() : fullDataset().slice(0, -1);
   const container = document.getElementById('split-view');
   container.innerHTML = '';
   Object.values(splitCharts).forEach(c => c.destroy());
@@ -687,7 +687,7 @@ function buildOverlayView() {
 
 function buildCombinedView() {
   const data = rangeData();
-  const full = fullDataset();
+  const full = isOverseasLastComplete() ? fullDataset() : fullDataset().slice(0, -1);
   const container = document.getElementById('combined-view');
   container.innerHTML = '';
   Object.values(combinedCharts).forEach(c => c.destroy());
