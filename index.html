@@ -959,62 +959,87 @@ function syncFreqData() {
 }
 function krUnitLabel() { return krFreq === 'weekly' ? '주' : '개월'; }
 
-// ============ Google Sheets 자동 로드 ============
-const PUB_TOKEN = '2PACX-1vRZ6PaxDJvrMPn6XFAHqLP4SVKNMyvalGL9FiHQHj6VogI-6VLrIdHzwF1gwLzr8DUuk0-XejcWCWtT';
+// ============ Google Sheets 자동 로드 (JSONP 방식) ============
+const SHEET_ID = '1UoJFC0VkAx4AQ7OxerBFUm8NJTqu0aDii9aFCCs7XqI';
 const SHEET_GID_MONTHLY = '1244969143';
 const SHEET_GID_WEEKLY = '1044128873';
 
-async function fetchSheetCSV(gid) {
-  const url = `https://docs.google.com/spreadsheets/d/e/${PUB_TOKEN}/pub?gid=${gid}&single=true&output=csv`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return await res.text();
+// JSONP 방식: script 태그로 로드해서 CORS 우회
+function fetchSheetJSONP(gid) {
+  return new Promise((resolve, reject) => {
+    const callbackName = 'gvizCb_' + Math.random().toString(36).slice(2, 10);
+    let script = null;
+    let timeout = null;
+    
+    const cleanup = () => {
+      if (timeout) clearTimeout(timeout);
+      delete window[callbackName];
+      if (script && script.parentNode) script.parentNode.removeChild(script);
+    };
+    
+    window[callbackName] = function(data) {
+      cleanup();
+      if (data && data.table) resolve(data.table);
+      else reject(new Error('No table in response'));
+    };
+    
+    script = document.createElement('script');
+    script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json;responseHandler:${callbackName}&gid=${gid}`;
+    script.onerror = () => { cleanup(); reject(new Error('Script load failed')); };
+    
+    timeout = setTimeout(() => { cleanup(); reject(new Error('Timeout')); }, 15000);
+    document.head.appendChild(script);
+  });
 }
 
-function parseRow(line) {
-  const result = [];
-  let cur = '', inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (c === '"') { inQ = !inQ; }
-    else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
-    else cur += c;
-  }
-  result.push(cur);
-  return result;
-}
-
-function parseDateHeader(dateStr) {
-  const parts = dateStr.replace(/"/g, '').match(/(\d+)\.\s*(\d+)\.\s*(\d+)/);
-  if (!parts) return null;
-  return {
-    year: parseInt(parts[1]),
-    month: parseInt(parts[2]),
-    day: parseInt(parts[3]),
-    fullDate: `${parts[1]}. ${parseInt(parts[2])}. ${parseInt(parts[3])}.`
-  };
-}
-
-function parseSheetRows(csv) {
-  const lines = csv.split('\n').filter(l => l.trim());
-  const header = parseRow(lines[0]);
-  const dateCols = header.slice(1).map(parseDateHeader);
-  const rows = [];
-  for (let i = 1; i < lines.length; i++) {
-    const cells = parseRow(lines[i]);
-    const tag = cells[0].replace(/"/g, '').trim();
+function parseGvizTable(table) {
+  // table.cols: [{label, type, ...}, ...]
+  // table.rows: [{c: [{v: value, f: formatted}, ...]}, ...]
+  const cols = table.cols || [];
+  const rows = table.rows || [];
+  
+  // 첫 컬럼(태그) 제외한 나머지 컬럼의 라벨/날짜 파싱
+  const dateCols = cols.slice(1).map(col => {
+    const label = col.label || col.id || '';
+    const parts = label.match(/(\d+)\.\s*(\d+)\.\s*(\d+)/);
+    if (parts) {
+      return {
+        year: parseInt(parts[1]),
+        month: parseInt(parts[2]),
+        day: parseInt(parts[3]),
+        fullDate: `${parts[1]}. ${parseInt(parts[2])}. ${parseInt(parts[3])}.`
+      };
+    }
+    return null;
+  });
+  
+  // rows 파싱: 첫 셀=태그, 나머지=값
+  const parsedRows = [];
+  rows.forEach(r => {
+    if (!r.c || !r.c[0]) return;
+    const tag = (r.c[0].v || '').toString().trim();
     const map = CATEGORY_MAPPING[tag];
-    if (!map) continue;
+    if (!map) return;
     const [op, cat] = map;
-    const vals = cells.slice(1).map(v => parseInt(v.replace(/[^\d-]/g, '')) || 0);
-    rows.push({ tag, op, cat, vals });
-  }
-  return { dateCols, rows };
+    const vals = r.c.slice(1).map(cell => {
+      if (!cell) return 0;
+      const v = cell.v;
+      return typeof v === 'number' ? v : (parseInt(v) || 0);
+    });
+    parsedRows.push({ tag, op, cat, vals });
+  });
+  
+  return { dateCols, rows: parsedRows };
 }
 
-function buildMonthlyFromSheet(csv) {
-  const { dateCols, rows } = parseSheetRows(csv);
-  const labels = dateCols.map(d => d ? `${d.year}-${String(d.month).padStart(2, '0')}` : null);
+function buildDataFromTable(table, mode) {
+  const { dateCols, rows } = parseGvizTable(table);
+  const labels = dateCols.map(d => {
+    if (!d) return null;
+    return mode === 'monthly'
+      ? `${d.year}-${String(d.month).padStart(2, '0')}`
+      : `${String(d.month).padStart(2, '0')}-${String(d.day).padStart(2, '0')}`;
+  });
   const fullDates = dateCols.map(d => d ? d.fullDate : null);
   
   const dataAll = labels.map((label, i) => {
@@ -1041,7 +1066,7 @@ function buildMonthlyFromSheet(csv) {
   
   const recent12 = Math.min(12, labels.length);
   const recentIdx = labels.length - recent12;
-  const recentLabels = labels.slice(recentIdx);
+  const recentLabels = labels.slice(recentIdx).filter(Boolean);
   const tagsByGroup = {};
   rows.forEach(r => {
     const key = `${r.op}_${r.cat}`;
@@ -1050,63 +1075,15 @@ function buildMonthlyFromSheet(csv) {
   });
   Object.keys(tagsByGroup).forEach(k => {
     tagsByGroup[k].sort((a, b) => {
-      const av = a.vals[a.vals.length - 2] || a.vals[a.vals.length - 1];
-      const bv = b.vals[b.vals.length - 2] || b.vals[b.vals.length - 1];
+      const av = a.vals[a.vals.length - 2] || a.vals[a.vals.length - 1] || 0;
+      const bv = b.vals[b.vals.length - 2] || b.vals[b.vals.length - 1] || 0;
       return bv - av;
     });
   });
   
-  return { dataAll, dataTotal, tagsByGroup, recentLabels, lastLabel: labels[labels.length - 1] };
+  return { dataAll, dataTotal, tagsByGroup, recentLabels, lastLabel: labels.filter(Boolean).pop() };
 }
 
-function buildWeeklyFromSheet(csv) {
-  const { dateCols, rows } = parseSheetRows(csv);
-  const labels = dateCols.map(d => d ? `${String(d.month).padStart(2, '0')}-${String(d.day).padStart(2, '0')}` : null);
-  const fullDates = dateCols.map(d => d ? d.fullDate : null);
-  
-  const dataAll = labels.map((label, i) => {
-    if (!label) return null;
-    const row = { period: label, fullDate: fullDates[i] };
-    const agg = {};
-    rows.forEach(r => {
-      const key = `${r.op}_${r.cat}`;
-      agg[key] = (agg[key] || 0) + r.vals[i];
-    });
-    Object.assign(row, agg);
-    return row;
-  }).filter(Boolean);
-  
-  const dataTotal = labels.map((label, i) => {
-    if (!label) return null;
-    let ns = 0, sg = 0;
-    rows.forEach(r => {
-      if (r.op === 'NONSURGICAL') ns += r.vals[i];
-      else if (r.op === 'SURGICAL') sg += r.vals[i];
-    });
-    return { period: label, fullDate: fullDates[i], NONSURGICAL: ns, SURGICAL: sg };
-  }).filter(Boolean);
-  
-  const recent12 = Math.min(12, labels.length);
-  const recentIdx = labels.length - recent12;
-  const recentLabels = labels.slice(recentIdx);
-  const tagsByGroup = {};
-  rows.forEach(r => {
-    const key = `${r.op}_${r.cat}`;
-    if (!tagsByGroup[key]) tagsByGroup[key] = [];
-    tagsByGroup[key].push({ tag: r.tag, vals: r.vals.slice(recentIdx) });
-  });
-  Object.keys(tagsByGroup).forEach(k => {
-    tagsByGroup[k].sort((a, b) => {
-      const av = a.vals[a.vals.length - 2] || a.vals[a.vals.length - 1];
-      const bv = b.vals[b.vals.length - 2] || b.vals[b.vals.length - 1];
-      return bv - av;
-    });
-  });
-  
-  return { dataAll, dataTotal, tagsByGroup, recentLabels, lastLabel: labels[labels.length - 1] };
-}
-
-// 페이지 로드 시 두 시트 다 로드
 (async function autoSheetLoad() {
   const badge = document.createElement('div');
   badge.id = 'sheet-status';
@@ -1115,28 +1092,29 @@ function buildWeeklyFromSheet(csv) {
   document.body.appendChild(badge);
   
   let monthlyOk = false, weeklyOk = false, monthlyLast = '', weeklyLast = '';
+  let errors = [];
   
   try {
-    const csv = await fetchSheetCSV(SHEET_GID_MONTHLY);
-    const d = buildMonthlyFromSheet(csv);
+    const table = await fetchSheetJSONP(SHEET_GID_MONTHLY);
+    const d = buildDataFromTable(table, 'monthly');
     dataAllMonthly = d.dataAll;
     dataTotalMonthly = d.dataTotal;
     tagsByGroupMonthly = d.tagsByGroup;
     recentLabelsMonthly = d.recentLabels;
     monthlyOk = true;
     monthlyLast = d.lastLabel;
-  } catch (e) { console.warn('Monthly 시트 로드 실패:', e.message); }
+  } catch (e) { errors.push('Monthly: ' + e.message); console.warn('Monthly 로드 실패:', e); }
   
   try {
-    const csv = await fetchSheetCSV(SHEET_GID_WEEKLY);
-    const d = buildWeeklyFromSheet(csv);
+    const table = await fetchSheetJSONP(SHEET_GID_WEEKLY);
+    const d = buildDataFromTable(table, 'weekly');
     dataAllWeekly = d.dataAll;
     dataTotalWeekly = d.dataTotal;
     tagsByGroupWeekly = d.tagsByGroup;
     recentLabelsWeekly = d.recentLabels;
     weeklyOk = true;
     weeklyLast = d.lastLabel;
-  } catch (e) { console.warn('Weekly 시트 로드 실패:', e.message); }
+  } catch (e) { errors.push('Weekly: ' + e.message); console.warn('Weekly 로드 실패:', e); }
   
   if (typeof syncFreqData === 'function') syncFreqData();
   if (typeof render === 'function') render();
@@ -1152,13 +1130,15 @@ function buildWeeklyFromSheet(csv) {
     badge.style.background = '#fff3cd';
     badge.style.color = '#856404';
     badge.innerHTML = `⚠ 부분 로드: Weekly ${weeklyOk ? '✓' : '✗'} / Monthly ${monthlyOk ? '✓' : '✗'}`;
-    setTimeout(() => badge.remove(), 10000);
+    badge.title = errors.join(' | ');
+    setTimeout(() => badge.remove(), 15000);
   } else {
     badge.style.background = '#f8d7da';
     badge.style.color = '#721c24';
     badge.style.borderColor = '#f5c6cb';
-    badge.textContent = '⚠ 시트 로드 실패 (임베드 데이터 사용) — 시트 공개 여부 확인';
-    setTimeout(() => badge.remove(), 10000);
+    badge.innerHTML = '⚠ 시트 로드 실패 · 콘솔 확인';
+    badge.title = errors.join(' | ');
+    setTimeout(() => badge.remove(), 15000);
   }
 })();
 // ============ /Google Sheets 자동 로드 ============
