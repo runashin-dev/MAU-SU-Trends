@@ -959,61 +959,88 @@ function syncFreqData() {
 }
 function krUnitLabel() { return krFreq === 'weekly' ? '주' : '개월'; }
 
-// ============ Google Sheets 자동 로드 (JSONP 방식) ============
+// ============ Google Sheets 자동 로드 (다중 방식 fallback) ============
 const SHEET_ID = '1UoJFC0VkAx4AQ7OxerBFUm8NJTqu0aDii9aFCCs7XqI';
 const SHEET_GID_MONTHLY = '1244969143';
 const SHEET_GID_WEEKLY = '1044128873';
 
-// JSONP 방식: script 태그로 로드해서 CORS 우회
-function fetchSheetJSONP(gid) {
+// 방법 1: opensheet.elk.sh 프록시 (CORS OK, JSON 반환)
+async function fetchOpenSheet(sheetIndex) {
+  const url = `https://opensheet.elk.sh/${SHEET_ID}/${sheetIndex}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`OpenSheet HTTP ${res.status}`);
+  const arr = await res.json();
+  if (!Array.isArray(arr)) throw new Error('OpenSheet: not array');
+  return arr;
+}
+
+// 방법 2: gviz JSONP (script 태그로 CORS 우회)
+function fetchGvizJSONP(gid) {
   return new Promise((resolve, reject) => {
-    const callbackName = 'gvizCb_' + Math.random().toString(36).slice(2, 10);
-    let script = null;
-    let timeout = null;
-    
+    const cb = 'gvizCb_' + Math.random().toString(36).slice(2, 10);
+    let script = null, timeout = null;
     const cleanup = () => {
       if (timeout) clearTimeout(timeout);
-      delete window[callbackName];
+      delete window[cb];
       if (script && script.parentNode) script.parentNode.removeChild(script);
     };
-    
-    window[callbackName] = function(data) {
+    window[cb] = function(data) {
       cleanup();
       if (data && data.table) resolve(data.table);
-      else reject(new Error('No table in response'));
+      else reject(new Error('gviz: no table'));
     };
-    
     script = document.createElement('script');
-    script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json;responseHandler:${callbackName}&gid=${gid}`;
-    script.onerror = () => { cleanup(); reject(new Error('Script load failed')); };
-    
-    timeout = setTimeout(() => { cleanup(); reject(new Error('Timeout')); }, 15000);
+    const tqx = encodeURIComponent(`out:json;responseHandler:${cb}`);
+    script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=${tqx}&gid=${gid}`;
+    script.onerror = () => { cleanup(); reject(new Error('gviz: script fail')); };
+    timeout = setTimeout(() => { cleanup(); reject(new Error('gviz: timeout')); }, 15000);
     document.head.appendChild(script);
   });
 }
 
+// OpenSheet 응답 → 우리 데이터 구조로 변환
+function parseOpenSheetArray(arr) {
+  // arr = [{"분석 단위": "사각턱보톡스", "2025. 5. 1.": "11717", ...}, ...]
+  if (!arr.length) return { dateCols: [], rows: [] };
+  const cols = Object.keys(arr[0]);
+  const dateCols = cols.slice(1).map(label => {
+    const parts = label.match(/(\d+)\.\s*(\d+)\.\s*(\d+)/);
+    if (!parts) return null;
+    return {
+      year: parseInt(parts[1]),
+      month: parseInt(parts[2]),
+      day: parseInt(parts[3]),
+      fullDate: `${parts[1]}. ${parseInt(parts[2])}. ${parseInt(parts[3])}.`,
+      key: label
+    };
+  });
+  const rows = [];
+  arr.forEach(r => {
+    const tag = (r[cols[0]] || '').toString().trim();
+    const map = CATEGORY_MAPPING[tag];
+    if (!map) return;
+    const [op, cat] = map;
+    const vals = dateCols.map(d => d ? (parseInt(r[d.key]) || 0) : 0);
+    rows.push({ tag, op, cat, vals });
+  });
+  return { dateCols, rows };
+}
+
+// gviz table → 우리 데이터 구조
 function parseGvizTable(table) {
-  // table.cols: [{label, type, ...}, ...]
-  // table.rows: [{c: [{v: value, f: formatted}, ...]}, ...]
   const cols = table.cols || [];
   const rows = table.rows || [];
-  
-  // 첫 컬럼(태그) 제외한 나머지 컬럼의 라벨/날짜 파싱
   const dateCols = cols.slice(1).map(col => {
     const label = col.label || col.id || '';
     const parts = label.match(/(\d+)\.\s*(\d+)\.\s*(\d+)/);
-    if (parts) {
-      return {
-        year: parseInt(parts[1]),
-        month: parseInt(parts[2]),
-        day: parseInt(parts[3]),
-        fullDate: `${parts[1]}. ${parseInt(parts[2])}. ${parseInt(parts[3])}.`
-      };
-    }
-    return null;
+    if (!parts) return null;
+    return {
+      year: parseInt(parts[1]),
+      month: parseInt(parts[2]),
+      day: parseInt(parts[3]),
+      fullDate: `${parts[1]}. ${parseInt(parts[2])}. ${parseInt(parts[3])}.`
+    };
   });
-  
-  // rows 파싱: 첫 셀=태그, 나머지=값
   const parsedRows = [];
   rows.forEach(r => {
     if (!r.c || !r.c[0]) return;
@@ -1028,12 +1055,11 @@ function parseGvizTable(table) {
     });
     parsedRows.push({ tag, op, cat, vals });
   });
-  
   return { dateCols, rows: parsedRows };
 }
 
-function buildDataFromTable(table, mode) {
-  const { dateCols, rows } = parseGvizTable(table);
+function buildData(parsed, mode) {
+  const { dateCols, rows } = parsed;
   const labels = dateCols.map(d => {
     if (!d) return null;
     return mode === 'monthly'
@@ -1064,9 +1090,10 @@ function buildDataFromTable(table, mode) {
     return { period: label, fullDate: fullDates[i], NONSURGICAL: ns, SURGICAL: sg };
   }).filter(Boolean);
   
-  const recent12 = Math.min(12, labels.length);
-  const recentIdx = labels.length - recent12;
-  const recentLabels = labels.slice(recentIdx).filter(Boolean);
+  const recent12 = Math.min(12, labels.filter(Boolean).length);
+  const validLabels = labels.filter(Boolean);
+  const recentIdx = validLabels.length - recent12;
+  const recentLabels = validLabels.slice(recentIdx);
   const tagsByGroup = {};
   rows.forEach(r => {
     const key = `${r.op}_${r.cat}`;
@@ -1081,64 +1108,82 @@ function buildDataFromTable(table, mode) {
     });
   });
   
-  return { dataAll, dataTotal, tagsByGroup, recentLabels, lastLabel: labels.filter(Boolean).pop() };
+  return { dataAll, dataTotal, tagsByGroup, recentLabels, lastLabel: validLabels[validLabels.length - 1] };
+}
+
+// 하나의 시트 로드: opensheet 먼저, 실패 시 gviz JSONP 시도
+async function loadOneSheet(sheetIndex, gid, mode) {
+  const errors = [];
+  // Try 1: OpenSheet
+  try {
+    const arr = await fetchOpenSheet(sheetIndex);
+    console.log(`[${mode}] OpenSheet 성공, rows:`, arr.length);
+    return buildData(parseOpenSheetArray(arr), mode);
+  } catch (e) {
+    errors.push('opensheet: ' + e.message);
+    console.warn(`[${mode}] OpenSheet 실패:`, e.message);
+  }
+  // Try 2: JSONP
+  try {
+    const table = await fetchGvizJSONP(gid);
+    console.log(`[${mode}] JSONP 성공`);
+    return buildData(parseGvizTable(table), mode);
+  } catch (e) {
+    errors.push('jsonp: ' + e.message);
+    console.warn(`[${mode}] JSONP 실패:`, e.message);
+  }
+  throw new Error(errors.join(' | '));
 }
 
 (async function autoSheetLoad() {
   const badge = document.createElement('div');
   badge.id = 'sheet-status';
-  badge.style.cssText = 'position:fixed;bottom:12px;right:12px;padding:8px 14px;border-radius:6px;font-size:12px;background:#fff3cd;color:#856404;border:1px solid #ffeaa7;box-shadow:0 2px 6px rgba(0,0,0,0.1);z-index:9999;font-family:sans-serif;max-width:320px;';
-  badge.textContent = '📊 시트에서 카테고리 데이터 로드 중...';
+  badge.style.cssText = 'position:fixed;bottom:12px;right:12px;padding:10px 14px;border-radius:6px;font-size:12px;background:#fff3cd;color:#856404;border:1px solid #ffeaa7;box-shadow:0 2px 6px rgba(0,0,0,0.1);z-index:9999;font-family:sans-serif;max-width:400px;line-height:1.5;';
+  badge.innerHTML = '📊 시트 로드 중...';
   document.body.appendChild(badge);
   
-  let monthlyOk = false, weeklyOk = false, monthlyLast = '', weeklyLast = '';
-  let errors = [];
+  let mErr = '', wErr = '', mLast = '', wLast = '';
   
   try {
-    const table = await fetchSheetJSONP(SHEET_GID_MONTHLY);
-    const d = buildDataFromTable(table, 'monthly');
+    const d = await loadOneSheet(1, SHEET_GID_MONTHLY, 'monthly');
     dataAllMonthly = d.dataAll;
     dataTotalMonthly = d.dataTotal;
     tagsByGroupMonthly = d.tagsByGroup;
     recentLabelsMonthly = d.recentLabels;
-    monthlyOk = true;
-    monthlyLast = d.lastLabel;
-  } catch (e) { errors.push('Monthly: ' + e.message); console.warn('Monthly 로드 실패:', e); }
+    mLast = d.lastLabel;
+  } catch (e) { mErr = e.message; }
   
   try {
-    const table = await fetchSheetJSONP(SHEET_GID_WEEKLY);
-    const d = buildDataFromTable(table, 'weekly');
+    const d = await loadOneSheet(2, SHEET_GID_WEEKLY, 'weekly');
     dataAllWeekly = d.dataAll;
     dataTotalWeekly = d.dataTotal;
     tagsByGroupWeekly = d.tagsByGroup;
     recentLabelsWeekly = d.recentLabels;
-    weeklyOk = true;
-    weeklyLast = d.lastLabel;
-  } catch (e) { errors.push('Weekly: ' + e.message); console.warn('Weekly 로드 실패:', e); }
+    wLast = d.lastLabel;
+  } catch (e) { wErr = e.message; }
   
   if (typeof syncFreqData === 'function') syncFreqData();
   if (typeof render === 'function') render();
   
-  if (monthlyOk && weeklyOk) {
+  const mOk = !mErr, wOk = !wErr;
+  
+  if (mOk && wOk) {
     badge.style.background = '#d4edda';
     badge.style.color = '#155724';
     badge.style.borderColor = '#c3e6cb';
-    badge.innerHTML = `✓ 카테고리 자동 로드 완료<br><span style="opacity:0.8">Weekly: ${weeklyLast} · Monthly: ${monthlyLast}</span>`;
+    badge.innerHTML = `✓ 카테고리 자동 로드 완료<br><span style="opacity:0.8">Weekly: ${wLast} · Monthly: ${mLast}</span>`;
     setTimeout(() => badge.style.opacity = '0.6', 4000);
     setTimeout(() => badge.remove(), 10000);
-  } else if (monthlyOk || weeklyOk) {
-    badge.style.background = '#fff3cd';
-    badge.style.color = '#856404';
-    badge.innerHTML = `⚠ 부분 로드: Weekly ${weeklyOk ? '✓' : '✗'} / Monthly ${monthlyOk ? '✓' : '✗'}`;
-    badge.title = errors.join(' | ');
-    setTimeout(() => badge.remove(), 15000);
   } else {
     badge.style.background = '#f8d7da';
     badge.style.color = '#721c24';
     badge.style.borderColor = '#f5c6cb';
-    badge.innerHTML = '⚠ 시트 로드 실패 · 콘솔 확인';
-    badge.title = errors.join(' | ');
-    setTimeout(() => badge.remove(), 15000);
+    badge.innerHTML = `⚠ 로드 실패<br>` +
+      `<b>Monthly:</b> ${mOk ? '✓ ' + mLast : mErr}<br>` +
+      `<b>Weekly:</b> ${wOk ? '✓ ' + wLast : wErr}<br>` +
+      `<span style="font-size:11px;opacity:0.7">클릭해서 닫기</span>`;
+    badge.style.cursor = 'pointer';
+    badge.onclick = () => badge.remove();
   }
 })();
 // ============ /Google Sheets 자동 로드 ============
