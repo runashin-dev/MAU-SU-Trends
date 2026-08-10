@@ -960,12 +960,12 @@ function syncFreqData() {
 function krUnitLabel() { return krFreq === 'weekly' ? '주' : '개월'; }
 
 // ============ Google Sheets 자동 로드 ============
-const SHEET_ID = '1UoJFC0VkAx4AQ7OxerBFUm8NJTqu0aDii9aFCCs7XqI';
+const PUB_TOKEN = '2PACX-1vRZ6PaxDJvrMPn6XFAHqLP4SVKNMyvalGL9FiHQHj6VogI-6VLrIdHzwF1gwLzr8DUuk0-XejcWCWtT';
 const SHEET_GID_MONTHLY = '1244969143';
 const SHEET_GID_WEEKLY = '1044128873';
 
 async function fetchSheetCSV(gid) {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`;
+  const url = `https://docs.google.com/spreadsheets/d/e/${PUB_TOKEN}/pub?gid=${gid}&single=true&output=csv`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return await res.text();
